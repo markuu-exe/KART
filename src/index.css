@@ -2,13 +2,15 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 
-@tailwind base;
+@supports selector(:is(.dark *)) {
+  @property --dark-variant {
+    syntax: "*";
+    inherits: false;
+    initial-value: unset;
+  }
+}
 
-@custom-variant dark (&:is(.dark *));
-@tailwind components;
-@tailwind utilities;
-
-@theme inline {
+@theme {
     --font-heading: var(--font-sans);
     --font-sans: 'Inter Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
