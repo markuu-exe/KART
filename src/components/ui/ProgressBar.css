@@ -1,7 +1,9 @@
+@import './../../components/tokens.css';
+
 .progress-bar-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
   width: 100%;
   max-width: 360px;
 }
@@ -9,17 +11,17 @@
 .progress-track {
   width: 100%;
   height: 8px;
-  background-color: #e8e4e0;
-  border-radius: 9999px;
+  background-color: var(--color-border-rule);
+  border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background-color: #ff5c1a;
-  border-radius: 9999px;
-  transition: width 0.3s ease;
+  background-color: var(--color-primary-orange);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
 }
 
 .progress-labels {
@@ -31,10 +33,10 @@
 }
 
 .progress-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
   font-weight: 400;
-  color: #8c8480;
+  color: var(--color-ink-light);
   text-align: center;
   flex: 1;
   white-space: nowrap;
@@ -42,10 +44,10 @@
 }
 
 .progress-label.active {
-  color: #8c8480;
+  color: var(--color-ink-light);
 }
 
 .progress-label.current {
   font-weight: 700;
-  color: #ff5c1a;
+  color: var(--color-primary-orange);
 }
