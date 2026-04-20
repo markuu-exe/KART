@@ -45,17 +45,58 @@
   --space-xl: 20px;
   --space-2xl: 24px;
   --space-3xl: 32px;
+  --space-4xl: 40px;
+  --space-5xl: 48px;
+  --space-6xl: 64px;
+  --space-7xl: 80px;
 
   /* ===== SIZE TOKENS ===== */
   --size-avatar: 36px;
   --size-icon: 20px;
   --size-icon-lg: 24px;
+  --size-auth-field: 44px;
+  --size-auth-tab: 44px;
+  --size-auth-cta: 44px;
+  --size-auth-icon-badge: 32px;
 
   /* ===== BORDER RADIUS ===== */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* ===== AUTH LAYOUT TOKENS ===== */
+  --layout-auth-shell-max-width: 116rem;
+  --layout-auth-brand-panel-ratio: 0.92fr;
+  --layout-auth-form-panel-ratio: 1.95fr;
+  --layout-auth-card-login-width: 32rem;
+  --layout-auth-card-register-width: 56rem;
+  --layout-auth-tab-width: 14.75rem;
+  --layout-auth-brand-content-width: 18rem;
+  --layout-auth-glow-size: 25rem;
+  --layout-auth-glow-blur: 40px;
+  --layout-auth-glow-offset: 8rem;
+  --layout-auth-mobile-breakpoint: 72rem;
+  --layout-auth-page-padding: 3rem;
+  --layout-auth-page-padding-mobile: 1.5rem;
+  --layout-auth-forgot-card-width: 36.1875rem;
+  --layout-auth-forgot-card-padding: 2rem;
+  --layout-auth-forgot-content-gap: 1.5rem;
+  --layout-onboarding-card-width: 32.5rem;
+  --layout-onboarding-card-padding: 2.5rem;
+  --layout-onboarding-content-gap: 1.75rem;
+  --layout-onboarding-dot-size: 0.5rem;
+  --layout-onboarding-dot-active-width: 1.5rem;
+  --layout-onboarding-zone-height: 4.375rem;
+  --layout-onboarding-zone-selected-border: 2px;
+  --layout-onboarding-notice-height: 3rem;
+  --layout-onboarding-description-width: 27.5rem;
+
+  /* ===== DARK PANEL TEXT ===== */
+  --color-ink-on-dark-muted: #b8b2ac;
+  --color-overlay-auth: rgba(18, 16, 14, 0.58);
+  --color-overlay-auth-soft: rgba(18, 16, 14, 0.36);
+  --color-overlay-auth-strong: rgba(18, 16, 14, 0.74);
 
   /* ===== SHADOWS ===== */
   --shadow-sm: 0px 1px 3px rgba(0, 0, 0, 0.08);
@@ -72,17 +113,26 @@
   --font-size-2xl: 20px;
   --font-size-3xl: 24px;
   --font-size-4xl: 32px;
+  --font-size-5xl: 48px;
+  --font-size-6xl: 64px;
+  --font-size-body: 15px;
 
   /* ===== LINE HEIGHT ===== */
   --line-height-tight: 1.2;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.75;
+  --line-height-body: 1.65;
 
   /* ===== LETTER SPACING ===== */
   --letter-spacing-tight: -0.5px;
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.96px;
   --letter-spacing-wider: 1.2px;
+
+  /* ===== OPACITY ===== */
+  --opacity-auth-brand: 0.6;
+  --opacity-auth-glow: 0.12;
+  --opacity-auth-soft: 0.08;
 
   /* ===== TRANSITIONS ===== */
   --transition-fast: 0.1s ease;
