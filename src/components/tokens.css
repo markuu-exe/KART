@@ -77,9 +77,13 @@
   --layout-auth-glow-blur: 40px;
   --layout-auth-glow-offset: 8rem;
   --layout-auth-mobile-breakpoint: 72rem;
+  --layout-auth-page-padding: 3rem;
+  --layout-auth-page-padding-mobile: 1.5rem;
 
   /* ===== DARK PANEL TEXT ===== */
   --color-ink-on-dark-muted: #b8b2ac;
+  --color-overlay-auth: rgba(18, 16, 14, 0.58);
+  --color-overlay-auth-soft: rgba(18, 16, 14, 0.36);
 
   /* ===== SHADOWS ===== */
   --shadow-sm: 0px 1px 3px rgba(0, 0, 0, 0.08);

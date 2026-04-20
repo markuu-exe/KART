@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
+import authHeroImage from '@/assets/Images/hero-auth-orangeAbstract.jpg';
 import './01_Auth.css';
 
 function AuthField({
@@ -174,7 +175,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page" style={{ '--auth-bg-image': `url(${authHeroImage})` }}>
       <div className="auth-shell">
         <aside className="auth-brandPanel" aria-label="Kart brand introduction">
           <div className="auth-brandPanel__content">
