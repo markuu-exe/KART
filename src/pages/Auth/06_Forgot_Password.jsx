@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Button, Card } from '@/components';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
 
@@ -11,12 +12,40 @@ export default function ForgotPasswordModal({
 	error,
 	notice,
 }) {
+	useEffect(() => {
+		if (!isOpen) {
+			return undefined;
+		}
+
+		const handleEscapeClose = (event) => {
+			if (event.key === 'Escape') {
+				onClose();
+			}
+		};
+
+		window.addEventListener('keydown', handleEscapeClose);
+
+		return () => {
+			window.removeEventListener('keydown', handleEscapeClose);
+		};
+	}, [isOpen, onClose]);
+
 	if (!isOpen) {
 		return null;
 	}
 
 	return (
-		<div className="auth-forgotOverlay" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title">
+		<div
+			className="auth-forgotOverlay"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="forgot-password-title"
+			onMouseDown={(event) => {
+				if (event.target === event.currentTarget) {
+					onClose();
+				}
+			}}
+		>
 			<Card variant="Base" className="auth-forgotCard">
 				<div className="auth-forgotCard__content">
 					<div className="auth-forgotCard__header">
