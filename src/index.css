@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&family=Syne:wght@700;800&display=swap");
+@import "./components/tokens.css";
 
 @supports selector(:is(.dark *)) {
   @property --dark-variant {
@@ -95,3 +97,49 @@ body {
 html {
   font-family: var(--font-sans);
 }
+
+/* KART token utility compatibility layer */
+.font-heading { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-content-mono); }
+
+.text-caption { font-family: var(--font-content-primary); font-size: var(--font-size-sm); line-height: var(--line-height-normal); }
+.text-label { font-family: var(--font-content-primary); font-size: var(--font-size-base); line-height: var(--line-height-normal); }
+.text-body { font-family: var(--font-content-primary); font-size: var(--font-size-body); line-height: var(--line-height-body); }
+.text-heading-1 { font-size: var(--font-size-3xl); line-height: 1.3; letter-spacing: var(--letter-spacing-tight); }
+.text-heading-2 { font-size: var(--font-size-xl); line-height: 1.4; }
+.text-mono { font-family: var(--font-content-mono); font-size: var(--font-size-base); line-height: var(--line-height-normal); }
+.text-mono-sm { font-family: var(--font-content-mono); font-size: var(--font-size-xs); line-height: var(--line-height-normal); }
+
+.bg-primary-orange { background-color: var(--color-primary-orange); }
+.bg-primary-orange-light { background-color: var(--color-primary-orange-light); }
+.bg-primary-orange-bg { background-color: var(--color-primary-orange-bg); }
+
+.bg-status-blue { background-color: var(--color-status-blue); }
+.bg-status-blue-bg { background-color: var(--color-status-blue-bg); }
+.bg-status-green { background-color: var(--color-status-green); }
+.bg-status-green-bg { background-color: var(--color-status-green-bg); }
+.bg-status-yellow { background-color: var(--color-status-yellow); }
+.bg-status-yellow-bg { background-color: var(--color-status-yellow-bg); }
+.bg-status-red { background-color: var(--color-status-red); }
+.bg-status-red-bg { background-color: var(--color-status-red-bg); }
+
+.bg-surface-default { background-color: var(--color-surface-default); }
+.bg-surface-white { background-color: var(--color-surface-white); }
+
+.text-primary-orange { color: var(--color-primary-orange); }
+.text-primary-orange-light { color: var(--color-primary-orange-light); }
+.text-status-blue { color: var(--color-status-blue); }
+.text-status-green { color: var(--color-status-green); }
+.text-status-yellow { color: var(--color-status-yellow); }
+.text-status-red { color: var(--color-status-red); }
+.text-surface-white { color: var(--color-surface-white); }
+
+.text-ink-default { color: var(--color-ink-default); }
+.text-ink-mid { color: var(--color-ink-mid); }
+.text-ink-light { color: var(--color-ink-light); }
+
+.border-primary-orange { border-color: var(--color-primary-orange); }
+.border-status-blue { border-color: var(--color-status-blue); }
+.border-status-green { border-color: var(--color-status-green); }
+.border-status-red { border-color: var(--color-status-red); }
+.border-border-rule { border-color: var(--color-border-rule); }
