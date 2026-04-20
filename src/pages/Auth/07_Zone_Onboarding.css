@@ -154,6 +154,14 @@
   height: var(--size-icon);
 }
 
+.onboarding-error {
+  margin: 0;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-status-red);
+}
+
 .onboarding-continue {
   width: 100%;
   height: var(--size-auth-cta);

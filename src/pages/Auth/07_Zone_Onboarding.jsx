@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '@/components';
 import { Check } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAppStore } from '@/store/useAppStore';
 import onboardingHeroImage from '@/assets/Images/hero-onboading-orangeAbstract.jpg';
 import './07_Zone_Onboarding.css';
 
@@ -17,16 +20,60 @@ const ZONES = [
 ];
 
 export default function ZoneOnboarding() {
+	const navigate = useNavigate();
+	const { user, setUser } = useAppStore();
 	const [selectedZoneId, setSelectedZoneId] = useState('lahug');
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState('');
 
 	const selectedZone = useMemo(
 		() => ZONES.find((zone) => zone.id === selectedZoneId) || null,
 		[selectedZoneId]
 	);
 
-	const handleContinue = () => {
-		// TODO: Persist selected zone via API (e.g., PATCH /api/v1/profile/zone) and route to the next onboarding step.
-		// Expected payload: { zoneId: selectedZoneId, zoneName: selectedZone?.name, city: selectedZone?.city }
+	const handleContinue = async () => {
+		if (!selectedZone) {
+			return;
+		}
+
+		setLoading(true);
+		setError('');
+
+		try {
+			const { data, error: updateError } = await supabase.auth.updateUser({
+				data: {
+					zone_id: selectedZone.id,
+					zone_name: selectedZone.name,
+					zone_city: selectedZone.city,
+					onboarding_complete: true,
+				},
+			});
+
+			if (updateError) {
+				throw updateError;
+			}
+
+			if (data.user) {
+				setUser(data.user);
+			} else if (user) {
+				setUser({
+					...user,
+					user_metadata: {
+						...(user.user_metadata || {}),
+						zone_id: selectedZone.id,
+						zone_name: selectedZone.name,
+						zone_city: selectedZone.city,
+						onboarding_complete: true,
+					},
+				});
+			}
+
+			navigate('/');
+		} catch (updateError) {
+			setError(updateError instanceof Error ? updateError.message : 'Unable to save your zone right now.');
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -73,15 +120,21 @@ export default function ZoneOnboarding() {
 						</div>
 					) : null}
 
+					{error ? (
+						<p className="onboarding-error" role="alert">
+							{error}
+						</p>
+					) : null}
+
 					<Button
 						type="button"
 						variant={selectedZone ? 'brand' : 'secondary'}
 						size="lg"
 						className="onboarding-continue"
 						onClick={handleContinue}
-						disabled={!selectedZone}
+						disabled={!selectedZone || loading}
 					>
-						Continue
+						{loading ? 'Saving...' : 'Continue'}
 					</Button>
 				</Card>
 			</div>

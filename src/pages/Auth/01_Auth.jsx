@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '@/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -81,6 +82,7 @@ function BenefitItem({ emoji, children }) {
 }
 
 export default function Auth() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -97,6 +99,8 @@ export default function Auth() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState('');
   const [forgotNotice, setForgotNotice] = useState('');
+  const [verificationEmail, setVerificationEmail] = useState('');
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   const { setUser, setLoading: setAppLoading } = useAppStore();
 
@@ -104,6 +108,36 @@ export default function Auth() {
     setIsSignUp(shouldSignUp);
     setError('');
     setNotice('');
+  };
+
+  const handleResendVerification = async () => {
+    const normalizedEmail = verificationEmail.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setError('Missing verification email. Please register again.');
+      return;
+    }
+
+    setVerificationLoading(true);
+    setError('');
+    setNotice('');
+
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: normalizedEmail,
+      });
+
+      if (resendError) {
+        throw resendError;
+      }
+
+      setNotice(`Verification email resent to ${normalizedEmail}.`);
+    } catch (resendError) {
+      setError(resendError instanceof Error ? resendError.message : 'Unable to resend verification email right now.');
+    } finally {
+      setVerificationLoading(false);
+    }
   };
 
   const openForgotPassword = () => {
@@ -195,9 +229,12 @@ export default function Auth() {
         }
 
         if (!data.session) {
-          setNotice('Account created. Check your email to verify before logging in.');
+          setVerificationEmail(normalizedEmail);
+          setNotice(`Verification required. We sent an email to ${normalizedEmail}.`);
+          setIsSignUp(false);
         } else {
           setNotice('Account created successfully.');
+          navigate('/auth/onboarding');
         }
       } else {
         const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -210,6 +247,7 @@ export default function Auth() {
         }
 
         setUser(data.user);
+        navigate('/auth/onboarding');
       }
 
       setAppLoading(false);
@@ -258,6 +296,23 @@ export default function Auth() {
                 Register
               </AuthTabButton>
             </div>
+
+            {verificationEmail ? (
+              <div className="auth-verificationBanner" role="status" aria-live="polite">
+                <p className="auth-verificationBanner__title">Verify your email to continue</p>
+                <p className="auth-verificationBanner__copy">
+                  We sent a verification link to <strong>{verificationEmail}</strong>. Check your inbox and spam folder.
+                </p>
+                <button
+                  type="button"
+                  className="auth-verificationBanner__action"
+                  onClick={handleResendVerification}
+                  disabled={verificationLoading}
+                >
+                  {verificationLoading ? 'Resending...' : 'Resend verification email'}
+                </button>
+              </div>
+            ) : null}
 
             <form className="auth-form" onSubmit={handleAuth}>
               {isSignUp ? (
