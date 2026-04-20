@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/useAppStore';
 
 // Pages
 import Auth from './pages/Auth/01_Auth';
+import ZoneOnboarding from './pages/Auth/07_Zone_Onboarding';
 import RequesterDashboard from './pages/Requester/02_Requester_Dashboard';
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
         {!user ? (
           <>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/onboarding" element={<ZoneOnboarding />} />
             <Route path="*" element={<Navigate to="/auth" />} />
           </>
         ) : (
