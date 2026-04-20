@@ -1,44 +1,46 @@
+@import './../../components/tokens.css';
+
 .status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 24px;
   padding: 0 10px;
-  border-radius: 9999px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-content-mono);
+  font-size: var(--font-size-xs);
   font-weight: 500;
   white-space: nowrap;
   text-transform: capitalize;
 }
 
 .pill-default {
-  background-color: white;
-  color: #12100e;
-  border: 1px solid #e8e4e0;
+  background-color: var(--color-surface-white);
+  color: var(--color-ink-default);
+  border: 1px solid var(--color-border-rule);
 }
 
 .pill-searching {
-  background-color: #fffbee;
+  background-color: var(--color-status-yellow-bg);
   color: #9a6a00;
 }
 
 .pill-accepted {
-  background-color: #eef3ff;
-  color: #1a6eff;
+  background-color: var(--color-status-blue-bg);
+  color: var(--color-status-blue);
 }
 
 .pill-atstore {
-  background-color: #fff3ee;
-  color: #ff5c1a;
+  background-color: var(--color-primary-orange-bg);
+  color: var(--color-primary-orange);
 }
 
 .pill-purchased {
-  background-color: #ff5c1a;
-  color: white;
+  background-color: var(--color-primary-orange);
+  color: var(--color-surface-white);
 }
 
 .pill-delivered {
-  background-color: #00c27c;
-  color: white;
+  background-color: var(--color-status-green);
+  color: var(--color-surface-white);
 }

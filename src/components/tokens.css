@@ -1,0 +1,91 @@
+/**
+ * Design System Tokens
+ * Centralized CSS custom properties for colors, fonts, spacing, and sizing
+ */
+
+:root {
+  /* ===== COLORS - PRIMARY ===== */
+  --color-primary-orange: #ff5c1a;
+  --color-primary-orange-light: #ff8a5c;
+  --color-primary-orange-bg: #fff3ee;
+
+  /* ===== COLORS - STATUS ===== */
+  --color-status-green: #00c27c;
+  --color-status-green-bg: #e6faf3;
+  --color-status-blue: #1a6eff;
+  --color-status-blue-bg: #eef3ff;
+  --color-status-yellow: #ffb800;
+  --color-status-yellow-bg: #fffbee;
+  --color-status-red: #d93025;
+  --color-status-red-bg: #fff0f0;
+
+  /* ===== COLORS - TEXT/INK ===== */
+  --color-ink-default: #12100e;
+  --color-ink-mid: #4a4540;
+  --color-ink-light: #8c8480;
+
+  /* ===== COLORS - SURFACE ===== */
+  --color-surface-default: #fafaf8;
+  --color-surface-white: #ffffff;
+
+  /* ===== COLORS - BORDER ===== */
+  --color-border-rule: #e8e4e0;
+
+  /* ===== FONTS - FAMILY ===== */
+  --font-display: 'Syne', sans-serif;
+  --font-content-primary: 'DM Sans', sans-serif;
+  --font-content-mono: 'DM Mono', monospace;
+  --font-general: 'Inter', sans-serif;
+
+  /* ===== SPACING TOKENS ===== */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  /* ===== SIZE TOKENS ===== */
+  --size-avatar: 36px;
+  --size-icon: 20px;
+  --size-icon-lg: 24px;
+
+  /* ===== BORDER RADIUS ===== */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0px 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0px 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* ===== TYPOGRAPHY SCALES ===== */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 32px;
+
+  /* ===== LINE HEIGHT ===== */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ===== LETTER SPACING ===== */
+  --letter-spacing-tight: -0.5px;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.96px;
+  --letter-spacing-wider: 1.2px;
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}

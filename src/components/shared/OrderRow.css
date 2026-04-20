@@ -1,18 +1,20 @@
+@import './../../components/tokens.css';
+
 .order-row {
   display: flex;
-  gap: 12px;
+  gap: var(--space-md);
   align-items: center;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e8e4e0;
-  background-color: white;
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-rule);
+  background-color: var(--color-surface-white);
   width: 100%;
 }
 
 .order-row-status-stripe {
   width: 3px;
   height: 100%;
-  background-color: #00c27c;
+  background-color: var(--color-status-green);
   border-radius: 2px;
   align-self: stretch;
   flex-shrink: 0;
@@ -22,15 +24,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-xs);
   min-width: 0;
 }
 
 .order-row-summary {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
   font-weight: 600;
-  color: #12100e;
+  color: var(--color-ink-default);
   max-width: 450px;
   white-space: nowrap;
   overflow: hidden;
@@ -41,10 +43,10 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
   font-weight: 400;
-  color: #8c8480;
+  color: var(--color-ink-light);
   white-space: nowrap;
 }
 
@@ -66,15 +68,15 @@
 }
 
 .order-row-price {
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
+  font-family: var(--font-content-mono);
+  font-size: var(--font-size-base);
   font-weight: 500;
-  color: #12100e;
+  color: var(--color-ink-default);
 }
 
 .order-row-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
   font-weight: 400;
-  color: #8c8480;
+  color: var(--color-ink-light);
 }

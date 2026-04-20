@@ -1,7 +1,9 @@
+@import './../../components/tokens.css';
+
 .empty-state {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
   align-items: center;
   justify-content: center;
   padding: 40px;
@@ -15,23 +17,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-sm);
 }
 
 .empty-state-title {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
   font-weight: 600;
-  color: #12100e;
+  color: var(--color-ink-default);
   margin: 0;
 }
 
 .empty-state-message {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-content-primary);
   font-size: 15px;
   font-weight: 400;
-  color: #8c8480;
+  color: var(--color-ink-light);
   max-width: 320px;
   margin: 0;
-  line-height: 1.65;
+  line-height: var(--line-height-relaxed);
 }

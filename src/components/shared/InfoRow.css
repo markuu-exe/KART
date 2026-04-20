@@ -1,9 +1,11 @@
+@import './../../components/tokens.css';
+
 .info-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 0;
-  border-bottom: 1px solid #e8e4e0;
+  border-bottom: 1px solid var(--color-border-rule);
   width: 100%;
 }
 
@@ -12,19 +14,19 @@
 }
 
 .info-row-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
   font-weight: 400;
-  color: #8c8480;
+  color: var(--color-ink-light);
   text-transform: uppercase;
-  letter-spacing: 0.96px;
+  letter-spacing: var(--letter-spacing-wide);
   white-space: nowrap;
 }
 
 .info-row-value {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
   font-weight: 500;
-  color: #12100e;
+  color: var(--color-ink-default);
   white-space: nowrap;
 }

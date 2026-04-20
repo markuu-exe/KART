@@ -1,7 +1,9 @@
+@import './../../components/tokens.css';
+
 .nav-item-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-xs);
   width: 100%;
 }
 
