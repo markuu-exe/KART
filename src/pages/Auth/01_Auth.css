@@ -136,7 +136,7 @@
 
 .auth-tabs {
   display: flex;
-  width: min(100%, var(--layout-auth-tab-width));
+  width: 100%;
   padding: var(--space-xs);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-default);
@@ -266,6 +266,14 @@
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   color: var(--color-status-red);
+}
+
+.auth-form__notice {
+  margin: 0;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-status-green);
 }
 
 .auth-form__submit {

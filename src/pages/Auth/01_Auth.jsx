@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Button, Card } from '@/components';
 import { Eye, EyeOff } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAppStore } from '@/store/useAppStore';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
 import './01_Auth.css';
 
@@ -79,7 +81,7 @@ function BenefitItem({ emoji, children }) {
 export default function Auth() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -87,23 +89,85 @@ export default function Auth() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+
+  const { setUser, setLoading: setAppLoading } = useAppStore();
+
+  const switchMode = (shouldSignUp) => {
+    setIsSignUp(shouldSignUp);
+    setError('');
+    setNotice('');
+  };
 
   const handleAuth = async (event) => {
     event.preventDefault();
     setLoading(true);
     setError('');
+    setNotice('');
 
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        throw new Error('Please enter your email address.');
+      }
+
+      if (!password) {
+        throw new Error('Please enter your password.');
+      }
+
+      if (isSignUp && (!firstName.trim() || !lastName.trim())) {
+        throw new Error('Please provide both first and last name.');
+      }
+
       if (isSignUp && password !== confirmPassword) {
         throw new Error('Passwords do not match.');
       }
 
-      // TODO: Connect this phone-based auth form to the backend contract.
-      // Expected payload: { mode: 'login' | 'register', firstName, lastName, phoneNumber, password, confirmPassword }.
-      // Supabase email/password auth is intentionally not used here because this screen is phone-first.
-      throw new Error('Auth flow is not connected yet.');
+      if (isSignUp) {
+        const { data, error: authError } = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: {
+            data: {
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+            },
+          },
+        });
+
+        if (authError) {
+          throw authError;
+        }
+
+        if (data.user) {
+          setUser(data.user);
+        }
+
+        if (!data.session) {
+          setNotice('Account created. Check your email to verify before logging in.');
+        } else {
+          setNotice('Account created successfully.');
+        }
+      } else {
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+
+        if (authError) {
+          throw authError;
+        }
+
+        setUser(data.user);
+      }
+
+      setAppLoading(false);
+
+      // TODO: Add phone verification as a secondary security checkpoint after successful email auth.
+      // Suggested flow: collect phone after login/signup, send OTP, and store verified phone + timestamp.
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : 'Auth flow is not connected yet.');
+      setError(authError instanceof Error ? authError.message : 'Unable to authenticate right now.');
     } finally {
       setLoading(false);
     }
@@ -134,10 +198,10 @@ export default function Auth() {
 
           <Card variant="Base" className={`auth-card ${isSignUp ? 'auth-card--register' : 'auth-card--login'}`}>
             <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
-              <AuthTabButton active={!isSignUp} onClick={() => setIsSignUp(false)}>
+              <AuthTabButton active={!isSignUp} onClick={() => switchMode(false)}>
                 Log in
               </AuthTabButton>
-              <AuthTabButton active={isSignUp} onClick={() => setIsSignUp(true)}>
+              <AuthTabButton active={isSignUp} onClick={() => switchMode(true)}>
                 Register
               </AuthTabButton>
             </div>
@@ -167,15 +231,14 @@ export default function Auth() {
               ) : null}
 
               <AuthField
-                label="PHONE NUMBER"
-                name="phoneNumber"
-                type="tel"
-                value={phoneNumber}
-                onChange={(event) => setPhoneNumber(event.target.value)}
-                placeholder="9XX XXX XXXX"
-                autoComplete="tel-national"
-                inputMode="tel"
-                prefix={'+63'}
+                label="EMAIL ADDRESS"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="name@yourmail.com"
+                autoComplete="email"
+                inputMode="email"
                 suffix={<img src={fieldIcon} alt="" aria-hidden="true" />}
               />
 
@@ -223,6 +286,12 @@ export default function Auth() {
                 </p>
               ) : null}
 
+              {notice ? (
+                <p className="auth-form__notice" role="status">
+                  {notice}
+                </p>
+              ) : null}
+
               <Button
                 type="submit"
                 variant="brand"
@@ -236,7 +305,7 @@ export default function Auth() {
               <button
                 type="button"
                 className="auth-form__toggle"
-                onClick={() => setIsSignUp((currentValue) => !currentValue)}
+                onClick={() => switchMode(!isSignUp)}
               >
                 {isSignUp ? 'Already have an account? Log in' : 'Need an account? Register'}
               </button>

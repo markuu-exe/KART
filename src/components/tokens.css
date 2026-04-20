@@ -66,11 +66,11 @@
   --radius-full: 9999px;
 
   /* ===== AUTH LAYOUT TOKENS ===== */
-  --layout-auth-shell-max-width: 96rem;
+  --layout-auth-shell-max-width: 116rem;
   --layout-auth-brand-panel-ratio: 0.92fr;
-  --layout-auth-form-panel-ratio: 1.58fr;
-  --layout-auth-card-login-width: 22.75rem;
-  --layout-auth-card-register-width: 43.625rem;
+  --layout-auth-form-panel-ratio: 1.95fr;
+  --layout-auth-card-login-width: 32rem;
+  --layout-auth-card-register-width: 56rem;
   --layout-auth-tab-width: 14.75rem;
   --layout-auth-brand-content-width: 18rem;
   --layout-auth-glow-size: 25rem;
