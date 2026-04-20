@@ -1,0 +1,39 @@
+@import './../../components/tokens.css';
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  width: 100%;
+}
+
+.empty-state-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+}
+
+.empty-state-title {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-ink-default);
+  margin: 0;
+}
+
+.empty-state-message {
+  font-family: var(--font-content-primary);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-ink-light);
+  max-width: 320px;
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}

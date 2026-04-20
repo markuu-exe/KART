@@ -1,0 +1,33 @@
+@import './../../components/tokens.css';
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  width: var(--size-avatar);
+  height: var(--size-avatar);
+  flex-shrink: 0;
+}
+
+.avatar-initials {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-surface-white);
+  background-color: var(--color-primary-orange);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
