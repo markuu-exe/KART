@@ -10,6 +10,7 @@ import RequesterDashboard from './pages/Requester/02_Requester_Dashboard';
 
 export default function App() {
   const { user, setUser, setLoading } = useAppStore();
+  const needsOnboarding = Boolean(user) && !user?.user_metadata?.onboarding_complete;
 
   useEffect(() => {
     // Check if user is logged in
@@ -28,8 +29,12 @@ export default function App() {
         {!user ? (
           <>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/onboarding" element={<ZoneOnboarding />} />
             <Route path="*" element={<Navigate to="/auth" />} />
+          </>
+        ) : needsOnboarding ? (
+          <>
+            <Route path="/auth/onboarding" element={<ZoneOnboarding />} />
+            <Route path="*" element={<Navigate to="/auth/onboarding" />} />
           </>
         ) : (
           <>

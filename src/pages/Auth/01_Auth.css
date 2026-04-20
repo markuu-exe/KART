@@ -114,6 +114,53 @@
   color: var(--color-ink-default);
 }
 
+.auth-verificationBanner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px solid var(--color-status-blue);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-status-blue-bg);
+}
+
+.auth-verificationBanner__title {
+  margin: 0;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  line-height: var(--line-height-normal);
+  color: var(--color-status-blue);
+}
+
+.auth-verificationBanner__copy {
+  margin: 0;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-ink-mid);
+}
+
+.auth-verificationBanner__action {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: var(--line-height-normal);
+  color: var(--color-status-blue);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-verificationBanner__action:disabled {
+  color: var(--color-ink-light);
+  cursor: not-allowed;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
