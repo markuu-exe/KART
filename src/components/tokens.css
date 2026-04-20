@@ -82,6 +82,15 @@
   --layout-auth-forgot-card-width: 36.1875rem;
   --layout-auth-forgot-card-padding: 2rem;
   --layout-auth-forgot-content-gap: 1.5rem;
+  --layout-onboarding-card-width: 32.5rem;
+  --layout-onboarding-card-padding: 2.5rem;
+  --layout-onboarding-content-gap: 1.75rem;
+  --layout-onboarding-dot-size: 0.5rem;
+  --layout-onboarding-dot-active-width: 1.5rem;
+  --layout-onboarding-zone-height: 4.375rem;
+  --layout-onboarding-zone-selected-border: 2px;
+  --layout-onboarding-notice-height: 3rem;
+  --layout-onboarding-description-width: 27.5rem;
 
   /* ===== DARK PANEL TEXT ===== */
   --color-ink-on-dark-muted: #b8b2ac;
