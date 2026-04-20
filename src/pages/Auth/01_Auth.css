@@ -4,38 +4,39 @@
   position: relative;
   min-height: 100vh;
   overflow: clip;
-  background-color: var(--color-surface-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--layout-auth-page-padding);
+  background-image:
+    linear-gradient(var(--color-overlay-auth-soft), var(--color-overlay-auth)),
+    var(--auth-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: var(--color-ink-default);
 }
 
 .auth-shell {
-  min-height: 100vh;
+  width: 100%;
+  min-height: calc(100vh - (var(--layout-auth-page-padding) * 2));
   max-width: var(--layout-auth-shell-max-width);
-  margin-inline: auto;
-  display: grid;
-  grid-template-columns: minmax(0, var(--layout-auth-brand-panel-ratio)) minmax(0, var(--layout-auth-form-panel-ratio));
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .auth-brandPanel {
-  position: relative;
-  display: flex;
-  min-height: 100vh;
-  align-items: flex-end;
-  overflow: hidden;
-  background-color: var(--color-ink-default);
-  padding: var(--space-6xl);
+  display: none;
 }
 
-.auth-brandPanel__content {
-  position: relative;
-  z-index: 1;
+.auth-mobileBrand {
   display: flex;
-  max-width: var(--layout-auth-brand-content-width);
   flex-direction: column;
-  gap: var(--space-3xl);
+  align-items: center;
+  gap: var(--space-xs);
 }
 
-.auth-brandPanel__title,
 .auth-mobileBrand__title {
   margin: 0;
   font-family: var(--font-display);
@@ -47,77 +48,24 @@
   opacity: var(--opacity-auth-brand);
 }
 
-.auth-brandPanel__tagline,
 .auth-mobileBrand__tagline {
   margin: 0;
   font-family: var(--font-content-primary);
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: var(--line-height-normal);
-  color: var(--color-ink-on-dark-muted);
-}
-
-.auth-benefitsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.auth-benefit {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-}
-
-.auth-benefit__badge {
-  display: inline-flex;
-  width: var(--size-auth-icon-badge);
-  height: var(--size-auth-icon-badge);
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-orange-bg);
-  font-size: var(--font-size-base);
-  line-height: 1;
-}
-
-.auth-benefit__copy {
-  padding-top: var(--space-xs);
-  font-family: var(--font-content-primary);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-  color: var(--color-ink-on-dark-muted);
-}
-
-.auth-brandPanel__glow {
-  position: absolute;
-  right: calc(var(--layout-auth-glow-offset) * -1);
-  bottom: calc(var(--layout-auth-glow-offset) * -1);
-  width: var(--layout-auth-glow-size);
-  height: var(--layout-auth-glow-size);
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-orange);
-  filter: blur(var(--layout-auth-glow-blur));
-  opacity: var(--opacity-auth-glow);
+  color: var(--color-surface-default);
 }
 
 .auth-formPanel {
+  width: 100%;
+  max-width: var(--layout-auth-card-register-width);
   display: flex;
-  min-height: 100vh;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: var(--space-3xl);
-  padding: var(--space-6xl);
-}
-
-.auth-mobileBrand {
-  display: none;
-  flex-direction: column;
-  gap: var(--space-xs);
+  padding: 0;
 }
 
 .auth-card {
@@ -295,21 +243,12 @@
 }
 
 @media (max-width: 72rem) {
-  .auth-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-brandPanel {
-    display: none;
+  .auth-page {
+    padding: var(--layout-auth-page-padding-mobile);
   }
 
   .auth-formPanel {
-    min-height: 100vh;
-    padding: var(--space-3xl);
-  }
-
-  .auth-mobileBrand {
-    display: flex;
+    max-width: 100%;
   }
 
   .auth-card,
@@ -324,15 +263,7 @@
     grid-template-columns: 1fr;
   }
 
-  .auth-formPanel {
-    padding: var(--space-2xl);
-  }
-
   .auth-card {
     padding: var(--space-2xl);
-  }
-
-  .auth-tabs {
-    width: 100%;
   }
 }
