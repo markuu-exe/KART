@@ -1,0 +1,102 @@
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.input-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8480;
+  text-transform: uppercase;
+  letter-spacing: 0.96px;
+}
+
+.input-container,
+.textarea-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #e8e4e0;
+  transition: all 0.2s ease;
+}
+
+.input-container {
+  min-height: 44px;
+  align-items: center;
+}
+
+.textarea-container {
+  padding: 12px;
+  flex-direction: column;
+  position: relative;
+}
+
+.input-container.focused {
+  border-color: #ff5c1a;
+  border-width: 1.5px;
+}
+
+.textarea-container.focused {
+  border-color: #ff5c1a;
+  border-width: 1.5px;
+}
+
+.input,
+.input-text,
+.input-textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #12100e;
+  border: none;
+  outline: none;
+  flex: 1;
+  background: transparent;
+  line-height: 1.65;
+  min-width: 0;
+}
+
+.input::placeholder,
+.input-text::placeholder,
+.input-textarea::placeholder {
+  color: #8c8480;
+}
+
+.input-textarea {
+  width: 100%;
+  resize: none;
+  min-height: 88px;
+}
+
+.input-prefix {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ff8a5c;
+  white-space: nowrap;
+}
+
+.input-suffix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.char-count {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8480;
+  text-align: right;
+  width: 100%;
+  margin-top: 4px;
+}
