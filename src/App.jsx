@@ -8,8 +8,10 @@ import Auth from './pages/Auth/01_Auth';
 import ZoneOnboarding from './pages/Auth/07_Zone_Onboarding';
 import RequesterDashboard from './pages/Requester/02_Requester_Dashboard';
 import ActiveOrderRequester from './pages/Requester/05_Active_Order_Requester';
+import OrderHistoryRequester from './pages/Requester/08_Order_History_Requester';
 import RunnerErrandBoard from './pages/Runner/03_Runner_Errand_Board';
 import ActiveOrderRunner from './pages/Runner/04_Active_Order_Runner';
+import OrderHistoryRunner from './pages/Runner/08_Order_History_Runner';
 
 export default function App() {
   const { user, setUser, setLoading } = useAppStore();
@@ -43,8 +45,10 @@ export default function App() {
           <>
             <Route path="/" element={<RequesterDashboard />} />
             <Route path="/requester/active-order" element={<ActiveOrderRequester />} />
+            <Route path="/requester/history" element={<OrderHistoryRequester />} />
             <Route path="/runner/board" element={<RunnerErrandBoard />} />
             <Route path="/runner/active-order" element={<ActiveOrderRunner />} />
+            <Route path="/runner/history" element={<OrderHistoryRunner />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         )}
