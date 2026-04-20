@@ -1,0 +1,74 @@
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: #ff5c1a;
+  color: white;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary.btn-pressed {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), #ff5c1a;
+}
+
+.btn-secondary {
+  background-color: #fff3ee;
+  color: #ff5c1a;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-secondary.btn-pressed {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), #fff3ee;
+}
+
+.btn-ghost {
+  background-color: white;
+  color: #4a4540;
+  border: 1px solid #e8e4e0;
+}
+
+.btn-ghost.btn-pressed {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), white;
+}
+
+.btn-success {
+  background-color: #e6faf3;
+  color: #00c27c;
+}
+
+.btn-success.btn-pressed {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), #e6faf3;
+}
+
+.btn-danger {
+  background-color: #fff0f0;
+  color: #d93025;
+}
+
+.btn-danger.btn-pressed {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), #fff0f0;
+}
+
+.btn-disabled {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), #e8e4e0;
+  color: #8c8480;
+  cursor: not-allowed;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+}
