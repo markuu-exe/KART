@@ -151,7 +151,7 @@ function UserCard({ fullName, role, joined }) {
   );
 }
 
-function ZoneCard({ zone }) {
+function ZoneCard({ zone, onChange }) {
   return (
     <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-[360px]">
       <div className="flex items-center justify-between text-label">
@@ -159,9 +159,7 @@ function ZoneCard({ zone }) {
         <button
           type="button"
           className="text-primary-orange underline"
-          onClick={() => {
-            // TODO: Connect zone editing flow when profile edit screen is implemented.
-          }}
+          onClick={onChange}
         >
           Change
         </button>
@@ -242,9 +240,7 @@ export default function ProfileScreen({ role = 'requester' }) {
             <button
               type="button"
               className="h-11 rounded-xl px-4 bg-primary-orange-bg text-primary-orange text-label"
-              onClick={() => {
-                // TODO: Navigate to edit profile screen when implemented.
-              }}
+              onClick={() => navigate(role === 'runner' ? '/runner/profile/edit' : '/requester/profile/edit')}
             >
               Edit Profile
             </button>
@@ -253,7 +249,10 @@ export default function ProfileScreen({ role = 'requester' }) {
           <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start">
             <div className="space-y-4">
               <UserCard fullName={fullName} role={role} joined={joined} />
-              <ZoneCard zone={zone} />
+              <ZoneCard
+                zone={zone}
+                onChange={() => navigate(role === 'runner' ? '/runner/profile/edit' : '/requester/profile/edit')}
+              />
             </div>
 
             <div className="space-y-4 max-w-[560px]">
