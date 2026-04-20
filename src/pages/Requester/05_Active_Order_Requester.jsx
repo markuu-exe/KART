@@ -20,10 +20,12 @@ const orderItems = [
 ];
 
 function RequesterNav() {
+	const navigate = useNavigate();
+
 	const items = [
-		{ id: 'Home', label: 'Home', icon: Home, active: true },
-		{ id: 'History', label: 'History', icon: History, active: false },
-		{ id: 'Profile', label: 'Profile', icon: User, active: false },
+		{ id: 'Home', label: 'Home', icon: Home, active: true, path: '/requester/board' },
+		{ id: 'History', label: 'History', icon: History, active: false, path: '/requester/history' },
+		{ id: 'Profile', label: 'Profile', icon: User, active: false, path: '/requester/profile' },
 	];
 
 	return (
@@ -37,15 +39,17 @@ function RequesterNav() {
 				{items.map((item) => {
 					const Icon = item.icon;
 					return (
-						<div
+						<button
+							type="button"
 							key={item.id}
 							className={`min-h-11 px-3 rounded-xl flex items-center gap-3 ${
 								item.active ? 'bg-primary-orange-bg text-primary-orange' : 'text-ink-mid'
 							}`}
+							onClick={() => navigate(item.path)}
 						>
 							<Icon className="w-5 h-5" />
 							<span className={`text-sm ${item.active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
-						</div>
+						</button>
 					);
 				})}
 			</div>
@@ -77,7 +81,7 @@ export default function ActiveOrderRequester() {
 
 			<main className="bg-surface-default flex-1 h-full overflow-y-auto p-10">
 				<div className="max-w-[900px] mx-auto">
-					<button type="button" className="text-label text-primary-orange px-2 py-1" onClick={() => navigate('/')}>
+					<button type="button" className="text-label text-primary-orange px-2 py-1" onClick={() => navigate('/requester/board')}>
 						← Your Order
 					</button>
 

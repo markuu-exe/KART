@@ -20,6 +20,8 @@ import EditProfileRunner from './pages/Runner/09b_Edit_Profile_Runner';
 export default function App() {
   const { user, setUser, setLoading } = useAppStore();
   const needsOnboarding = Boolean(user) && !user?.user_metadata?.onboarding_complete;
+  const activeRole = user?.user_metadata?.role === 'runner' ? 'runner' : 'requester';
+  const homePath = activeRole === 'runner' ? '/runner/board' : '/requester/board';
 
   useEffect(() => {
     // Check if user is logged in
@@ -47,7 +49,8 @@ export default function App() {
           </>
         ) : (
           <>
-            <Route path="/" element={<RequesterDashboard />} />
+            <Route path="/" element={<Navigate to={homePath} />} />
+            <Route path="/requester/board" element={<RequesterDashboard />} />
             <Route path="/requester/active-order" element={<ActiveOrderRequester />} />
             <Route path="/requester/history" element={<OrderHistoryRequester />} />
             <Route path="/requester/profile" element={<ProfileRequester />} />
@@ -57,7 +60,7 @@ export default function App() {
             <Route path="/runner/history" element={<OrderHistoryRunner />} />
             <Route path="/runner/profile" element={<ProfileRunner />} />
             <Route path="/runner/profile/edit" element={<EditProfileRunner />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to={homePath} />} />
           </>
         )}
       </Routes>

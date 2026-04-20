@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, ClipboardList, Settings, ChevronRight, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -28,7 +28,7 @@ function ProfileSideNav({ role }) {
 
   const navItems = isRequester
     ? [
-        { id: 'home', label: 'Home', icon: Home, path: '/' },
+        { id: 'home', label: 'Home', icon: Home, path: '/requester/board' },
         { id: 'history', label: 'History', icon: History, path: '/requester/history' },
         { id: 'profile', label: 'Profile', icon: User, path: '/requester/profile', selected: true },
       ]
@@ -206,7 +206,8 @@ function RunnerPaymentCard({ gcashNumber }) {
 
 export default function ProfileScreen({ role = 'requester' }) {
   const navigate = useNavigate();
-  const { user } = useAppStore();
+  const { user, setUser } = useAppStore();
+  const [isSwitchingRole, setIsSwitchingRole] = useState(false);
 
   const fullName = user?.user_metadata?.full_name || 'John Doe';
   const phone = user?.user_metadata?.phone || '09123456789';
@@ -229,6 +230,37 @@ export default function ProfileScreen({ role = 'requester' }) {
     navigate('/auth');
   };
 
+  const handleRoleSwitch = async (nextRole) => {
+    if (nextRole === role || isSwitchingRole) {
+      return;
+    }
+
+    try {
+      setIsSwitchingRole(true);
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          ...(user?.user_metadata || {}),
+          role: nextRole,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.user) {
+        setUser(data.user);
+      }
+
+      navigate(nextRole === 'runner' ? '/runner/profile' : '/requester/profile');
+    } catch (switchError) {
+      // TODO: Replace with toast/inline error component once global notification system is available.
+      console.error('Role switch failed:', switchError);
+    } finally {
+      setIsSwitchingRole(false);
+    }
+  };
+
   return (
     <div className="bg-surface-default flex items-start size-full">
       <ProfileSideNav role={role} />
@@ -237,13 +269,38 @@ export default function ProfileScreen({ role = 'requester' }) {
         <section className="max-w-[980px] mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Profile</h1>
-            <button
-              type="button"
-              className="h-11 rounded-xl px-4 bg-primary-orange-bg text-primary-orange text-label"
-              onClick={() => navigate(role === 'runner' ? '/runner/profile/edit' : '/requester/profile/edit')}
-            >
-              Edit Profile
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="h-11 rounded-xl border border-border-rule bg-surface-white p-1 inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  className={`h-9 px-3 rounded-lg text-caption ${
+                    role === 'requester' ? 'bg-primary-orange-bg text-primary-orange font-semibold' : 'text-ink-mid'
+                  }`}
+                  disabled={isSwitchingRole}
+                  onClick={() => handleRoleSwitch('requester')}
+                >
+                  Requester
+                </button>
+                <button
+                  type="button"
+                  className={`h-9 px-3 rounded-lg text-caption ${
+                    role === 'runner' ? 'bg-primary-orange-bg text-primary-orange font-semibold' : 'text-ink-mid'
+                  }`}
+                  disabled={isSwitchingRole}
+                  onClick={() => handleRoleSwitch('runner')}
+                >
+                  Runner
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="h-11 rounded-xl px-4 bg-primary-orange-bg text-primary-orange text-label"
+                onClick={() => navigate(role === 'runner' ? '/runner/profile/edit' : '/requester/profile/edit')}
+              >
+                Edit Profile
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start">

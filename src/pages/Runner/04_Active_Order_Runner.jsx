@@ -12,10 +12,12 @@ const STEP_LABELS = {
 };
 
 function RunnerNav() {
+	const navigate = useNavigate();
+
 	const items = [
-		{ id: 'Board', icon: ClipboardList, label: 'Board' },
-		{ id: 'History', icon: History, label: 'History' },
-		{ id: 'Profile', icon: User, label: 'Profile' },
+		{ id: 'Board', icon: ClipboardList, label: 'Board', path: '/runner/board' },
+		{ id: 'History', icon: History, label: 'History', path: '/runner/history' },
+		{ id: 'Profile', icon: User, label: 'Profile', path: '/runner/profile' },
 	];
 
 	return (
@@ -29,10 +31,15 @@ function RunnerNav() {
 				{items.map((item) => {
 					const Icon = item.icon;
 					return (
-						<div key={item.id} className="min-h-11 px-3 rounded-xl flex items-center gap-3 text-ink-mid">
+						<button
+							type="button"
+							key={item.id}
+							className="min-h-11 px-3 rounded-xl flex items-center gap-3 text-ink-mid"
+							onClick={() => navigate(item.path)}
+						>
 							<Icon className="w-5 h-5" />
 							<span className="text-sm font-medium">{item.label}</span>
-						</div>
+						</button>
 					);
 				})}
 			</div>
@@ -44,7 +51,7 @@ function RunnerNav() {
 					</div>
 					<div className="flex-1 min-w-0">
 						<p className="text-sm font-semibold text-ink-default truncate">Gina Cole</p>
-						<p className="text-caption text-ink-light">Requester</p>
+						<p className="text-caption text-ink-light">Runner</p>
 					</div>
 					<Settings className="w-5 h-5 text-ink-mid" />
 				</div>

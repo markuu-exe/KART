@@ -19,10 +19,16 @@ const ZONES = [
 	{ id: 'mactan', name: 'Mactan', city: 'Lapu-Lapu City' },
 ];
 
+const ROLES = [
+	{ id: 'requester', label: 'Requester', description: 'Post requests and track deliveries' },
+	{ id: 'runner', label: 'Runner', description: 'Accept errands and deliver orders' },
+];
+
 export default function ZoneOnboarding() {
 	const navigate = useNavigate();
 	const { user, setUser } = useAppStore();
 	const [selectedZoneId, setSelectedZoneId] = useState('lahug');
+	const [selectedRole, setSelectedRole] = useState(user?.user_metadata?.role || 'requester');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
@@ -42,6 +48,8 @@ export default function ZoneOnboarding() {
 		try {
 			const { data, error: updateError } = await supabase.auth.updateUser({
 				data: {
+					role: selectedRole,
+					zone: selectedZone.name,
 					zone_id: selectedZone.id,
 					zone_name: selectedZone.name,
 					zone_city: selectedZone.city,
@@ -60,6 +68,8 @@ export default function ZoneOnboarding() {
 					...user,
 					user_metadata: {
 						...(user.user_metadata || {}),
+						role: selectedRole,
+						zone: selectedZone.name,
 						zone_id: selectedZone.id,
 						zone_name: selectedZone.name,
 						zone_city: selectedZone.city,
@@ -68,7 +78,7 @@ export default function ZoneOnboarding() {
 				});
 			}
 
-			navigate('/');
+			navigate(selectedRole === 'runner' ? '/runner/board' : '/requester/board');
 		} catch (updateError) {
 			setError(updateError instanceof Error ? updateError.message : 'Unable to save your zone right now.');
 		} finally {
@@ -91,6 +101,25 @@ export default function ZoneOnboarding() {
 							Pick your primary neighborhood. This helps match you with nearby errands and requesters.
 						</p>
 					</header>
+
+					<section className="onboarding-roles" aria-label="Choose your role">
+						{ROLES.map((role) => {
+							const isSelected = role.id === selectedRole;
+
+							return (
+								<button
+									key={role.id}
+									type="button"
+									className={`onboarding-roleCard ${isSelected ? 'is-selected' : ''}`}
+									onClick={() => setSelectedRole(role.id)}
+									aria-pressed={isSelected}
+								>
+									<span className="onboarding-roleCard__label">{role.label}</span>
+									<span className="onboarding-roleCard__description">{role.description}</span>
+								</button>
+							);
+						})}
+					</section>
 
 					<section className="onboarding-zones" aria-label="Choose your primary zone">
 						{ZONES.map((zone) => {

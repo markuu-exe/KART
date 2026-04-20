@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, Footprints, MapPin } from 'lucide-react';
 import { ErrandDetailModal } from '@/components';
 
@@ -31,10 +32,12 @@ const OPEN_ERRANDS = Array.from({ length: 6 }, (_, index) => ({
 }));
 
 function RunnerNav() {
+  const navigate = useNavigate();
+
 	const items = [
-		{ id: 'Board', icon: ClipboardList, label: 'Board', active: true },
-		{ id: 'History', icon: History, label: 'History', active: false },
-		{ id: 'Profile', icon: User, label: 'Profile', active: false },
+		{ id: 'Board', icon: ClipboardList, label: 'Board', active: true, path: '/runner/board' },
+		{ id: 'History', icon: History, label: 'History', active: false, path: '/runner/history' },
+		{ id: 'Profile', icon: User, label: 'Profile', active: false, path: '/runner/profile' },
 	];
 
 	return (
@@ -55,6 +58,7 @@ function RunnerNav() {
 							className={`min-h-11 px-3 rounded-xl flex items-center gap-3 text-left ${
 								item.active ? 'bg-primary-orange-bg text-primary-orange' : 'text-ink-mid'
 							}`}
+							onClick={() => navigate(item.path)}
 						>
 							<Icon className="w-5 h-5" />
 							<span className={`text-sm ${item.active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
@@ -121,6 +125,7 @@ function RunnerErrandCard({ errand, onDetails, onAccept }) {
 }
 
 export default function RunnerErrandBoard() {
+	const navigate = useNavigate();
 	const [selectedFilter, setSelectedFilter] = useState('All Zones');
 	const [selectedErrand, setSelectedErrand] = useState(null);
 
@@ -185,7 +190,7 @@ export default function RunnerErrandBoard() {
 							key={errand.id}
 							errand={errand}
 							onDetails={setSelectedErrand}
-							onAccept={setSelectedErrand}
+							onAccept={() => navigate('/runner/active-order')}
 						/>
 					))}
 				</section>

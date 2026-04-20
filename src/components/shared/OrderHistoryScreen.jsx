@@ -85,7 +85,7 @@ function SideNav({ role }) {
 
   const navItems = isRequester
     ? [
-        { id: 'home', label: 'Home', icon: Home, path: '/' },
+        { id: 'home', label: 'Home', icon: Home, path: '/requester/board' },
         { id: 'history', label: 'History', icon: History, path: '/requester/history', selected: true },
         { id: 'profile', label: 'Profile', icon: User, path: '/requester/profile' },
       ]

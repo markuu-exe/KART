@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, Package } from 'lucide-react';
 import { ErrandDetailModal } from '@/components';
 
@@ -58,10 +59,12 @@ const ACTIVE_REQUESTS = [
 ];
 
 function AppNav({ selected = 'Home' }) {
+  const navigate = useNavigate();
+
   const items = [
-    { id: 'Home', icon: Home, label: 'Home' },
-    { id: 'History', icon: History, label: 'History' },
-    { id: 'Profile', icon: User, label: 'Profile' },
+    { id: 'Home', icon: Home, label: 'Home', path: '/requester/board' },
+    { id: 'History', icon: History, label: 'History', path: '/requester/history' },
+    { id: 'Profile', icon: User, label: 'Profile', path: '/requester/profile' },
   ];
 
   return (
@@ -83,6 +86,7 @@ function AppNav({ selected = 'Home' }) {
               className={`min-h-11 px-3 rounded-xl flex items-center gap-3 text-left ${
                 active ? 'bg-primary-orange-bg text-primary-orange' : 'text-ink-mid'
               }`}
+              onClick={() => navigate(item.path)}
             >
               <Icon className="w-5 h-5" />
               <span className={`text-sm ${active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
@@ -151,6 +155,7 @@ function RequestCard({ request, onOpen }) {
 }
 
 export default function RequesterDashboard() {
+  const navigate = useNavigate();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -259,6 +264,13 @@ export default function RequesterDashboard() {
               <span className="h-5 px-2 rounded-full bg-primary-orange text-surface-white text-caption font-semibold inline-flex items-center">
                 {activeCount}
               </span>
+              <button
+                type="button"
+                className="h-8 px-3 rounded-full border border-border-rule bg-surface-white text-caption text-ink-mid"
+                onClick={() => navigate('/requester/active-order')}
+              >
+                View Active Order
+              </button>
             </div>
 
             <div className="flex flex-col gap-3">
