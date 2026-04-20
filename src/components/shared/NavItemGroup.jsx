@@ -2,7 +2,6 @@ import './NavItemGroup.css';
 import NavItem from './NavItem';
 
 export default function NavItemGroup({
-  role = 'Requester',
   selectedItem = 'home',
   onItemSelect = () => {},
   className = '',
