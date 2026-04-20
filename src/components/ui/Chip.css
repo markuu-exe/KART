@@ -1,0 +1,28 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  border: 1px solid;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.chip-selected {
+  background-color: #fff3ee;
+  border-color: #ff5c1a;
+  color: #ff5c1a;
+  font-weight: 600;
+}
+
+.chip-default {
+  background-color: #fafaf8;
+  border-color: #e8e4e0;
+  color: #4a4540;
+}
