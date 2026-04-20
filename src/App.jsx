@@ -7,7 +7,9 @@ import { useAppStore } from '@/store/useAppStore';
 import Auth from './pages/Auth/01_Auth';
 import ZoneOnboarding from './pages/Auth/07_Zone_Onboarding';
 import RequesterDashboard from './pages/Requester/02_Requester_Dashboard';
+import ActiveOrderRequester from './pages/Requester/05_Active_Order_Requester';
 import RunnerErrandBoard from './pages/Runner/03_Runner_Errand_Board';
+import ActiveOrderRunner from './pages/Runner/04_Active_Order_Runner';
 
 export default function App() {
   const { user, setUser, setLoading } = useAppStore();
@@ -40,7 +42,9 @@ export default function App() {
         ) : (
           <>
             <Route path="/" element={<RequesterDashboard />} />
+            <Route path="/requester/active-order" element={<ActiveOrderRequester />} />
             <Route path="/runner/board" element={<RunnerErrandBoard />} />
+            <Route path="/runner/active-order" element={<ActiveOrderRunner />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         )}
