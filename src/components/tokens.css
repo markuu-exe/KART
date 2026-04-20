@@ -45,17 +45,41 @@
   --space-xl: 20px;
   --space-2xl: 24px;
   --space-3xl: 32px;
+  --space-4xl: 40px;
+  --space-5xl: 48px;
+  --space-6xl: 64px;
+  --space-7xl: 80px;
 
   /* ===== SIZE TOKENS ===== */
   --size-avatar: 36px;
   --size-icon: 20px;
   --size-icon-lg: 24px;
+  --size-auth-field: 44px;
+  --size-auth-tab: 44px;
+  --size-auth-cta: 44px;
+  --size-auth-icon-badge: 32px;
 
   /* ===== BORDER RADIUS ===== */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* ===== AUTH LAYOUT TOKENS ===== */
+  --layout-auth-shell-max-width: 96rem;
+  --layout-auth-brand-panel-ratio: 0.92fr;
+  --layout-auth-form-panel-ratio: 1.58fr;
+  --layout-auth-card-login-width: 22.75rem;
+  --layout-auth-card-register-width: 43.625rem;
+  --layout-auth-tab-width: 14.75rem;
+  --layout-auth-brand-content-width: 18rem;
+  --layout-auth-glow-size: 25rem;
+  --layout-auth-glow-blur: 40px;
+  --layout-auth-glow-offset: 8rem;
+  --layout-auth-mobile-breakpoint: 72rem;
+
+  /* ===== DARK PANEL TEXT ===== */
+  --color-ink-on-dark-muted: #b8b2ac;
 
   /* ===== SHADOWS ===== */
   --shadow-sm: 0px 1px 3px rgba(0, 0, 0, 0.08);
@@ -72,17 +96,26 @@
   --font-size-2xl: 20px;
   --font-size-3xl: 24px;
   --font-size-4xl: 32px;
+  --font-size-5xl: 48px;
+  --font-size-6xl: 64px;
+  --font-size-body: 15px;
 
   /* ===== LINE HEIGHT ===== */
   --line-height-tight: 1.2;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.75;
+  --line-height-body: 1.65;
 
   /* ===== LETTER SPACING ===== */
   --letter-spacing-tight: -0.5px;
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.96px;
   --letter-spacing-wider: 1.2px;
+
+  /* ===== OPACITY ===== */
+  --opacity-auth-brand: 0.6;
+  --opacity-auth-glow: 0.12;
+  --opacity-auth-soft: 0.08;
 
   /* ===== TRANSITIONS ===== */
   --transition-fast: 0.1s ease;

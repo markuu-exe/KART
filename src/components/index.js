@@ -7,9 +7,9 @@ export { default as Input } from './ui/Input';
 export { default as Modal } from './ui/Modal';
 export { default as ProgressBar } from './ui/ProgressBar';
 export { default as StatusPill } from './ui/StatusPill';
+export { Button } from './ui/button';
 
 // Shared Components
 export * from './shared';
 
 // Note: Button component is in src/components/ui/button.jsx
-// Import as: import Button from '@/components/ui/button'
