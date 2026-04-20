@@ -1,0 +1,30 @@
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #e8e4e0;
+  width: 100%;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8480;
+  text-transform: uppercase;
+  letter-spacing: 0.96px;
+  white-space: nowrap;
+}
+
+.info-row-value {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #12100e;
+  white-space: nowrap;
+}
