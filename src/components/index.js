@@ -13,3 +13,4 @@ export { Button } from './ui/button';
 export * from './shared';
 
 // Note: Button component is in src/components/ui/button.jsx
+// Import as: import Button from '@/components/ui/button'
