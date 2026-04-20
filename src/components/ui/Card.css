@@ -1,0 +1,29 @@
+.card {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e4e0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.card-base {
+  border: 1px solid #e8e4e0;
+}
+
+.card-highlight {
+  border: 1px solid #ff5c1a;
+  background-color: #fff3ee;
+}
+
+.card-statusaccent {
+  border-left: 3px solid #12100e;
+  padding-left: 19px;
+  padding-right: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
