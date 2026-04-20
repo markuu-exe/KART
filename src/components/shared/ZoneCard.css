@@ -1,0 +1,48 @@
+@import './../../components/tokens.css';
+
+.zone-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  min-width: 150px;
+  transition: var(--transition-normal);
+  cursor: pointer;
+}
+
+.zone-card-default {
+  background-color: var(--color-surface-default);
+  border-color: var(--color-border-rule);
+}
+
+.zone-card-selected {
+  background-color: var(--color-primary-orange-bg);
+  border-color: var(--color-primary-orange);
+  border-width: 2px;
+}
+
+.zone-card-zone {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-ink-default);
+}
+
+.zone-card-selected .zone-card-zone {
+  color: var(--color-primary-orange);
+}
+
+.zone-card-city {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  color: var(--color-ink-light);
+}
+
+.zone-card-selected .zone-card-city {
+  color: var(--color-primary-orange-light);
+}

@@ -1,0 +1,32 @@
+@import './../../components/tokens.css';
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border-rule);
+  width: 100%;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row-label {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  color: var(--color-ink-light);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  white-space: nowrap;
+}
+
+.info-row-value {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-ink-default);
+  white-space: nowrap;
+}
