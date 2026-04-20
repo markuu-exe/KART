@@ -84,6 +84,62 @@
   gap: var(--space-sm);
 }
 
+.onboarding-roles {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.onboarding-roleCard {
+  min-height: 74px;
+  border: 1px solid var(--color-border-rule);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-default);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-normal), background-color var(--transition-normal), transform var(--transition-fast);
+}
+
+.onboarding-roleCard:hover {
+  transform: translateY(-1px);
+}
+
+.onboarding-roleCard.is-selected {
+  border: 1.5px solid var(--color-primary-orange);
+  background-color: var(--color-primary-orange-bg);
+}
+
+.onboarding-roleCard__label {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: var(--line-height-normal);
+  color: var(--color-ink-default);
+}
+
+.onboarding-roleCard__description {
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  line-height: var(--line-height-normal);
+  color: var(--color-ink-light);
+}
+
+.onboarding-roleCard.is-selected .onboarding-roleCard__label {
+  color: var(--color-primary-orange);
+}
+
+.onboarding-roleCard.is-selected .onboarding-roleCard__description {
+  color: var(--color-primary-orange-light);
+}
+
 .onboarding-zoneCard {
   min-height: var(--layout-onboarding-zone-height);
   border: 1px solid var(--color-border-rule);
@@ -178,6 +234,10 @@
 }
 
 @media (max-width: 42rem) {
+  .onboarding-roles {
+    grid-template-columns: 1fr;
+  }
+
   .onboarding-zones {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
