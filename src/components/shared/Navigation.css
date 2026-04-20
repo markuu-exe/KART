@@ -1,0 +1,128 @@
+.navigation {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 240px;
+  min-width: 240px;
+  padding: 24px 16px;
+  background-color: white;
+  border-right: 1px solid #e8e4e0;
+  overflow-y: auto;
+}
+
+.nav-logo {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+}
+
+.nav-logo-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ff5c1a;
+  letter-spacing: -0.56px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.nav-logo-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8480;
+}
+
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.nav-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a4540;
+  text-align: left;
+}
+
+.nav-item-active {
+  background-color: #fff3ee;
+  color: #ff5c1a;
+  font-weight: 600;
+}
+
+.nav-item:hover:not(.nav-item-active) {
+  background-color: rgba(255, 92, 26, 0.05);
+}
+
+.nav-item-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-item-label {
+  white-space: nowrap;
+}
+
+.nav-user {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 32px;
+  border-top: 1px solid #e8e4e0;
+}
+
+.nav-user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-user-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #12100e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-user-role {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8480;
+}
+
+.nav-settings {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 16px;
+}
