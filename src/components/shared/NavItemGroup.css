@@ -1,0 +1,10 @@
+.nav-item-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.nav-item-group .nav-item-btn {
+  width: 100%;
+}
