@@ -1,0 +1,46 @@
+.zone-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid;
+  min-width: 150px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.zone-card-default {
+  background-color: #fafaf8;
+  border-color: #e8e4e0;
+}
+
+.zone-card-selected {
+  background-color: #fff3ee;
+  border-color: #ff5c1a;
+  border-width: 2px;
+}
+
+.zone-card-zone {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #12100e;
+}
+
+.zone-card-selected .zone-card-zone {
+  color: #ff5c1a;
+}
+
+.zone-card-city {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8480;
+}
+
+.zone-card-selected .zone-card-city {
+  color: #ff8a5c;
+}
