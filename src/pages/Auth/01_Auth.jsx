@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
 import authHeroImage from '@/assets/Images/hero-auth-orangeAbstract.jpg';
+import ForgotPasswordModal from './06_Forgot_Password';
 import './01_Auth.css';
 
 function AuthField({
@@ -91,6 +92,11 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotNotice, setForgotNotice] = useState('');
 
   const { setUser, setLoading: setAppLoading } = useAppStore();
 
@@ -98,6 +104,49 @@ export default function Auth() {
     setIsSignUp(shouldSignUp);
     setError('');
     setNotice('');
+  };
+
+  const openForgotPassword = () => {
+    setForgotEmail(email);
+    setForgotError('');
+    setForgotNotice('');
+    setIsForgotPasswordOpen(true);
+  };
+
+  const closeForgotPassword = () => {
+    setIsForgotPasswordOpen(false);
+    setForgotLoading(false);
+    setForgotError('');
+    setForgotNotice('');
+  };
+
+  const handleForgotPassword = async (event) => {
+    event.preventDefault();
+    setForgotLoading(true);
+    setForgotError('');
+    setForgotNotice('');
+
+    try {
+      const normalizedEmail = forgotEmail.trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        throw new Error('Please enter your email address.');
+      }
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (resetError) {
+        throw resetError;
+      }
+
+      setForgotNotice('Reset link sent. Check your inbox and spam folder.');
+    } catch (resetError) {
+      setForgotError(resetError instanceof Error ? resetError.message : 'Unable to send reset link right now.');
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const handleAuth = async (event) => {
@@ -175,7 +224,10 @@ export default function Auth() {
   };
 
   return (
-    <div className="auth-page" style={{ '--auth-bg-image': `url(${authHeroImage})` }}>
+    <div
+      className={`auth-page ${isForgotPasswordOpen ? 'auth-page--modalOpen' : ''}`}
+      style={{ '--auth-bg-image': `url(${authHeroImage})` }}
+    >
       <div className="auth-shell">
         <aside className="auth-brandPanel" aria-label="Kart brand introduction">
           <div className="auth-brandPanel__content">
@@ -261,6 +313,16 @@ export default function Auth() {
                 onSuffixClick={() => setShowPassword((currentValue) => !currentValue)}
               />
 
+              {!isSignUp ? (
+                <button
+                  type="button"
+                  className="auth-form__forgotLink"
+                  onClick={openForgotPassword}
+                >
+                  Forgot password?
+                </button>
+              ) : null}
+
               {isSignUp ? (
                 <AuthField
                   label="CONFIRM PASSWORD"
@@ -314,6 +376,17 @@ export default function Auth() {
           </Card>
         </main>
       </div>
+
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        email={forgotEmail}
+        onEmailChange={(event) => setForgotEmail(event.target.value)}
+        onSubmit={handleForgotPassword}
+        onClose={closeForgotPassword}
+        loading={forgotLoading}
+        error={forgotError}
+        notice={forgotNotice}
+      />
     </div>
   );
 }
