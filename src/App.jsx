@@ -13,11 +13,13 @@ export default function App() {
   useEffect(() => {
     // Check if user is logged in
     setLoading(true);
-    supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
       setLoading(false);
     });
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [setLoading, setUser]);
 
   return (
     <BrowserRouter>
