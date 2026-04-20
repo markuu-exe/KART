@@ -1,12 +1,39 @@
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { useAppStore } from '@/store/useAppStore';
+
+// Pages
+import Auth from './pages/Auth/01_Auth';
+import RequesterDashboard from './pages/Requester/02_Requester_Dashboard';
+
 export default function App() {
+  const { user, setUser, setLoading } = useAppStore();
+
+  useEffect(() => {
+    // Check if user is logged in
+    setLoading(true);
+    supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+      setLoading(false);
+    });
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">🛒 Kart</h1>
-        <p className="mt-4 text-lg text-zinc-600">
-          Frontend environment successfully configured.
-        </p>
-      </div>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        {!user ? (
+          <>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<Navigate to="/auth" />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<RequesterDashboard />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        )}
+      </Routes>
+    </BrowserRouter>
+  );
 }

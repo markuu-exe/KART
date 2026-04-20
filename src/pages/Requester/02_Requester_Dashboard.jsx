@@ -16,7 +16,7 @@ const Avatar = ({ className, initialsText = "JD" }) => (
   </div>
 );
 
-const NavItemsGroup = ({ className, role = "Requester", selected = "HomeBoard" }) => (
+const NavItemsGroup = ({ className }) => (
   <div className={`${className} flex flex-col gap-1`}>
     <div className="bg-primary-orange-bg flex gap-3 items-center min-h-11 px-3 rounded-xl">
       <Icons className="shrink-0 w-5 h-5" icon="Home" />
