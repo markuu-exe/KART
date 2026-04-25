@@ -68,12 +68,7 @@ function AppNav({ selected = 'Home' }) {
   ];
 
   return (
-    <aside className="bg-surface-white border-r border-border-rule flex flex-col h-full min-w-60 px-4 py-6">
-      <div className="flex flex-col pb-8">
-        <p className="font-heading font-extrabold text-[28px] tracking-tight text-primary-orange">Kart</p>
-        <p className="text-caption text-ink-light">Skip the checkout line.</p>
-      </div>
-
+    <aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
       <div className="flex flex-col gap-1">
         {items.map((item) => {
           const Icon = item.icon;
@@ -180,17 +175,17 @@ export default function RequesterDashboard() {
   }, [selectedRequest]);
 
   return (
-    <div className="bg-surface-default flex items-start size-full">
+    <div className="bg-surface-default flex min-h-screen w-full items-stretch">
       <AppNav selected="Home" />
 
-      <main className="bg-surface-default flex-1 h-full p-10 overflow-y-auto">
+      <main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
         <header className="pb-8">
           <h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Hi, Gina!</h1>
           <p className="text-caption text-ink-light">Cebu City · March 25, 2026</p>
         </header>
 
         <section className="flex gap-8 items-start justify-center">
-          <div className="w-full max-w-[420px] flex flex-col gap-3">
+          <div className="w-full max-w-105 flex flex-col gap-3">
             <p className="font-mono text-mono-sm tracking-wider uppercase text-ink-light text-center">New Request</p>
 
             <div className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6">
@@ -201,7 +196,7 @@ export default function RequesterDashboard() {
                   <label className="text-caption uppercase tracking-wide text-ink-light">Item(s) Needed</label>
                   <div className="bg-surface-white border border-border-rule rounded-lg p-3 h-22">
                     <textarea
-                      className="w-full h-[58px] resize-none bg-transparent outline-none text-body text-ink-mid leading-relaxed"
+                      className="w-full h-14.5 resize-none bg-transparent outline-none text-body text-ink-mid leading-relaxed"
                       placeholder="e.g. 1 loaf bread, 2L water..."
                       maxLength={500}
                       value={itemText}

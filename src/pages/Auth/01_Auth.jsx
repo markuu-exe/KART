@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, Card } from '@/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -83,12 +83,13 @@ function BenefitItem({ emoji, children }) {
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(new URLSearchParams(location.search).get('mode') === 'signup');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -104,10 +105,15 @@ export default function Auth() {
 
   const { setUser, setLoading: setAppLoading } = useAppStore();
 
+  useEffect(() => {
+    setIsSignUp(new URLSearchParams(location.search).get('mode') === 'signup');
+  }, [location.search]);
+
   const switchMode = (shouldSignUp) => {
     setIsSignUp(shouldSignUp);
     setError('');
     setNotice('');
+    navigate(`/auth?mode=${shouldSignUp ? 'signup' : 'login'}`, { replace: true });
   };
 
   const handleResendVerification = async () => {

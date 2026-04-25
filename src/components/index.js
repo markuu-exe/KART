@@ -11,6 +11,9 @@ export { Button } from './ui/button';
 
 // Shared Components
 export * from './shared';
+export { default as Header } from './layout/Header';
+export { default as Footer } from './layout/Footer';
+export { default as AppShell } from './layout/AppShell';
 
 // Note: Button component is in src/components/ui/button.jsx
 // Import as: import Button from '@/components/ui/button'

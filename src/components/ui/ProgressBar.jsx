@@ -1,4 +1,4 @@
-import './ProgressBar.css';
+import { cn } from "@/lib/utils";
 
 const STEPS = ['Accepted', 'At Store', 'Purchased', 'Delivered'];
 
@@ -11,20 +11,22 @@ export default function ProgressBar({
   const progressPercent = stepIndex === -1 ? 0 : ((stepIndex + 1) / STEPS.length) * 100;
 
   return (
-    <div className={`progress-bar-wrapper ${className}`} {...props}>
-      <div className="progress-track">
+    <div className={cn('flex w-full max-w-sm flex-col gap-2', className)} {...props}>
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-border-rule">
         <div
-          className="progress-fill"
+          className="h-full rounded-full bg-primary-orange transition-[width] duration-300 ease-in-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
-      <div className="progress-labels">
+      <div className="flex w-full items-center justify-between gap-0">
         {STEPS.map((step) => (
           <div
             key={step}
-            className={`progress-label ${
-              STEPS.indexOf(step) <= stepIndex ? 'active' : ''
-            } ${step === currentStep ? 'current' : ''}`}
+            className={cn(
+              'flex-1 whitespace-nowrap px-1 text-center font-sans text-sm font-normal text-ink-light',
+              STEPS.indexOf(step) <= stepIndex && 'text-ink-light',
+              step === currentStep && 'font-bold text-primary-orange',
+            )}
           >
             {step}
           </div>

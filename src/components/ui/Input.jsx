@@ -1,4 +1,4 @@
-import './Input.css';
+import { cn } from "@/lib/utils";
 
 export default function Input({
   type = 'Text',
@@ -15,41 +15,53 @@ export default function Input({
 }) {
   const isTextarea = type === 'Textarea';
   const charCount = value.length;
+  const isFocused = state === 'Focused';
 
-  const inputClasses = `input input-${type.toLowerCase()} input-${state.toLowerCase()} ${className}`;
+  const sharedFieldClasses = cn(
+    'w-full min-w-0 border-0 bg-transparent font-sans text-sm leading-6 text-ink-default outline-none placeholder:text-ink-light',
+    className,
+  );
+
+  const fieldShellClasses = cn(
+    'flex items-start gap-1.5 rounded-md border bg-surface-white px-3 transition-colors',
+    isTextarea ? 'min-h-24 py-3 flex-col' : 'h-11 items-center',
+    isFocused ? 'border-primary-orange ring-1 ring-primary-orange/20' : 'border-border-rule',
+  );
 
   return (
-    <div className="input-wrapper">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
-        <label className="input-label">{label}</label>
+        <label className="font-sans text-xs font-normal uppercase tracking-wider text-ink-light">
+          {label}
+        </label>
       )}
 
       {isTextarea ? (
-        <div className={`textarea-container ${state === 'Focused' ? 'focused' : ''}`}>
+        <div className={fieldShellClasses}>
           <textarea
-            className={inputClasses}
+            className={sharedFieldClasses}
             value={value}
             onChange={onChange}
             maxLength={maxLength}
             placeholder={placeholder}
             {...props}
           />
-          <div className="char-count">
+          <div className="mt-1 w-full text-right font-sans text-xs font-normal text-ink-light">
             {charCount} / {maxLength}
           </div>
         </div>
       ) : (
-        <div className={`input-container ${state === 'Focused' ? 'focused' : ''}`}>
-          {prefix && <span className="input-prefix">{prefix}</span>}
+        <div className={fieldShellClasses}>
+          {prefix && <span className="whitespace-nowrap font-mono text-sm font-medium text-primary-orange-light">{prefix}</span>}
           <input
             type="text"
-            className={inputClasses}
+            className={sharedFieldClasses}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
             {...props}
           />
-          {suffix && <span className="input-suffix">{suffix}</span>}
+          {suffix && <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">{suffix}</span>}
         </div>
       )}
     </div>
