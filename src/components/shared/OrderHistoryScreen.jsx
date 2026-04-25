@@ -96,12 +96,7 @@ function SideNav({ role }) {
       ];
 
   return (
-    <aside className="bg-surface-white border-r border-border-rule flex flex-col h-full min-w-60 px-4 py-6">
-      <div className="flex flex-col pb-8">
-        <p className="font-heading font-extrabold text-[28px] tracking-tight text-primary-orange">Kart</p>
-        <p className="text-caption text-ink-light">Skip the checkout line.</p>
-      </div>
-
+    <aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
       <div className="flex flex-col gap-1">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -205,10 +200,10 @@ export default function OrderHistoryScreen({ role = 'requester' }) {
   }, [visibleRows]);
 
   return (
-    <div className="bg-surface-default flex items-start size-full">
+    <div className="bg-surface-default flex min-h-screen w-full items-stretch">
       <SideNav role={role} />
 
-      <main className="bg-surface-default flex-1 h-full overflow-y-auto p-10">
+      <main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
         <section className="max-w-[960px] mx-auto flex flex-col gap-4">
           <header className="flex items-start justify-between">
             <div>
