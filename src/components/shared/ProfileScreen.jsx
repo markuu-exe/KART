@@ -68,7 +68,7 @@ function ProfileSideNav({ role }) {
 
 function UserFooter({ role }) {
   const { user } = useAppStore();
-  const fullName = user?.user_metadata?.full_name || 'Gina Cole';
+  const fullName = user?.user_metadata?.full_name || 'User';
 
   return (
     <div className="flex items-center gap-3 min-w-52">
@@ -204,20 +204,20 @@ export default function ProfileScreen({ role = 'requester' }) {
   const { user, setUser } = useAppStore();
   const [isSwitchingRole, setIsSwitchingRole] = useState(false);
 
-  const fullName = user?.user_metadata?.full_name || 'John Doe';
-  const phone = user?.user_metadata?.phone || '09123456789';
-  const zone = user?.user_metadata?.zone || 'Pasig City';
+  const fullName = user?.user_metadata?.full_name || 'User';
+  const phone = user?.user_metadata?.phone || 'Not set';
+  const zone = user?.user_metadata?.zone || 'Not set';
   const gcashNumber = user?.user_metadata?.gcash_number || '';
-  const joined = formatMemberSince(user?.created_at || '2024-06-24');
+  const joined = formatMemberSince(user?.created_at);
 
   const infoRows = useMemo(
     () => [
       { label: 'Full Name', value: fullName },
       { label: 'Phone', value: phone },
       { label: 'Role', value: role === 'requester' ? 'Requester' : 'Runner' },
-      { label: 'Joined', value: 'June 15, 2024' },
+      { label: 'Joined', value: joined },
     ],
-    [fullName, phone, role],
+    [fullName, joined, phone, role],
   );
 
   const handleSignOut = async () => {
