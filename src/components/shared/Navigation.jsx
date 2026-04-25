@@ -27,6 +27,7 @@ export default function Navigation({
         {navItems.map((item) => (
           <button
             key={item.id}
+            type="button"
             className={`nav-item ${selectedNav === item.id ? 'nav-item-active' : ''}`}
             onClick={() => onNavChange(item.id)}
           >
@@ -42,7 +43,7 @@ export default function Navigation({
           <div className="nav-user-name">{userName}</div>
           <div className="nav-user-role">{role}</div>
         </div>
-        <button className="nav-settings">⚙️</button>
+        <button type="button" className="nav-settings" aria-label="Open navigation settings">⚙️</button>
       </div>
     </nav>
   );
