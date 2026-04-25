@@ -233,7 +233,7 @@ Zone/location selector card.
 ```jsx
 import { ZoneCard } from "@/components";
 
-<ZoneCard zone="Zone A" city="Manila" isSelected={false} />;
+<ZoneCard zone="Guadalupe" city="Cebu City" isSelected={false} />;
 ```
 
 **Props:**
@@ -253,7 +253,7 @@ import { OrderRow } from "@/components";
 
 <OrderRow
   itemSummary="Item 1, Item 2"
-  zone="Zone A"
+  zone="Guadalupe"
   date="01 Jan 2024"
   amount="₱1,500.00"
   role="Requester"
@@ -295,8 +295,8 @@ Side navigation panel with user info.
 import { Navigation } from "@/components";
 
 <Navigation
-  userName="Gina Cole"
-  userInitials="GC"
+  userName="Current User"
+  userInitials="CU"
   role="Requester"
   selectedNav="home"
   onNavChange={(navId) => console.log(navId)}

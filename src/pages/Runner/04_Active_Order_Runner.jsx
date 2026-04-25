@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, ArrowLeft, Camera, CheckCircle2 } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
 
 const STEP_ORDER = ['accepted', 'at_store', 'purchased', 'delivered'];
 
@@ -11,8 +12,38 @@ const STEP_LABELS = {
 	delivered: 'Delivered',
 };
 
+const ACTIVE_STATUSES = new Set(['accepted', 'at_store', 'purchased', 'delivered']);
+
+function getInitials(name) {
+	const parts = String(name || 'User').trim().split(' ').filter(Boolean);
+	return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'U';
+}
+
+function toSummaryItems(items) {
+	if (Array.isArray(items) && items.length > 0) {
+		return items;
+	}
+
+	if (typeof items === 'string' && items.trim()) {
+		return [items];
+	}
+
+	return ['No items listed'];
+}
+
+function formatCurrency(amount) {
+	const numericAmount = Number(amount || 0);
+	return new Intl.NumberFormat('en-PH', {
+		style: 'currency',
+		currency: 'PHP',
+		minimumFractionDigits: 2,
+	}).format(numericAmount);
+}
+
 function RunnerNav() {
 	const navigate = useNavigate();
+	const { user } = useAppStore();
+	const fullName = user?.user_metadata?.full_name || 'User';
 
 	const items = [
 		{ id: 'Board', icon: ClipboardList, label: 'Board', path: '/runner/board' },
@@ -42,10 +73,10 @@ function RunnerNav() {
 			<div className="mt-auto pt-8">
 				<div className="flex items-center gap-3 min-w-52">
 					<div className="w-9 h-9 rounded-full bg-primary-orange inline-flex items-center justify-center text-surface-white text-sm font-bold">
-						GC
+						{getInitials(fullName)}
 					</div>
 					<div className="flex-1 min-w-0">
-						<p className="text-sm font-semibold text-ink-default truncate">Gina Cole</p>
+						<p className="text-sm font-semibold text-ink-default truncate">{fullName}</p>
 						<p className="text-caption text-ink-light">Runner</p>
 					</div>
 					<Settings className="w-5 h-5 text-ink-mid" />
@@ -92,8 +123,26 @@ function Stepper({ step }) {
 
 export default function ActiveOrderRunner() {
 	const navigate = useNavigate();
-	const [step, setStep] = useState('accepted');
+	const { user, orders, fetchOrders, isOrdersLoading, updateOrderStatus } = useAppStore();
 	const [receiptPreview, setReceiptPreview] = useState('');
+
+	useEffect(() => {
+		if (!user?.id) {
+			return;
+		}
+
+		fetchOrders({ runnerId: user.id });
+	}, [fetchOrders, user?.id]);
+
+	const activeOrder = useMemo(
+		() =>
+			orders.find((order) => {
+				const status = String(order.status || '').toLowerCase();
+				return ACTIVE_STATUSES.has(status);
+			}),
+		[orders],
+	);
+	const step = activeOrder?.status ? String(activeOrder.status).toLowerCase() : 'accepted';
 
 	const statusTone = useMemo(() => {
 		if (step === 'accepted') {
@@ -108,27 +157,51 @@ export default function ActiveOrderRunner() {
 		return { pillClass: 'bg-status-green text-surface-white', label: 'Delivered' };
 	}, [step]);
 
-	const handlePrimaryAction = () => {
+	const handlePrimaryAction = async () => {
+		if (!activeOrder?.id) {
+			return;
+		}
+
 		if (step === 'accepted') {
-			// TODO: Connect to PATCH /api/v1/errands/:id/status with payload { status: 'at_store' }.
-			setStep('at_store');
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'at_store' });
 			return;
 		}
 
 		if (step === 'at_store') {
-			// TODO: Connect to PATCH /api/v1/errands/:id/status with payload { status: 'purchased' }.
-			setStep('purchased');
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'purchased' });
 			return;
 		}
 
 		if (step === 'purchased') {
-			// TODO: Connect to PATCH /api/v1/errands/:id/status with payload { status: 'delivered' }.
-			setStep('delivered');
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'delivered' });
 		}
 	};
 
 	const primaryLabel =
 		step === 'accepted' ? "I'm at the Store" : step === 'at_store' ? 'Mark as Purchased' : 'Mark as Delivered';
+
+	if (isOrdersLoading) {
+		return (
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+				<RunnerNav />
+				<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+					<p className="text-caption text-ink-light">Loading active errand...</p>
+				</main>
+			</div>
+		);
+	}
+
+	if (!activeOrder) {
+		return (
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+				<RunnerNav />
+				<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+					<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Active Errand</h1>
+					<p className="text-caption text-ink-light mt-2">No active errand assigned right now.</p>
+				</main>
+			</div>
+		);
+	}
 
 	return (
 		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
@@ -154,8 +227,8 @@ export default function ActiveOrderRunner() {
 						<button type="button" className="text-caption text-primary-orange underline">Open Maps →</button>
 						<span className="text-primary-orange text-label">📍</span>
 						<div>
-							<p className="text-[14px] text-ink-default font-semibold">Deliver to: Tisa</p>
-							<p className="text-caption text-ink-light">Sitio Sunflower, 5th Street · Ring the Doorbell</p>
+							<p className="text-[14px] text-ink-default font-semibold">Deliver to: {activeOrder.zone || 'Unspecified zone'}</p>
+							<p className="text-caption text-ink-light">{activeOrder.city || 'No city details provided'}</p>
 						</div>
 					</div>
 
@@ -163,11 +236,12 @@ export default function ActiveOrderRunner() {
 						<div className="bg-surface-default border border-border-rule rounded-2xl p-5">
 							<h2 className="text-heading-2 text-ink-default font-semibold">🛒 Shopping List</h2>
 							<ul className="mt-3 text-body text-ink-default space-y-1 pl-5 list-disc">
-								<li>1 kg Rice</li>
-								<li>1 kilo Banana</li>
+								{toSummaryItems(activeOrder.items).map((item) => (
+									<li key={item}>{item}</li>
+								))}
 							</ul>
 							<div className="mt-4 border border-border-rule p-3">
-								<p className="font-mono text-mono text-ink-light">Budget cap: ₱500</p>
+								<p className="font-mono text-mono text-ink-light">Budget cap: {formatCurrency(activeOrder.amount)}</p>
 							</div>
 						</div>
 					</div>
@@ -175,12 +249,12 @@ export default function ActiveOrderRunner() {
 					<div className="text-center">
 						<p className="font-mono text-mono-sm text-ink-light uppercase">📷 Receipt</p>
 						{step === 'delivered' ? (
-							<div className="mt-2 mx-auto w-47.5 rounded-xl border-[1.5px] border-dashed border-border-rule bg-primary-orange-bg p-2">
-								<img
-									src={receiptPreview || 'https://www.figma.com/api/mcp/asset/bd4df891-3ef8-42e9-ab25-9f0e8c5102ee'}
-									alt="Uploaded receipt"
-									className="w-full h-42.5 object-cover rounded-lg"
-								/>
+							<div className="mt-2 mx-auto w-full max-w-190 rounded-xl border-[1.5px] border-dashed border-border-rule bg-primary-orange-bg p-4 text-caption text-ink-light">
+								{receiptPreview ? (
+									<img src={receiptPreview} alt="Uploaded receipt" className="w-full h-42.5 object-cover rounded-lg" />
+								) : (
+									'No receipt image uploaded.'
+								)}
 							</div>
 						) : (
 							<label className="mt-2 mx-auto w-full max-w-190 min-h-20 rounded-xl border-[1.5px] border-dashed border-primary-orange bg-primary-orange-bg px-8 py-5 flex flex-col items-center justify-center cursor-pointer">
@@ -193,7 +267,6 @@ export default function ActiveOrderRunner() {
 									onChange={(event) => {
 										const file = event.target.files?.[0];
 										if (!file) return;
-										// TODO: Upload receipt image to storage endpoint (e.g., POST /api/v1/errands/:id/receipt).
 										setReceiptPreview(URL.createObjectURL(file));
 									}}
 								/>
@@ -223,7 +296,7 @@ export default function ActiveOrderRunner() {
 					{step === 'delivered' ? (
 						<div className="bg-status-green-bg border border-status-green rounded-2xl p-5 text-center">
 							<p className="text-heading-2 text-status-green font-semibold">🎉 Errand Complete!</p>
-							<p className="text-body text-ink-mid mt-2">Collect ₱280 from Gina.</p>
+							<p className="text-body text-ink-mid mt-2">Collect payment from requester.</p>
 							<button
 								type="button"
 								className="mt-4 h-11 w-full rounded-xl bg-surface-white border border-border-rule text-label text-ink-mid"
