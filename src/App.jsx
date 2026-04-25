@@ -5,6 +5,7 @@ import { AppShell } from '@/components';
 import { useAppStore } from '@/store/useAppStore';
 
 // Pages
+import LandingPage from './pages/LandingPage';
 import Auth from './pages/Auth/01_Auth';
 import ZoneOnboarding from './pages/Auth/07_Zone_Onboarding';
 import RequesterDashboard from './pages/Requester/02_Requester_Dashboard';
@@ -41,8 +42,9 @@ export default function App() {
         <Routes>
           {!user ? (
             <>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="*" element={<Navigate to="/auth" />} />
+              <Route path="*" element={<Navigate to="/" />} />
             </>
           ) : needsOnboarding ? (
             <>

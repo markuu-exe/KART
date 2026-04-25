@@ -66,7 +66,7 @@ export default function Header({ mode = 'public', className = '' }) {
     <header className={cn('sticky top-0 z-40 border-b border-border-rule bg-surface-white/95 backdrop-blur supports-backdrop-filter:bg-surface-white/85', className)}>
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
-          <Link to={user ? homePath : '/auth'} className="flex items-center gap-3">
+          <Link to={user ? homePath : '/'} className="flex items-center gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-orange text-lg font-black text-surface-white shadow-sm">
               K
             </span>
@@ -79,7 +79,7 @@ export default function Header({ mode = 'public', className = '' }) {
 
         {!user ? (
           <div className="flex flex-wrap items-center justify-end gap-3">
-            <a href="#site-footer" className="hidden text-sm font-medium text-ink-mid transition-colors hover:text-ink-default sm:inline-flex">
+            <a href="#how-it-works" className="hidden text-sm font-medium text-ink-mid transition-colors hover:text-ink-default sm:inline-flex">
               How it Works
             </a>
             <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/auth?mode=login')}>
