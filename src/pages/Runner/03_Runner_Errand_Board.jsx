@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, Footprints, MapPin } from 'lucide-react';
-import { ErrandDetailModal } from '@/components';
+import { ErrandDetailModal, EmptyState } from '@/components';
 
 const FILTERS = ['All Zones', 'Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
@@ -119,6 +119,22 @@ function RunnerErrandCard({ errand, onDetails, onAccept }) {
 	);
 }
 
+function EmptyErrandState({ zoneLabel }) {
+	return (
+		<div className="flex items-center justify-center py-4" style={{ minHeight: 360 }}>
+			<EmptyState
+				icon={<Footprints className="h-7 w-7" />}
+				title="No errands available"
+				message={
+					zoneLabel === 'All Zones'
+						? 'There are no open errands near you right now. Check back soon or pick a zone to narrow the search.'
+						: `There are no open errands in ${zoneLabel.toLowerCase()} right now. Try another zone or check back soon.`
+				}
+			/>
+		</div>
+	);
+}
+
 export default function RunnerErrandBoard() {
 	const navigate = useNavigate();
 	const [selectedFilter, setSelectedFilter] = useState('All Zones');
@@ -179,22 +195,20 @@ export default function RunnerErrandBoard() {
 					})}
 				</section>
 
-				<section className="pt-6 flex flex-wrap gap-4 justify-center">
-					{filteredErrands.map((errand) => (
-						<RunnerErrandCard
-							key={errand.id}
-							errand={errand}
-							onDetails={setSelectedErrand}
-							onAccept={() => navigate('/runner/active-order')}
-						/>
-					))}
-				</section>
-
-				<section className="pt-8 text-center">
-					<Footprints className="w-9 h-9 mx-auto text-ink-light/75" />
-					<p className="mt-2 text-label text-ink-default font-semibold">Laid-back Day</p>
-					<p className="mt-1 text-body text-ink-light">No open errands in {selectedFilter.toLowerCase()} right now.</p>
-				</section>
+				{filteredErrands.length > 0 ? (
+					<section className="pt-6 flex flex-wrap gap-4 justify-center">
+						{filteredErrands.map((errand) => (
+							<RunnerErrandCard
+								key={errand.id}
+								errand={errand}
+								onDetails={setSelectedErrand}
+								onAccept={() => navigate('/runner/active-order')}
+							/>
+						))}
+					</section>
+				) : (
+					<EmptyErrandState zoneLabel={selectedFilter} />
+				)}
 			</main>
 
 			<ErrandDetailModal
