@@ -1,66 +1,97 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
+import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
 const ZONES = ['Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
-const REQUEST_ITEMS = [
-  'Bananas (1 bunch)',
-  'Apples (4 pcs)',
-  'Onions (1 kg)',
-  'Garlic (3 bulbs)',
-  'Tomatoes (500g)',
-  'Potatoes (1 kg)',
-  'Carrots (2 pcs)',
-  'Leafy Greens (2 bundles)',
-  'Chicken (1 kg)',
-  'Ground Meat (500g)',
-  'Eggs (1 dozen)',
-  'Fish (3 pcs)',
-  'Tofu (2 blocks)',
-  'Milk (1L)',
-];
+const FALLBACK_ITEMS = ['No item details provided'];
 
-const ACTIVE_REQUESTS = [
-  {
-    id: 'r-accepted',
-    summary: 'Sliced bread, 5kg rice, 1 tray eggs',
-    status: 'Accepted',
-    statusTone: 'blue',
-    stripeTone: 'blue',
-    zone: 'Tisa',
-    amount: '₱100.00',
-    age: '12m ago',
-    address: 'Sitio Sunflower, 5th Street',
-  },
-  {
-    id: 'r-at-store',
-    summary: 'Bananas (1 bunch), Apples (4 pcs), Onions (1 kg), Garlic (3 bulbs), Tomatoes (500g)',
-    status: 'At Store',
-    statusTone: 'orange',
-    stripeTone: 'orange',
-    zone: 'Tisa',
-    amount: '₱100.00',
-    age: '30m ago',
-    address: 'Sitio Sunflower, 5th Street',
-  },
-  {
-    id: 'r-delivered',
-    summary: 'Carrots (2 pcs), Leafy Greens (2 bundles), Chicken (1 kg), Ground Meat (500g)',
-    status: 'Delivered',
-    statusTone: 'green',
-    stripeTone: 'green',
-    zone: 'Tisa',
-    amount: '₱100.00',
-    age: '45m ago',
-    address: 'Sitio Sunflower, 5th Street',
-  },
-];
+function formatCurrency(amount) {
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount)) {
+    return '₱0.00';
+  }
+
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(numericAmount);
+}
+
+function formatRelativeTime(inputDate) {
+  if (!inputDate) {
+    return 'Just now';
+  }
+
+  const date = new Date(inputDate);
+  if (Number.isNaN(date.getTime())) {
+    return 'Just now';
+  }
+
+  const diffMs = Math.max(0, Date.now() - date.getTime());
+  const diffMinutes = Math.floor(diffMs / 60000);
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
+function toStatusLabel(status) {
+  const raw = String(status || 'pending').trim();
+  if (!raw) {
+    return 'Pending';
+  }
+
+  return raw
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function toStatusTone(status) {
+  const normalized = String(status || '').toLowerCase();
+
+  if (normalized === 'delivered') {
+    return 'green';
+  }
+
+  if (normalized === 'at_store' || normalized === 'purchased') {
+    return 'orange';
+  }
+
+  return 'blue';
+}
+
+function toSummary(items) {
+  if (Array.isArray(items) && items.length > 0) {
+    return items.join(', ');
+  }
+
+  if (typeof items === 'string' && items.trim()) {
+    return items;
+  }
+
+  return 'Errand request';
+}
 
 function AppNav({ selected = 'Home' }) {
   const navigate = useNavigate();
+  const { user } = useAppStore();
+  const fullName = user?.user_metadata?.full_name || 'User';
+  const initials = fullName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'U';
 
   const items = [
     { id: 'Home', icon: Home, label: 'Home', path: '/requester/board' },
@@ -94,10 +125,10 @@ function AppNav({ selected = 'Home' }) {
       <div className="mt-auto pt-8">
         <div className="flex items-center gap-3 min-w-52">
           <div className="w-9 h-9 rounded-full bg-primary-orange inline-flex items-center justify-center text-surface-white text-sm font-bold">
-            GC
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-ink-default truncate">Gina Cole</p>
+            <p className="text-sm font-semibold text-ink-default truncate">{fullName}</p>
             <p className="text-caption text-ink-light">Requester</p>
           </div>
           <Settings className="w-5 h-5 text-ink-mid" />
@@ -166,11 +197,43 @@ function EmptyOrdersState({ onPostRequest }) {
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
+  const { user, orders, fetchOrders, isOrdersLoading } = useAppStore();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const firstName = user?.user_metadata?.full_name?.split(' ')?.[0] || 'there';
+  const todayLabel = new Date().toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
 
-  const activeCount = ACTIVE_REQUESTS.length;
+  useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
+
+    fetchOrders({ requesterId: user.id });
+  }, [fetchOrders, user?.id]);
+
+  const activeRequests = useMemo(
+    () =>
+      orders.map((order) => {
+        const statusTone = toStatusTone(order.status);
+
+        return {
+          id: order.id,
+          summary: toSummary(order.items),
+          status: toStatusLabel(order.status),
+          statusTone,
+          stripeTone: statusTone,
+          zone: order.zone || 'Unspecified zone',
+          amount: formatCurrency(order.amount),
+          age: formatRelativeTime(order.created_at),
+          address: [order.city, order.zone].filter(Boolean).join(', ') || 'Address not specified',
+          items: Array.isArray(order.items) && order.items.length > 0 ? order.items : FALLBACK_ITEMS,
+        };
+      }),
+    [orders],
+  );
+
+  const activeCount = activeRequests.length;
 
   const modalErrand = useMemo(() => {
     if (!selectedRequest) {
@@ -178,7 +241,7 @@ export default function RequesterDashboard() {
     }
 
     return {
-      items: REQUEST_ITEMS,
+      items: selectedRequest.items,
       zone: selectedRequest.zone,
       address: selectedRequest.address,
       budget: selectedRequest.amount,
@@ -195,8 +258,8 @@ export default function RequesterDashboard() {
 
       <main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
         <header className="pb-8">
-          <h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Hi, Gina!</h1>
-          <p className="text-caption text-ink-light">Cebu City · March 25, 2026</p>
+          <h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Hi, {firstName}!</h1>
+          <p className="text-caption text-ink-light">{todayLabel}</p>
         </header>
 
         <section className="flex gap-8 items-start justify-center">
@@ -285,13 +348,14 @@ export default function RequesterDashboard() {
 
             {activeCount > 0 ? (
               <div className="flex flex-col gap-3">
-                {ACTIVE_REQUESTS.map((request) => (
+                {activeRequests.map((request) => (
                   <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
                 ))}
               </div>
             ) : (
               <EmptyOrdersState onPostRequest={() => navigate('/requester/board')} />
             )}
+            {isOrdersLoading ? <p className="text-center text-caption text-ink-light">Loading requests...</p> : null}
           </div>
         </section>
       </main>
