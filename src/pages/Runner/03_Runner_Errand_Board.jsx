@@ -41,12 +41,7 @@ function RunnerNav() {
 	];
 
 	return (
-		<aside className="bg-surface-white border-r border-border-rule flex flex-col h-full min-w-60 px-4 py-6">
-			<div className="flex flex-col pb-8">
-				<p className="font-heading font-extrabold text-[28px] tracking-tight text-primary-orange">Kart</p>
-				<p className="text-caption text-ink-light">Skip the checkout line.</p>
-			</div>
-
+		<aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
 			<div className="flex flex-col gap-1">
 				{items.map((item) => {
 					const Icon = item.icon;
@@ -85,7 +80,7 @@ function RunnerNav() {
 
 function RunnerErrandCard({ errand, onDetails, onAccept }) {
 	return (
-		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-[500px] min-w-[360px]">
+		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90">
 			<div className="flex flex-col gap-2">
 				<div className="flex items-center gap-6">
 					<p className="flex-1 text-label text-ink-default font-semibold line-clamp-2">{errand.summary}</p>
@@ -97,9 +92,9 @@ function RunnerErrandCard({ errand, onDetails, onAccept }) {
 				<div className="flex items-center gap-1.5 text-caption text-ink-light">
 					<MapPin className="w-3 h-3" />
 					<span>{errand.zone}</span>
-					<span className="w-[3px] h-[3px] rounded-full bg-ink-light" />
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
 					<span>{errand.address}</span>
-					<span className="w-[3px] h-[3px] rounded-full bg-ink-light" />
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
 					<span>{errand.age}</span>
 				</div>
 
@@ -155,10 +150,10 @@ export default function RunnerErrandBoard() {
 	}, [selectedErrand]);
 
 	return (
-		<div className="bg-surface-default flex items-start size-full">
+		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
 			<RunnerNav />
 
-			<main className="bg-surface-default flex-1 h-full p-10 overflow-y-auto">
+			<main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
 				<header className="pb-6">
 					<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Errand Board</h1>
 					<p className="text-caption text-ink-light">{filteredErrands.length} open near you</p>
