@@ -12,7 +12,7 @@ const SETTINGS_PATHS = [
 
 export default function AppShell({ children, user, needsOnboarding }) {
   const { pathname } = useLocation();
-  const showFooter = pathname === '/' || pathname === '/auth' || SETTINGS_PATHS.some((path) => pathname.startsWith(path));
+  const showFooter = pathname === '/auth' || SETTINGS_PATHS.some((path) => pathname.startsWith(path));
   const headerMode = !user ? 'public' : needsOnboarding ? 'onboarding' : (user?.user_metadata?.role === 'runner' ? 'runner' : 'requester');
 
   return (
