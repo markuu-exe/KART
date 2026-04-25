@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
+import { Globe, Mail, MessageCircle, Phone } from 'lucide-react';
 
 const companyLinks = [
   { label: 'About Us', href: '#site-footer-about' },
@@ -12,10 +12,10 @@ const legalLinks = [
 ];
 
 const socialLinks = [
-  { label: 'Facebook', icon: Facebook },
-  { label: 'Instagram', icon: Instagram },
-  { label: 'LinkedIn', icon: Linkedin },
-  { label: 'X', icon: Twitter },
+  { label: 'Website', icon: Globe },
+  { label: 'Email', icon: Mail },
+  { label: 'Support', icon: MessageCircle },
+  { label: 'Phone', icon: Phone },
 ];
 
 export default function Footer() {
