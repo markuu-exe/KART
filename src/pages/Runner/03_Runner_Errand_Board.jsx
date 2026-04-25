@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, History, User, Settings, Footprints, MapPin } from 'lucide-react';
+import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
+import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
 const FILTERS = ['All Zones', 'Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
@@ -120,16 +121,27 @@ function RunnerErrandCard({ errand, onDetails, onAccept }) {
 }
 
 function EmptyErrandState({ zoneLabel }) {
+	const navigate = useNavigate();
+
 	return (
 		<div className="flex items-center justify-center py-4" style={{ minHeight: 360 }}>
 			<EmptyState
-				icon={<Footprints className="h-7 w-7" />}
+				illustration={<img src={boxIllustration} alt="" aria-hidden="true" />}
 				title="No errands available"
 				message={
 					zoneLabel === 'All Zones'
 						? 'There are no open errands near you right now. Check back soon or pick a zone to narrow the search.'
 						: `There are no open errands in ${zoneLabel.toLowerCase()} right now. Try another zone or check back soon.`
 				}
+				actionLabel={zoneLabel === 'All Zones' ? 'Refresh board' : 'Show all zones'}
+				onAction={() => {
+					if (zoneLabel === 'All Zones') {
+						navigate('/runner/board');
+						return;
+					}
+
+					navigate('/runner/board');
+				}}
 			/>
 		</div>
 	);
