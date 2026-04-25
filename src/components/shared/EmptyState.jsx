@@ -1,12 +1,14 @@
 import './EmptyState.css';
 
 export default function EmptyState({
+  illustration = null,
   icon = null,
   title = 'Title',
   message = 'Body',
   actionLabel = '',
   onAction,
   className = '',
+  illustrationClassName = '',
   iconClassName = '',
   titleClassName = '',
   messageClassName = '',
@@ -18,6 +20,7 @@ export default function EmptyState({
 
   return (
     <div className={`empty-state ${className}`.trim()} {...props}>
+      {illustration && <div className={`empty-state-illustration ${illustrationClassName}`.trim()}>{illustration}</div>}
       {icon && <div className={`empty-state-icon ${iconClassName}`.trim()}>{icon}</div>}
       <h2 className={`empty-state-title ${titleClassName}`.trim()}>{title}</h2>
       <p className={`empty-state-message ${messageClassName}`.trim()}>{message}</p>
