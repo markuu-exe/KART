@@ -124,7 +124,6 @@ function Stepper({ step }) {
 export default function ActiveOrderRunner() {
 	const navigate = useNavigate();
 	const { user, orders, fetchOrders, isOrdersLoading, updateOrderStatus } = useAppStore();
-	const [step, setStep] = useState('accepted');
 	const [receiptPreview, setReceiptPreview] = useState('');
 
 	useEffect(() => {
@@ -143,14 +142,7 @@ export default function ActiveOrderRunner() {
 			}),
 		[orders],
 	);
-
-	useEffect(() => {
-		if (!activeOrder?.status) {
-			return;
-		}
-
-		setStep(String(activeOrder.status).toLowerCase());
-	}, [activeOrder?.status]);
+	const step = activeOrder?.status ? String(activeOrder.status).toLowerCase() : 'accepted';
 
 	const statusTone = useMemo(() => {
 		if (step === 'accepted') {
@@ -171,26 +163,17 @@ export default function ActiveOrderRunner() {
 		}
 
 		if (step === 'accepted') {
-			const { error } = await updateOrderStatus({ orderId: activeOrder.id, status: 'at_store' });
-			if (!error) {
-				setStep('at_store');
-			}
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'at_store' });
 			return;
 		}
 
 		if (step === 'at_store') {
-			const { error } = await updateOrderStatus({ orderId: activeOrder.id, status: 'purchased' });
-			if (!error) {
-				setStep('purchased');
-			}
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'purchased' });
 			return;
 		}
 
 		if (step === 'purchased') {
-			const { error } = await updateOrderStatus({ orderId: activeOrder.id, status: 'delivered' });
-			if (!error) {
-				setStep('delivered');
-			}
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'delivered' });
 		}
 	};
 
