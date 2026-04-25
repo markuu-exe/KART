@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
+import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
 const ZONES = ['Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
@@ -151,9 +152,9 @@ function RequestCard({ request, onOpen }) {
 
 function EmptyOrdersState({ onPostRequest }) {
   return (
-    <div className="flex items-center justify-center py-4" style={{ minHeight: 360 }}>
+    <div className="flex min-h-90 items-center justify-center py-4">
       <EmptyState
-        icon={<ClipboardList className="h-7 w-7" />}
+        illustration={<img src={boxIllustration} alt="" aria-hidden="true" />}
         title="No active orders yet"
         message="Your active requests will appear here after you post one and a runner accepts it."
         actionLabel="Post a request"
