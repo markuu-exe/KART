@@ -3,9 +3,9 @@ import { X } from 'lucide-react';
 
 function MetaRow({ label, value }) {
   return (
-    <div className="flex items-center gap-1.5 min-h-[18px]">
+    <div className="flex items-center gap-1.5 min-h-4.5">
       <span className="text-caption text-ink-light uppercase">{label}</span>
-      <span className="w-[3px] h-[3px] rounded-full bg-ink-light" aria-hidden="true" />
+      <span className="w-0.75 h-0.75 rounded-full bg-ink-light" aria-hidden="true" />
       <span className="text-label text-ink-default font-medium">{value}</span>
     </div>
   );
@@ -49,7 +49,7 @@ export default function ErrandDetailModal({
         }
       }}
     >
-      <div className="bg-surface-white rounded-t-[20px] sm:rounded-[20px] shadow-md w-full max-w-[520px] max-h-[90vh] overflow-hidden">
+      <div className="bg-surface-white rounded-t-[20px] sm:rounded-[20px] shadow-md w-full max-w-130 max-h-[90vh] overflow-hidden">
         <div className="px-6 py-5 overflow-y-auto max-h-[90vh]">
           <div className="w-10 h-1 rounded-full bg-border-rule mx-auto" aria-hidden="true" />
 
