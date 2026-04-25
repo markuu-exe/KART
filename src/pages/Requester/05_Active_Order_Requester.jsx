@@ -29,12 +29,7 @@ function RequesterNav() {
 	];
 
 	return (
-		<aside className="bg-surface-white border-r border-border-rule flex flex-col h-full min-w-60 px-4 py-6">
-			<div className="flex flex-col pb-8">
-				<p className="font-heading font-extrabold text-[28px] tracking-tight text-primary-orange">Kart</p>
-				<p className="text-caption text-ink-light">Skip the checkout line.</p>
-			</div>
-
+		<aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
 			<div className="flex flex-col gap-1">
 				{items.map((item) => {
 					const Icon = item.icon;
@@ -76,11 +71,11 @@ export default function ActiveOrderRequester() {
 	const [orderReceived, setOrderReceived] = useState(false);
 
 	return (
-		<div className="bg-surface-default flex items-start size-full">
+		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
 			<RequesterNav />
 
-			<main className="bg-surface-default flex-1 h-full overflow-y-auto p-10">
-				<div className="max-w-[900px] mx-auto">
+			<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+				<div className="max-w-225 mx-auto">
 					<button type="button" className="text-label text-primary-orange px-2 py-1" onClick={() => navigate('/requester/board')}>
 						← Your Order
 					</button>
@@ -104,7 +99,7 @@ export default function ActiveOrderRequester() {
 						</div>
 					</section>
 
-					<section className="mt-10 space-y-6 max-w-[640px] mx-auto">
+					<section className="mt-10 space-y-6 max-w-160 mx-auto">
 						<div className="bg-primary-orange-bg border border-primary-orange rounded-2xl p-6 shadow-sm">
 							<div className="flex items-center justify-center gap-6">
 								<div className="flex flex-col items-center gap-1">

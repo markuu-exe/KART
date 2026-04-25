@@ -21,12 +21,7 @@ function RunnerNav() {
 	];
 
 	return (
-		<aside className="bg-surface-white border-r border-border-rule flex flex-col h-full min-w-60 px-4 py-6">
-			<div className="flex flex-col pb-8">
-				<p className="font-heading font-extrabold text-[28px] tracking-tight text-primary-orange">Kart</p>
-				<p className="text-caption text-ink-light">Skip the checkout line.</p>
-			</div>
-
+		<aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
 			<div className="flex flex-col gap-1">
 				{items.map((item) => {
 					const Icon = item.icon;
@@ -71,7 +66,7 @@ function Stepper({ step }) {
 
 				return (
 					<div key={name} className="flex items-center flex-1">
-						<div className="w-full max-w-[90px] flex flex-col items-center">
+						<div className="w-full max-w-22.5 flex flex-col items-center">
 							<div
 								className={`w-6 h-6 rounded-full inline-flex items-center justify-center ${
 									isDone
@@ -86,7 +81,7 @@ function Stepper({ step }) {
 							<p className={`mt-1 text-label ${isCurrent ? 'text-ink-default' : 'text-ink-mid'}`}>{STEP_LABELS[name]}</p>
 						</div>
 						{index < STEP_ORDER.length - 1 ? (
-							<div className="flex-1 h-[2px] bg-border-rule -mt-5" />
+							<div className="flex-1 h-0.5 bg-border-rule -mt-5" />
 						) : null}
 					</div>
 				);
@@ -136,16 +131,16 @@ export default function ActiveOrderRunner() {
 		step === 'accepted' ? "I'm at the Store" : step === 'at_store' ? 'Mark as Purchased' : 'Mark as Delivered';
 
 	return (
-		<div className="bg-surface-default flex items-start size-full">
+		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
 			<RunnerNav />
 
-			<main className="bg-surface-default flex-1 h-full overflow-y-auto p-10">
+			<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
 				<button type="button" className="inline-flex items-center gap-1.5 text-primary-orange text-label mb-4" onClick={() => navigate('/runner/board')}>
 					<ArrowLeft className="w-4 h-4" />
 					Back to Board
 				</button>
 
-				<section className="max-w-[900px] mx-auto flex flex-col gap-6">
+				<section className="max-w-225 mx-auto flex flex-col gap-6">
 					<div className="flex items-center justify-between">
 						<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Active Errand</h1>
 						<span className={`h-6 px-2.5 rounded-full font-mono text-mono-sm inline-flex items-center ${statusTone.pillClass}`}>
@@ -164,7 +159,7 @@ export default function ActiveOrderRunner() {
 						</div>
 					</div>
 
-					<div className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6 max-w-[680px] mx-auto w-full">
+					<div className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6 max-w-170 mx-auto w-full">
 						<div className="bg-surface-default border border-border-rule rounded-2xl p-5">
 							<h2 className="text-heading-2 text-ink-default font-semibold">🛒 Shopping List</h2>
 							<ul className="mt-3 text-body text-ink-default space-y-1 pl-5 list-disc">
@@ -180,15 +175,15 @@ export default function ActiveOrderRunner() {
 					<div className="text-center">
 						<p className="font-mono text-mono-sm text-ink-light uppercase">📷 Receipt</p>
 						{step === 'delivered' ? (
-							<div className="mt-2 mx-auto w-[190px] rounded-xl border-[1.5px] border-dashed border-border-rule bg-primary-orange-bg p-2">
+							<div className="mt-2 mx-auto w-47.5 rounded-xl border-[1.5px] border-dashed border-border-rule bg-primary-orange-bg p-2">
 								<img
 									src={receiptPreview || 'https://www.figma.com/api/mcp/asset/bd4df891-3ef8-42e9-ab25-9f0e8c5102ee'}
 									alt="Uploaded receipt"
-									className="w-full h-[170px] object-cover rounded-lg"
+									className="w-full h-42.5 object-cover rounded-lg"
 								/>
 							</div>
 						) : (
-							<label className="mt-2 mx-auto w-full max-w-[760px] min-h-[80px] rounded-xl border-[1.5px] border-dashed border-primary-orange bg-primary-orange-bg px-8 py-5 flex flex-col items-center justify-center cursor-pointer">
+							<label className="mt-2 mx-auto w-full max-w-190 min-h-20 rounded-xl border-[1.5px] border-dashed border-primary-orange bg-primary-orange-bg px-8 py-5 flex flex-col items-center justify-center cursor-pointer">
 								<Camera className="w-6 h-6 text-ink-default" />
 								<span className="text-caption text-ink-default mt-1">Click to Upload Receipt</span>
 								<input

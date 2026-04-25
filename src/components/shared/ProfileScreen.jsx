@@ -39,12 +39,7 @@ function ProfileSideNav({ role }) {
       ];
 
   return (
-    <aside className="bg-surface-white border-r border-border-rule flex flex-col h-full min-w-60 px-4 py-6">
-      <div className="flex flex-col pb-8">
-        <p className="font-heading font-extrabold text-[28px] tracking-tight text-primary-orange">Kart</p>
-        <p className="text-caption text-ink-light">Skip the checkout line.</p>
-      </div>
-
+    <aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
       <div className="flex flex-col gap-1">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -91,7 +86,7 @@ function UserFooter({ role }) {
 
 function InfoCard({ rows }) {
   return (
-    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-[360px]">
+    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-90">
       <h2 className="text-label text-ink-default text-center pb-1 border-b border-border-rule">Personal Information</h2>
       <div className="mt-2">
         {rows.map((row) => (
@@ -107,7 +102,7 @@ function InfoCard({ rows }) {
 
 function AccountCard({ onSignOut }) {
   return (
-    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-[360px]">
+    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-90">
       <h2 className="text-label text-ink-default text-center pb-1 border-b border-border-rule">Account</h2>
       <button
         type="button"
@@ -134,7 +129,7 @@ function AccountCard({ onSignOut }) {
 function UserCard({ fullName, role, joined }) {
   const isRequester = role === 'requester';
   return (
-    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6 w-full max-w-[360px] text-center">
+    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6 w-full max-w-90 text-center">
       <div className="w-16 h-16 rounded-full bg-primary-orange mx-auto inline-flex items-center justify-center text-surface-white text-[30px] font-bold">
         {getInitials(fullName)}
       </div>
@@ -153,7 +148,7 @@ function UserCard({ fullName, role, joined }) {
 
 function ZoneCard({ zone, onChange }) {
   return (
-    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-[360px]">
+    <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-5 w-full max-w-90">
       <div className="flex items-center justify-between text-label">
         <p className="text-ink-default">📍 My Zone</p>
         <button
@@ -262,11 +257,11 @@ export default function ProfileScreen({ role = 'requester' }) {
   };
 
   return (
-    <div className="bg-surface-default flex items-start size-full">
+    <div className="bg-surface-default flex min-h-screen w-full items-stretch">
       <ProfileSideNav role={role} />
 
-      <main className="bg-surface-default flex-1 h-full overflow-y-auto p-10">
-        <section className="max-w-[980px] mx-auto">
+      <main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+        <section className="max-w-245 mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Profile</h1>
             <div className="flex items-center gap-2">
@@ -312,7 +307,7 @@ export default function ProfileScreen({ role = 'requester' }) {
               />
             </div>
 
-            <div className="space-y-4 max-w-[560px]">
+            <div className="space-y-4 max-w-140">
               <InfoCard rows={infoRows} />
               {role === 'runner' ? <RunnerPaymentCard gcashNumber={gcashNumber} /> : null}
               <AccountCard onSignOut={handleSignOut} />
