@@ -1,39 +1,72 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
+import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
 const FILTERS = ['All Zones', 'Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
-const DETAIL_ITEMS = [
-	'Bananas (1 bunch)',
-	'Apples (4 pcs)',
-	'Onions (1 kg)',
-	'Garlic (3 bulbs)',
-	'Tomatoes (500g)',
-	'Potatoes (1 kg)',
-	'Carrots (2 pcs)',
-	'Leafy Greens (2 bundles)',
-	'Chicken (1 kg)',
-	'Ground Meat (500g)',
-	'Eggs (1 dozen)',
-	'Fish (3 pcs)',
-	'Tofu (2 blocks)',
-	'Milk (1L)',
-];
+const FALLBACK_ITEMS = ['No item details provided'];
+const OPEN_STATUSES = new Set(['', 'open', 'pending', 'posted', 'new']);
 
-const OPEN_ERRANDS = Array.from({ length: 6 }, (_, index) => ({
-	id: `e-${index + 1}`,
-	summary: 'Bananas (1 bunch), Apples (4 pcs), Onions (1 kg), Garlic (3 bulbs), Tomatoes (500g), Potatoes (1 kg), Carrots (2 pcs)',
-	zone: 'Tisa',
-	address: 'Sitio Sunflower, 5th Street',
-	age: '12m ago',
-	payout: '₱40.00',
-}));
+function formatCurrency(amount) {
+	const numericAmount = Number(amount);
+	if (!Number.isFinite(numericAmount)) {
+		return '₱0.00';
+	}
+
+	return new Intl.NumberFormat('en-PH', {
+		style: 'currency',
+		currency: 'PHP',
+		minimumFractionDigits: 2,
+	}).format(numericAmount);
+}
+
+function formatRelativeTime(inputDate) {
+	if (!inputDate) {
+		return 'Just now';
+	}
+
+	const date = new Date(inputDate);
+	if (Number.isNaN(date.getTime())) {
+		return 'Just now';
+	}
+
+	const diffMs = Math.max(0, Date.now() - date.getTime());
+	const diffMinutes = Math.floor(diffMs / 60000);
+	if (diffMinutes < 1) return 'Just now';
+	if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+	const diffHours = Math.floor(diffMinutes / 60);
+	if (diffHours < 24) return `${diffHours}h ago`;
+
+	const diffDays = Math.floor(diffHours / 24);
+	return `${diffDays}d ago`;
+}
+
+function toSummary(items) {
+	if (Array.isArray(items) && items.length > 0) {
+		return items.join(', ');
+	}
+
+	if (typeof items === 'string' && items.trim()) {
+		return items;
+	}
+
+	return 'Errand request';
+}
 
 function RunnerNav() {
   const navigate = useNavigate();
+	const { user } = useAppStore();
+	const fullName = user?.user_metadata?.full_name || 'User';
+	const initials = fullName
+		.split(' ')
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part[0]?.toUpperCase())
+		.join('') || 'U';
 
 	const items = [
 		{ id: 'Board', icon: ClipboardList, label: 'Board', active: true, path: '/runner/board' },
@@ -66,10 +99,10 @@ function RunnerNav() {
 			<div className="mt-auto pt-8">
 				<div className="flex items-center gap-3 min-w-52">
 					<div className="w-9 h-9 rounded-full bg-status-blue inline-flex items-center justify-center text-surface-white text-sm font-bold">
-						YB
+						{initials}
 					</div>
 					<div className="flex-1 min-w-0">
-						<p className="text-sm font-semibold text-ink-default truncate">Yuno Ball</p>
+						<p className="text-sm font-semibold text-ink-default truncate">{fullName}</p>
 						<p className="text-caption text-ink-light">Runner</p>
 					</div>
 					<Settings className="w-5 h-5 text-ink-mid" />
@@ -149,16 +182,37 @@ function EmptyErrandState({ zoneLabel }) {
 
 export default function RunnerErrandBoard() {
 	const navigate = useNavigate();
+	const { user, orders, fetchOrders, acceptOrder, isOrdersLoading } = useAppStore();
 	const [selectedFilter, setSelectedFilter] = useState('All Zones');
 	const [selectedErrand, setSelectedErrand] = useState(null);
 
+	useEffect(() => {
+		fetchOrders();
+	}, [fetchOrders, user?.id]);
+
+	const openErrands = useMemo(
+		() =>
+			orders
+				.filter((order) => OPEN_STATUSES.has(String(order.status || '').toLowerCase()))
+				.map((order) => ({
+					id: order.id,
+					summary: toSummary(order.items),
+					zone: order.zone || 'Unspecified zone',
+					address: [order.city, order.zone].filter(Boolean).join(', ') || 'Address not specified',
+					age: formatRelativeTime(order.created_at),
+					payout: formatCurrency(order.amount),
+					items: Array.isArray(order.items) && order.items.length > 0 ? order.items : FALLBACK_ITEMS,
+				})),
+		[orders],
+	);
+
 	const filteredErrands = useMemo(() => {
 		if (selectedFilter === 'All Zones') {
-			return OPEN_ERRANDS;
+			return openErrands;
 		}
 
-		return OPEN_ERRANDS.filter((errand) => errand.zone === selectedFilter);
-	}, [selectedFilter]);
+		return openErrands.filter((errand) => errand.zone === selectedFilter);
+	}, [openErrands, selectedFilter]);
 
 	const modalErrand = useMemo(() => {
 		if (!selectedErrand) {
@@ -166,16 +220,23 @@ export default function RunnerErrandBoard() {
 		}
 
 		return {
-			items: DETAIL_ITEMS,
+			items: selectedErrand.items,
 			zone: selectedErrand.zone,
 			address: selectedErrand.address,
-			budget: '₱730.00',
-			postedTime: '3:48 PM',
+			budget: selectedErrand.payout,
+			postedTime: selectedErrand.age,
 			requesterInitials: 'GC',
 			requesterName: 'Gina',
 			requesterRole: 'Requester',
 		};
 	}, [selectedErrand]);
+
+	const handleAccept = async (errand) => {
+		const { error } = await acceptOrder({ orderId: errand.id, runnerId: user?.id });
+		if (!error) {
+			navigate('/runner/active-order');
+		}
+	};
 
 	return (
 		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
@@ -214,13 +275,14 @@ export default function RunnerErrandBoard() {
 								key={errand.id}
 								errand={errand}
 								onDetails={setSelectedErrand}
-								onAccept={() => navigate('/runner/active-order')}
+								onAccept={handleAccept}
 							/>
 						))}
 					</section>
 				) : (
 					<EmptyErrandState zoneLabel={selectedFilter} />
 				)}
+				{isOrdersLoading ? <p className="pt-4 text-center text-caption text-ink-light">Loading errands...</p> : null}
 			</main>
 
 			<ErrandDetailModal
