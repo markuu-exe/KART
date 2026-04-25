@@ -4,7 +4,7 @@ import { Home, History, User, ClipboardList, Settings, ArrowLeft, Pencil, Lock }
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
 
-const ZONES = ['Zone A', 'Zone B', 'Zone C', 'Zone D', 'Zone E'];
+const ZONES = ['Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
 function splitName(fullName) {
   const parts = String(fullName || '').trim().split(' ').filter(Boolean);
@@ -45,7 +45,7 @@ function SideNav({ role }) {
       ];
 
   const { user } = useAppStore();
-  const fullName = user?.user_metadata?.full_name || 'Gina Cole';
+  const fullName = user?.user_metadata?.full_name || 'User';
 
   return (
     <aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
@@ -121,9 +121,9 @@ export default function EditProfileScreen({ role = 'requester' }) {
   const isRunner = role === 'runner';
 
   const meta = user?.user_metadata || {};
-  const { firstName: initialFirstName, lastName: initialLastName } = splitName(meta.full_name || 'John Doe');
+  const { firstName: initialFirstName, lastName: initialLastName } = splitName(meta.full_name || '');
   const initialZone = meta.zone || ZONES[0];
-  const initialPhone = normalizePhone(meta.phone || '09123456789');
+  const initialPhone = normalizePhone(meta.phone || '');
   const initialGcash = normalizePhone(meta.gcash_number || '');
 
   const [firstName, setFirstName] = useState(initialFirstName);
