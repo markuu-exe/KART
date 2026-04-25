@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, History, User, Settings, MapPin, Package } from 'lucide-react';
-import { ErrandDetailModal } from '@/components';
+import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
+import { ErrandDetailModal, EmptyState } from '@/components';
+import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
 const ZONES = ['Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
@@ -149,6 +150,20 @@ function RequestCard({ request, onOpen }) {
   );
 }
 
+function EmptyOrdersState({ onPostRequest }) {
+  return (
+    <div className="flex min-h-90 items-center justify-center py-4">
+      <EmptyState
+        illustration={<img src={boxIllustration} alt="" aria-hidden="true" />}
+        title="No active orders yet"
+        message="Your active requests will appear here after you post one and a runner accepts it."
+        actionLabel="Post a request"
+        onAction={onPostRequest}
+      />
+    </div>
+  );
+}
+
 export default function RequesterDashboard() {
   const navigate = useNavigate();
   const [itemText, setItemText] = useState('');
@@ -268,17 +283,15 @@ export default function RequesterDashboard() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-3">
-              {ACTIVE_REQUESTS.map((request) => (
-                <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
-              ))}
-            </div>
-
-            <div className="pt-8 text-center">
-              <Package className="w-9 h-9 mx-auto text-ink-light/75" />
-              <p className="mt-2 text-label text-ink-default font-semibold">Empty Request List</p>
-              <p className="mt-1 text-body text-ink-light">No active requests. Post one whenever!</p>
-            </div>
+            {activeCount > 0 ? (
+              <div className="flex flex-col gap-3">
+                {ACTIVE_REQUESTS.map((request) => (
+                  <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
+                ))}
+              </div>
+            ) : (
+              <EmptyOrdersState onPostRequest={() => navigate('/requester/board')} />
+            )}
           </div>
         </section>
       </main>
