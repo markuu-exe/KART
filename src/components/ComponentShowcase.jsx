@@ -109,9 +109,9 @@ export function AvatarAndChips() {
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px' }}>
-        <Avatar initials="JD" />
-        <Avatar initials="GC" />
-        <Avatar initials="MP" />
+        <Avatar initials="RU" />
+        <Avatar initials="KU" />
+        <Avatar initials="TM" />
       </div>
 
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -171,9 +171,9 @@ export function StatusAndProgress() {
 // ===== 6. ZONE CARD =====
 export function ZoneCardExample() {
   const zones = [
-    { zone: 'Zone A', city: 'Manila' },
-    { zone: 'Zone B', city: 'Quezon City' },
-    { zone: 'Zone C', city: 'Makati' },
+    { zone: 'Guadalupe', city: 'Cebu City' },
+    { zone: 'Tisa', city: 'Cebu City' },
+    { zone: 'Lahug', city: 'Cebu City' },
   ];
 
   const [selected, setSelected] = useState(0);
@@ -204,15 +204,15 @@ export function OrderRowExample() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <OrderRow
           itemSummary="Rice, Oil, Salt, Sugar"
-          zone="Zone A"
-          date="15 Jan 2024"
+          zone="Guadalupe"
+          date="15 Jan 2026"
           amount="₱1,200.50"
           role="Requester"
         />
         <OrderRow
           itemSummary="Cereal, Milk, Eggs"
-          zone="Zone B"
-          date="14 Jan 2024"
+          zone="Tisa"
+          date="14 Jan 2026"
           amount="₱850.00"
           role="Runner"
         />
@@ -293,8 +293,8 @@ export function LayoutWithNavigation() {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <Navigation
-        userName="John Doe"
-        userInitials="JD"
+        userName="Current User"
+        userInitials="CU"
         role="Requester"
         selectedNav={selectedNav}
         onNavChange={setSelectedNav}
@@ -315,7 +315,7 @@ export function InfoRowExample() {
       <h3>Order Details</h3>
       <InfoRow label="Order ID" value="#12345" />
       <InfoRow label="Status" value="Delivered" />
-      <InfoRow label="Zone" value="Zone A" />
+      <InfoRow label="Zone" value="Guadalupe" />
       <InfoRow label="Total" value="₱2,500.00" />
     </Card>
   );

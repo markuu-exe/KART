@@ -1,57 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpDown, ClipboardList, History, Home, Settings, User, ChevronRight } from 'lucide-react';
-
-const ORDER_DATA = [
-  {
-    id: 'ord-1001',
-    itemSummary: 'Bananas, Apples, Onions, Garlic, Tomatoes, Potatoes',
-    zone: 'Market Zone A',
-    date: '2026-03-20',
-    amount: 620,
-    status: 'delivered',
-  },
-  {
-    id: 'ord-1002',
-    itemSummary: 'Rice, Cooking Oil, Salt, Soy Sauce, Vinegar',
-    zone: 'Market Zone B',
-    date: '2026-03-16',
-    amount: 455,
-    status: 'in_progress',
-  },
-  {
-    id: 'ord-1003',
-    itemSummary: 'Chicken, Eggs, Milk, Bread, Cheese',
-    zone: 'Central Grocery',
-    date: '2026-03-05',
-    amount: 820,
-    status: 'delivered',
-  },
-  {
-    id: 'ord-1004',
-    itemSummary: 'Detergent, Fabric Conditioner, Bleach',
-    zone: 'Household Hub',
-    date: '2026-02-25',
-    amount: 390,
-    status: 'cancelled',
-  },
-  {
-    id: 'ord-1005',
-    itemSummary: 'Fish, Tofu, Leafy Greens, Carrots',
-    zone: 'Fresh Produce',
-    date: '2026-02-18',
-    amount: 540,
-    status: 'delivered',
-  },
-  {
-    id: 'ord-1006',
-    itemSummary: 'Ground Meat, Bell Pepper, Onion, Tomato Sauce',
-    zone: 'Weekend Market',
-    date: '2026-02-11',
-    amount: 470,
-    status: 'delivered',
-  },
-];
+import { useAppStore } from '@/store/useAppStore';
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'All' },
@@ -62,26 +12,66 @@ const FILTER_OPTIONS = [
 
 function formatDate(dateValue) {
   const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) {
+    return 'N/A';
+  }
   return date.toLocaleDateString('en-PH', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
 }
 
 function formatMonth(dateValue) {
   const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) {
+    return 'UNKNOWN';
+  }
   return date.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' }).toUpperCase();
 }
 
 function formatAmount(amountValue) {
+  const numeric = Number(amountValue || 0);
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amountValue);
+  }).format(numeric);
+}
+
+function getInitials(name) {
+  const parts = String(name || 'User')
+    .trim()
+    .split(' ')
+    .filter(Boolean);
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'U';
+}
+
+function toSummary(items) {
+  if (Array.isArray(items) && items.length > 0) {
+    return items.join(', ');
+  }
+
+  if (typeof items === 'string' && items.trim()) {
+    return items;
+  }
+
+  return 'No items listed';
+}
+
+function normalizeHistoryStatus(status) {
+  const normalized = String(status || '').toLowerCase();
+  if (normalized === 'cancelled') {
+    return 'cancelled';
+  }
+  if (normalized === 'delivered') {
+    return 'delivered';
+  }
+  return 'in_progress';
 }
 
 function SideNav({ role }) {
   const navigate = useNavigate();
+  const { user } = useAppStore();
   const isRequester = role === 'requester';
+  const fullName = user?.user_metadata?.full_name || 'User';
 
   const navItems = isRequester
     ? [
@@ -119,10 +109,10 @@ function SideNav({ role }) {
       <div className="mt-auto pt-8">
         <div className="flex items-center gap-3 min-w-52">
           <div className="w-9 h-9 rounded-full bg-primary-orange inline-flex items-center justify-center text-surface-white text-sm font-bold">
-            GC
+            {getInitials(fullName)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-ink-default truncate">Gina Cole</p>
+            <p className="text-sm font-semibold text-ink-default truncate">{fullName}</p>
             <p className="text-caption text-ink-light">{isRequester ? 'Requester' : 'Runner'}</p>
           </div>
           <Settings className="w-5 h-5 text-ink-mid" />
@@ -168,14 +158,41 @@ function HistoryRow({ row, role }) {
 }
 
 export default function OrderHistoryScreen({ role = 'requester' }) {
+  const { user, orders, fetchOrders, isOrdersLoading } = useAppStore();
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [visibleCount, setVisibleCount] = useState(4);
 
   const subtitle = role === 'runner' ? "All errands you've completed" : "All requests you've posted";
 
+  useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
+
+    if (role === 'runner') {
+      fetchOrders({ runnerId: user.id });
+      return;
+    }
+
+    fetchOrders({ requesterId: user.id });
+  }, [fetchOrders, role, user?.id]);
+
+  const historyRows = useMemo(
+    () =>
+      orders.map((order) => ({
+        id: order.id,
+        itemSummary: toSummary(order.items),
+        zone: [order.zone, order.city].filter(Boolean).join(', ') || 'Unknown zone',
+        date: order.created_at,
+        amount: order.amount,
+        status: normalizeHistoryStatus(order.status),
+      })),
+    [orders],
+  );
+
   const filteredRows = useMemo(() => {
-    const rows = activeFilter === 'all' ? ORDER_DATA : ORDER_DATA.filter((item) => item.status === activeFilter);
+    const rows = activeFilter === 'all' ? historyRows : historyRows.filter((item) => item.status === activeFilter);
     const sorted = [...rows].sort((a, b) => {
       const aValue = new Date(a.date).getTime();
       const bValue = new Date(b.date).getTime();
@@ -183,7 +200,7 @@ export default function OrderHistoryScreen({ role = 'requester' }) {
     });
 
     return sorted;
-  }, [activeFilter, sortOrder]);
+  }, [activeFilter, historyRows, sortOrder]);
 
   const visibleRows = filteredRows.slice(0, visibleCount);
 
@@ -276,9 +293,7 @@ export default function OrderHistoryScreen({ role = 'requester' }) {
             </div>
           ) : null}
 
-          <p className="text-caption text-ink-light">
-            TODO: Replace ORDER_DATA with API results once order history endpoint and pagination are available.
-          </p>
+          {isOrdersLoading ? <p className="text-caption text-ink-light">Loading order history...</p> : null}
         </section>
       </main>
     </div>
