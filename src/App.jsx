@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import { AppShell } from '@/components';
 import { useAppStore } from '@/store/useAppStore';
 
 // Pages
@@ -36,34 +37,36 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        {!user ? (
-          <>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="*" element={<Navigate to="/auth" />} />
-          </>
-        ) : needsOnboarding ? (
-          <>
-            <Route path="/auth/onboarding" element={<ZoneOnboarding />} />
-            <Route path="*" element={<Navigate to="/auth/onboarding" />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<Navigate to={homePath} />} />
-            <Route path="/requester/board" element={<RequesterDashboard />} />
-            <Route path="/requester/active-order" element={<ActiveOrderRequester />} />
-            <Route path="/requester/history" element={<OrderHistoryRequester />} />
-            <Route path="/requester/profile" element={<ProfileRequester />} />
-            <Route path="/requester/profile/edit" element={<EditProfileRequester />} />
-            <Route path="/runner/board" element={<RunnerErrandBoard />} />
-            <Route path="/runner/active-order" element={<ActiveOrderRunner />} />
-            <Route path="/runner/history" element={<OrderHistoryRunner />} />
-            <Route path="/runner/profile" element={<ProfileRunner />} />
-            <Route path="/runner/profile/edit" element={<EditProfileRunner />} />
-            <Route path="*" element={<Navigate to={homePath} />} />
-          </>
-        )}
-      </Routes>
+      <AppShell user={user} needsOnboarding={needsOnboarding}>
+        <Routes>
+          {!user ? (
+            <>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="*" element={<Navigate to="/auth" />} />
+            </>
+          ) : needsOnboarding ? (
+            <>
+              <Route path="/auth/onboarding" element={<ZoneOnboarding />} />
+              <Route path="*" element={<Navigate to="/auth/onboarding" />} />
+            </>
+          ) : (
+            <>
+              <Route path="/" element={<Navigate to={homePath} />} />
+              <Route path="/requester/board" element={<RequesterDashboard />} />
+              <Route path="/requester/active-order" element={<ActiveOrderRequester />} />
+              <Route path="/requester/history" element={<OrderHistoryRequester />} />
+              <Route path="/requester/profile" element={<ProfileRequester />} />
+              <Route path="/requester/profile/edit" element={<EditProfileRequester />} />
+              <Route path="/runner/board" element={<RunnerErrandBoard />} />
+              <Route path="/runner/active-order" element={<ActiveOrderRunner />} />
+              <Route path="/runner/history" element={<OrderHistoryRunner />} />
+              <Route path="/runner/profile" element={<ProfileRunner />} />
+              <Route path="/runner/profile/edit" element={<EditProfileRunner />} />
+              <Route path="*" element={<Navigate to={homePath} />} />
+            </>
+          )}
+        </Routes>
+      </AppShell>
     </BrowserRouter>
   );
 }
