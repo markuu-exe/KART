@@ -186,7 +186,7 @@ export default function EditProfileScreen({ role = 'requester' }) {
       <SideNav role={role} />
 
       <main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
-        <section className="max-w-[760px]">
+        <section className="max-w-190">
           <button
             type="button"
             className="inline-flex items-center gap-1 text-label text-primary-orange"
@@ -201,7 +201,7 @@ export default function EditProfileScreen({ role = 'requester' }) {
             <p className="text-caption text-ink-light mt-1">Changes are saved when tap save</p>
           </div>
 
-          <div className="mt-6 space-y-6 max-w-[560px]">
+          <div className="mt-6 space-y-6 max-w-140">
             <section className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6">
               <p className="font-mono text-mono-sm text-ink-light text-center">PERSONAL INFORMATION</p>
 

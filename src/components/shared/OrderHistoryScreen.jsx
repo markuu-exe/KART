@@ -143,7 +143,7 @@ function HistoryRow({ row, role }) {
         // TODO: Navigate to history detail screen when history detail route is finalized.
       }}
     >
-      <div className="w-[3px] self-stretch rounded-[2px] bg-status-green" />
+      <div className="w-0.75 self-stretch rounded-xs bg-status-green" />
 
       <div className="flex-1 min-w-0">
         <p className="text-label font-semibold text-ink-default truncate">{row.itemSummary}</p>
@@ -204,7 +204,7 @@ export default function OrderHistoryScreen({ role = 'requester' }) {
       <SideNav role={role} />
 
       <main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
-        <section className="max-w-[960px] mx-auto flex flex-col gap-4">
+        <section className="max-w-240 mx-auto flex flex-col gap-4">
           <header className="flex items-start justify-between">
             <div>
               <h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Order History</h1>
