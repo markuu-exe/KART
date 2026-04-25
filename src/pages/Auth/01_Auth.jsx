@@ -102,6 +102,8 @@ export default function Auth() {
   const [forgotNotice, setForgotNotice] = useState('');
   const [verificationEmail, setVerificationEmail] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
 
   const { setUser, setLoading: setAppLoading } = useAppStore();
 
@@ -114,6 +116,70 @@ export default function Auth() {
     setError('');
     setNotice('');
     navigate(`/auth?mode=${shouldSignUp ? 'signup' : 'login'}`, { replace: true });
+  };
+
+  const getAuthRedirectTo = () => `${window.location.origin}/auth`;
+
+  const handleGoogleAuth = async () => {
+    setOauthLoading(true);
+    setError('');
+    setNotice('');
+
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: getAuthRedirectTo(),
+        },
+      });
+
+      if (oauthError) {
+        throw oauthError;
+      }
+    } catch (oauthError) {
+      setError(oauthError instanceof Error ? oauthError.message : 'Unable to continue with Google right now.');
+      setOauthLoading(false);
+    }
+  };
+
+  const handleMagicLink = async () => {
+    setMagicLinkLoading(true);
+    setError('');
+    setNotice('');
+
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        throw new Error('Enter your email address first to receive a magic link.');
+      }
+
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo: getAuthRedirectTo(),
+          shouldCreateUser: isSignUp,
+          ...(isSignUp
+            ? {
+                data: {
+                  first_name: firstName.trim(),
+                  last_name: lastName.trim(),
+                },
+              }
+            : {}),
+        },
+      });
+
+      if (otpError) {
+        throw otpError;
+      }
+
+      setNotice(`Magic link sent to ${normalizedEmail}. Open it on this device to continue.`);
+    } catch (otpError) {
+      setError(otpError instanceof Error ? otpError.message : 'Unable to send a magic link right now.');
+    } finally {
+      setMagicLinkLoading(false);
+    }
   };
 
   const handleResendVerification = async () => {
@@ -321,6 +387,30 @@ export default function Auth() {
             ) : null}
 
             <form className="auth-form" onSubmit={handleAuth}>
+              <div className="auth-socialActions">
+                <button
+                  type="button"
+                  className="auth-socialActions__button"
+                  onClick={handleGoogleAuth}
+                  disabled={oauthLoading || magicLinkLoading || loading}
+                >
+                  {oauthLoading ? 'Opening Google...' : 'Continue with Google'}
+                </button>
+
+                <button
+                  type="button"
+                  className="auth-socialActions__button auth-socialActions__button--secondary"
+                  onClick={handleMagicLink}
+                  disabled={oauthLoading || magicLinkLoading || loading}
+                >
+                  {magicLinkLoading ? 'Sending Magic Link...' : 'Send Magic Link'}
+                </button>
+              </div>
+
+              <p className="auth-form__divider" role="presentation" aria-hidden="true">
+                <span>or continue with email and password</span>
+              </p>
+
               {isSignUp ? (
                 <div className="auth-form__nameRow">
                   <AuthField
