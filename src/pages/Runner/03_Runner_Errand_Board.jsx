@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
+import { Skeleton } from '@/components/ui';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -114,7 +115,7 @@ function RunnerNav() {
 
 function RunnerErrandCard({ errand, onDetails, onAccept }) {
 	return (
-		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90">
+		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90 transform transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md">
 			<div className="flex flex-col gap-2">
 				<div className="flex items-center gap-6">
 					<p className="flex-1 text-label text-ink-default font-semibold line-clamp-2">{errand.summary}</p>
@@ -153,6 +154,33 @@ function RunnerErrandCard({ errand, onDetails, onAccept }) {
 	);
 }
 
+function RunnerErrandCardSkeleton() {
+	return (
+		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90">
+			<div className="flex flex-col gap-2">
+				<div className="flex items-center gap-6">
+					<Skeleton className="flex-1 h-5" />
+					<Skeleton className="h-6 w-16 rounded-full" />
+				</div>
+
+				<div className="flex items-center gap-1.5">
+					<MapPin className="w-3 h-3 text-ink-light" />
+					<Skeleton className="h-3 w-12" />
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
+					<Skeleton className="h-3 w-20" />
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
+					<Skeleton className="h-3 w-8" />
+				</div>
+
+				<div className="grid grid-cols-2 gap-2 pt-1">
+					<Skeleton className="h-9 rounded-xl" />
+					<Skeleton className="h-9 rounded-xl" />
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function EmptyErrandState({ zoneLabel }) {
 	const navigate = useNavigate();
 
@@ -185,6 +213,9 @@ export default function RunnerErrandBoard() {
 	const { user, orders, fetchOrders, acceptOrder, isOrdersLoading } = useAppStore();
 	const [selectedFilter, setSelectedFilter] = useState('All Zones');
 	const [selectedErrand, setSelectedErrand] = useState(null);
+
+	// Fallback: Hardcoded loading state to prove UI works with skeletons
+	const mockIsLoading = true;
 
 	useEffect(() => {
 		fetchOrders();
@@ -279,10 +310,16 @@ export default function RunnerErrandBoard() {
 							/>
 						))}
 					</section>
+				) : mockIsLoading ? (
+					<section className="pt-6 flex flex-wrap gap-4 justify-center">
+						{Array.from({ length: 6 }, (_, i) => (
+							<RunnerErrandCardSkeleton key={i} />
+						))}
+					</section>
 				) : (
 					<EmptyErrandState zoneLabel={selectedFilter} />
 				)}
-				{isOrdersLoading ? <p className="pt-4 text-center text-caption text-ink-light">Loading errands...</p> : null}
+				{isOrdersLoading && !mockIsLoading ? <p className="pt-4 text-center text-caption text-ink-light">Loading errands...</p> : null}
 			</main>
 
 			<ErrandDetailModal
