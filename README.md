@@ -58,6 +58,8 @@ VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
+The route preview in the errand detail modal uses **Leaflet (open-source map library) + OSRM (free routing engine)** — no authentication required.
+
 ### 5. Run locally
 
 ```bash
