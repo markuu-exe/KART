@@ -114,7 +114,7 @@ function RunnerNav() {
 
 function RunnerErrandCard({ errand, onDetails, onAccept }) {
 	return (
-		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90">
+		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90 hover:scale-105 transition-transform duration-200 cursor-pointer">
 			<div className="flex flex-col gap-2">
 				<div className="flex items-center gap-6">
 					<p className="flex-1 text-label text-ink-default font-semibold line-clamp-2">{errand.summary}</p>
