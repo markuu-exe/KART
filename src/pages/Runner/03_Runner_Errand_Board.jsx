@@ -196,6 +196,7 @@ export default function RunnerErrandBoard() {
 				.filter((order) => OPEN_STATUSES.has(String(order.status || '').toLowerCase()))
 				.map((order) => ({
 					id: order.id,
+					sourceOrder: order,
 					summary: toSummary(order.items),
 					zone: order.zone || 'Unspecified zone',
 					address: [order.city, order.zone].filter(Boolean).join(', ') || 'Address not specified',
@@ -220,6 +221,7 @@ export default function RunnerErrandBoard() {
 		}
 
 		return {
+			sourceOrder: selectedErrand.sourceOrder,
 			items: selectedErrand.items,
 			zone: selectedErrand.zone,
 			address: selectedErrand.address,
