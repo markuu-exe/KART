@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import RouteMap from './RouteMap';
 
 function MetaRow({ label, value }) {
   return (
@@ -36,6 +37,33 @@ export default function ErrandDetailModal({
   if (!isOpen || !errand) {
     return null;
   }
+
+  const source = errand.sourceOrder || errand;
+  const pickupCoordinates =
+    source.pickupCoordinates ||
+    source.pickup_coordinates ||
+    source.pickupLocation ||
+    source.pickup_location ||
+    (source.pickup_latitude != null && source.pickup_longitude != null
+      ? { lat: source.pickup_latitude, lng: source.pickup_longitude }
+      : null) ||
+    (source.pickupLatitude != null && source.pickupLongitude != null
+      ? { lat: source.pickupLatitude, lng: source.pickupLongitude }
+      : null);
+
+  const dropoffCoordinates =
+    source.dropoffCoordinates ||
+    source.dropoff_coordinates ||
+    source.destinationCoordinates ||
+    source.destination_coordinates ||
+    source.dropoffLocation ||
+    source.dropoff_location ||
+    (source.dropoff_latitude != null && source.dropoff_longitude != null
+      ? { lat: source.dropoff_latitude, lng: source.dropoff_longitude }
+      : null) ||
+    (source.dropoffLatitude != null && source.dropoffLongitude != null
+      ? { lat: source.dropoffLatitude, lng: source.dropoffLongitude }
+      : null);
 
   return (
     <div
@@ -82,6 +110,12 @@ export default function ErrandDetailModal({
             <MetaRow label="Address" value={errand.address} />
             <MetaRow label="Budget" value={errand.budget} />
             <MetaRow label="Posted Time" value={errand.postedTime} />
+          </div>
+
+          <div className="mt-4 border-t border-border-rule" />
+
+          <div className="mt-4">
+            <RouteMap pickup={pickupCoordinates} dropoff={dropoffCoordinates} />
           </div>
 
           <div className="mt-4 border-t border-border-rule" />
