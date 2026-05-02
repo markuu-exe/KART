@@ -219,6 +219,7 @@ export default function RequesterDashboard() {
 
         return {
           id: order.id,
+          sourceOrder: order,
           summary: toSummary(order.items),
           status: toStatusLabel(order.status),
           statusTone,
@@ -241,6 +242,7 @@ export default function RequesterDashboard() {
     }
 
     return {
+      sourceOrder: selectedRequest.sourceOrder,
       items: selectedRequest.items,
       zone: selectedRequest.zone,
       address: selectedRequest.address,
