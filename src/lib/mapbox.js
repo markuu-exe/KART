@@ -1,4 +1,4 @@
-const MAPBOX_DIRECTIONS_MATRIX_ENDPOINT = 'https://api.mapbox.com/directions-matrix/v1/mapbox/driving';
+const OSRM_ROUTE_ENDPOINT = 'https://router.project-osrm.org/route/v1/driving';
 
 const DEFAULT_PRICING = {
   baseFee: 30,
@@ -101,12 +101,6 @@ export function estimateRoutePricing({ distanceMeters, durationSeconds }, pricin
 }
 
 export async function fetchRouteMatrixEstimate(pickup, dropoff, signal) {
-  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-
-  if (!accessToken) {
-    throw new Error('Missing Mapbox access token. Add VITE_MAPBOX_ACCESS_TOKEN to .env.local.');
-  }
-
   const pickupCoordinates = normalizeCoordinates(pickup);
   const dropoffCoordinates = normalizeCoordinates(dropoff);
 
@@ -115,27 +109,22 @@ export async function fetchRouteMatrixEstimate(pickup, dropoff, signal) {
   }
 
   const coordinates = `${pickupCoordinates[0]},${pickupCoordinates[1]};${dropoffCoordinates[0]},${dropoffCoordinates[1]}`;
-  const searchParams = new URLSearchParams({
-    access_token: accessToken,
-    annotations: 'distance,duration',
-    sources: '0',
-    destinations: '1',
-  });
 
-  const response = await fetch(`${MAPBOX_DIRECTIONS_MATRIX_ENDPOINT}/${coordinates}?${searchParams.toString()}`, {
-    signal,
-  });
+  const response = await fetch(
+    `${OSRM_ROUTE_ENDPOINT}/${coordinates}?overview=full&geometries=geojson`,
+    { signal },
+  );
 
   if (!response.ok) {
-    throw new Error(`Mapbox Matrix API request failed with status ${response.status}.`);
+    throw new Error(`OSRM route request failed with status ${response.status}.`);
   }
 
   const data = await response.json();
-  const distanceMeters = data?.distances?.[0]?.[1] ?? null;
-  const durationSeconds = data?.durations?.[0]?.[1] ?? null;
+  const distanceMeters = data?.routes?.[0]?.distance ?? null;
+  const durationSeconds = data?.routes?.[0]?.duration ?? null;
 
   if (!Number.isFinite(distanceMeters) || !Number.isFinite(durationSeconds)) {
-    throw new Error('Mapbox Matrix API did not return a valid route estimate.');
+    throw new Error('OSRM did not return a valid route estimate.');
   }
 
   const pricing = estimateRoutePricing({ distanceMeters, durationSeconds });
