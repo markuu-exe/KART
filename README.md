@@ -56,7 +56,10 @@ Create `.env.local` with:
 ```bash
 VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_MAPBOX_ACCESS_TOKEN=your-mapbox-public-token
 ```
+
+The Mapbox token powers the shared route preview and Matrix API distance/ETA estimate used in the errand detail modal.
 
 ### 5. Run locally
 
