@@ -6,3 +6,4 @@ export { default as Navigation } from './Navigation';
 export { default as ErrandDetailModal } from './ErrandDetailModal';
 export { default as OrderRow } from './OrderRow';
 export { default as ZoneCard } from './ZoneCard';
+export { default as RouteMap } from './RouteMap';
