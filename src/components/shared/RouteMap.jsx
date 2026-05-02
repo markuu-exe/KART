@@ -1,18 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { fetchRouteMatrixEstimate, formatPeso, normalizeCoordinates } from '@/lib/mapbox';
-
-function buildRouteGeoJson(pickupCoordinates, dropoffCoordinates) {
-  return {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: [pickupCoordinates, dropoffCoordinates],
-    },
-    properties: {},
-  };
-}
 
 function RouteStat({ label, value, accent = 'text-ink-default' }) {
   return (
@@ -38,7 +27,6 @@ export default function RouteMap({
   const pickupCoordinates = useMemo(() => normalizeCoordinates(pickup), [pickup]);
   const dropoffCoordinates = useMemo(() => normalizeCoordinates(dropoff), [dropoff]);
   const hasCoordinates = Boolean(pickupCoordinates && dropoffCoordinates);
-  const hasToken = Boolean(import.meta.env.VITE_MAPBOX_ACCESS_TOKEN);
 
   useEffect(() => {
     if (!hasCoordinates) {
@@ -69,63 +57,49 @@ export default function RouteMap({
   }, [dropoffCoordinates, hasCoordinates, pickupCoordinates]);
 
   useEffect(() => {
-    if (!mapContainerRef.current || !hasCoordinates || !hasToken) {
+    if (!mapContainerRef.current || !hasCoordinates) {
       return undefined;
     }
 
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+    const map = L.map(mapContainerRef.current).setView(pickupCoordinates, 12);
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: pickupCoordinates,
-      zoom: 12,
-      attributionControl: false,
-      cooperativeGestures: true,
-    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
 
-    const pickupMarker = new mapboxgl.Marker({ color: '#ff5c1a' }).setLngLat(pickupCoordinates).addTo(map);
-    const dropoffMarker = new mapboxgl.Marker({ color: '#1f9d55' }).setLngLat(dropoffCoordinates).addTo(map);
+    const pickupMarker = L.circleMarker(pickupCoordinates, {
+      color: '#ff5c1a',
+      radius: 8,
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8,
+    }).addTo(map);
+
+    const dropoffMarker = L.circleMarker(dropoffCoordinates, {
+      color: '#1f9d55',
+      radius: 8,
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8,
+    }).addTo(map);
+
     markerRefs.current = [pickupMarker, dropoffMarker];
 
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+    L.polyline([pickupCoordinates, dropoffCoordinates], {
+      color: '#ff5c1a',
+      weight: 4,
+      opacity: 0.9,
+    }).addTo(map);
 
-    map.on('load', () => {
-      if (!map.getSource('route-line')) {
-        map.addSource('route-line', {
-          type: 'geojson',
-          data: buildRouteGeoJson(pickupCoordinates, dropoffCoordinates),
-        });
-      }
-
-      if (!map.getLayer('route-line')) {
-        map.addLayer({
-          id: 'route-line',
-          type: 'line',
-          source: 'route-line',
-          layout: {
-            'line-cap': 'round',
-            'line-join': 'round',
-          },
-          paint: {
-            'line-color': '#ff5c1a',
-            'line-width': 4,
-            'line-opacity': 0.9,
-          },
-        });
-      }
-
-      const bounds = new mapboxgl.LngLatBounds(pickupCoordinates, pickupCoordinates);
-      bounds.extend(dropoffCoordinates);
-      map.fitBounds(bounds, { padding: 56, duration: 0 });
-    });
+    const bounds = L.latLngBounds([pickupCoordinates, dropoffCoordinates]);
+    map.fitBounds(bounds, { padding: [56, 56] });
 
     return () => {
-      markerRefs.current.forEach((marker) => marker.remove());
-      markerRefs.current = [];
       map.remove();
+      markerRefs.current = [];
     };
-  }, [dropoffCoordinates, hasCoordinates, hasToken, pickupCoordinates]);
+  }, [dropoffCoordinates, hasCoordinates, pickupCoordinates]);
 
   const routeSummary = estimate
     ? [
@@ -145,17 +119,15 @@ export default function RouteMap({
           </p>
         </div>
         <span className="rounded-full bg-primary-orange-bg px-2.5 py-1 text-caption font-semibold text-primary-orange">
-          Mapbox GL JS
+          Leaflet + OSRM
         </span>
       </div>
 
       <div className="mt-3 overflow-hidden rounded-2xl border border-border-rule bg-surface-white">
-        {hasCoordinates && hasToken ? <div ref={mapContainerRef} className="h-72 w-full bg-surface-default" /> : null}
-        {!hasCoordinates || !hasToken ? (
+        {hasCoordinates ? <div ref={mapContainerRef} className="h-72 w-full bg-surface-default" /> : null}
+        {!hasCoordinates ? (
           <div className="flex h-72 items-center justify-center px-6 text-center text-caption text-ink-light">
-            {!hasToken
-              ? 'Add VITE_MAPBOX_ACCESS_TOKEN to .env.local to enable the route preview.'
-              : 'Add pickup and drop-off coordinates to render the route.'}
+            Add pickup and drop-off coordinates to render the route.
           </div>
         ) : null}
       </div>
