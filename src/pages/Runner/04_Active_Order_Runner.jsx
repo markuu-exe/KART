@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, ArrowLeft, Camera, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
+import PageTransition from '@/components/shared/PageTransition';
 
 const STEP_ORDER = ['accepted', 'at_store', 'purchased', 'delivered'];
 
@@ -182,29 +183,34 @@ export default function ActiveOrderRunner() {
 
 	if (isOrdersLoading) {
 		return (
-			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
-				<RunnerNav />
-				<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
-					<p className="text-caption text-ink-light">Loading active errand...</p>
-				</main>
-			</div>
+			<PageTransition>
+				<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+					<RunnerNav />
+					<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+						<p className="text-caption text-ink-light">Loading active errand...</p>
+					</main>
+				</div>
+			</PageTransition>
 		);
 	}
 
 	if (!activeOrder) {
 		return (
-			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
-				<RunnerNav />
-				<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
-					<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Active Errand</h1>
-					<p className="text-caption text-ink-light mt-2">No active errand assigned right now.</p>
-				</main>
-			</div>
+			<PageTransition>
+				<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+					<RunnerNav />
+					<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+						<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Active Errand</h1>
+						<p className="text-caption text-ink-light mt-2">No active errand assigned right now.</p>
+					</main>
+				</div>
+			</PageTransition>
 		);
 	}
 
 	return (
-		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+		<PageTransition>
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
 			<RunnerNav />
 
 			<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
@@ -309,5 +315,6 @@ export default function ActiveOrderRunner() {
 				</section>
 			</main>
 		</div>
+		</PageTransition>
 	);
 }
