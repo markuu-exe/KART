@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { fetchRouteMatrixEstimate, formatPeso, normalizeCoordinates } from '@/lib/mapbox';
+import { fetchRouteMatrixEstimate, formatPeso, normalizeCoordinates } from '@/lib/routing';
 
 function RouteStat({ label, value, accent = 'text-ink-default' }) {
   return (
