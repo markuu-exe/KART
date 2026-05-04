@@ -36,3 +36,5 @@ supabase/.temp/
 *.sln
 *.sw?
 COMPONENT_SYSTEM_SETUP.md
+PAYMENT_SETUP.md
+supabase/functions/create-payment-intent/README.md
