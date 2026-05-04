@@ -221,16 +221,86 @@ function EmptyOrdersState({ onPostRequest }) {
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
-  const { user, orders, fetchOrders, isOrdersLoading } = useAppStore();
+  const { user, orders, fetchOrders, isOrdersLoading, createOrder, error: storeError } = useAppStore();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
+  const [budgetCap, setBudgetCap] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const firstName = user?.user_metadata?.full_name?.split(' ')?.[0] || 'there';
   const todayLabel = new Date().toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
 
   // Fallback: Hardcoded loading state to prove UI works with skeletons
   const mockIsLoading = true;
+
+  const handlePostRequest = async (e) => {
+    e.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    // Validation
+    if (!itemText.trim()) {
+      setSubmitError('Please specify items needed.');
+      return;
+    }
+
+    if (!zone) {
+      setSubmitError('Please select a delivery zone.');
+      return;
+    }
+
+    const numericBudget = Number(budgetCap);
+    if (!budgetCap || !Number.isFinite(numericBudget) || numericBudget <= 0) {
+      setSubmitError('Please enter a valid budget amount.');
+      return;
+    }
+
+    if (!deliveryAddress.trim()) {
+      setSubmitError('Please provide a delivery address.');
+      return;
+    }
+
+    if (!user?.id) {
+      setSubmitError('You must be logged in to post a request.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await createOrder({
+        requesterId: user.id,
+        items: itemText.trim().split(',').map((item) => item.trim()),
+        zone,
+        amount: numericBudget,
+        address: deliveryAddress.trim(),
+      });
+
+      if (error) {
+        setSubmitError(error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Success: Clear form and show success feedback
+      setItemText('');
+      setBudgetCap('');
+      setDeliveryAddress('');
+      setZone('Guadalupe');
+      setSubmitSuccess(true);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (err) {
+      setSubmitError(err?.message || 'Failed to post request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.id) {
@@ -343,20 +413,50 @@ export default function RequesterDashboard() {
                     <label className="text-caption uppercase tracking-wide text-ink-light">Budget Cap (₱)</label>
                     <div className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 flex items-center gap-2">
                       <span className="font-mono text-mono text-primary-orange-light">₱</span>
-                      <span className="text-body text-ink-light">Includes ₱30 runner fee</span>
+                      <input
+                        type="number"
+                        className="flex-1 outline-none bg-transparent text-body text-ink-default placeholder:text-ink-light"
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        value={budgetCap}
+                        onChange={(e) => setBudgetCap(e.target.value)}
+                      />
+                      <span className="text-body text-ink-light whitespace-nowrap">+ ₱30 fee</span>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-caption uppercase tracking-wide text-ink-light">Delivery Address</label>
-                    <div className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 flex items-center">
-                      <span className="text-body text-ink-light">Street, Landmark</span>
-                    </div>
+                    <input
+                      type="text"
+                      className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 outline-none text-body text-ink-default placeholder:text-ink-light"
+                      placeholder="Street, Landmark"
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                    />
                   </div>
                 </div>
 
-                <button type="button" className="h-11 rounded-xl px-5 bg-primary-orange text-surface-white text-label shadow-sm">
-                  Post Request →
+                {submitError && (
+                  <div className="bg-status-red-bg text-status-red text-caption px-4 py-3 rounded-lg">
+                    {submitError}
+                  </div>
+                )}
+
+                {submitSuccess && (
+                  <div className="bg-status-green text-surface-white text-caption px-4 py-3 rounded-lg">
+                    Request posted successfully! 🎉
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handlePostRequest}
+                  disabled={isSubmitting}
+                  className="h-11 rounded-xl px-5 bg-primary-orange text-surface-white text-label shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Posting...' : 'Post Request →'}
                 </button>
               </div>
             </div>
