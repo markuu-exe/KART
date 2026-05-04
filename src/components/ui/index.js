@@ -7,3 +7,4 @@ export { default as Divider } from './Divider';
 export { default as Modal } from './Modal';
 export { default as StatusPill } from './StatusPill';
 export { default as ProgressBar } from './ProgressBar';
+export { default as Skeleton } from './Skeleton';
