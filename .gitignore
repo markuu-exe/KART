@@ -35,6 +35,25 @@ supabase/.temp/
 *.njsproj
 *.sln
 *.sw?
-COMPONENT_SYSTEM_SETUP.md
-PAYMENT_SETUP.md
-supabase/functions/create-payment-intent/README.md
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Build / cache
+.vite
+.cache
+.parcel-cache
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Framework / platform
+.next/
+.vercel/
+
+# Misc
+Thumbs.db
+.pnp.*
