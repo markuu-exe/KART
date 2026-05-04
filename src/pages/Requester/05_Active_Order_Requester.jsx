@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings } from 'lucide-react';
+import PageTransition from '@/components/shared/PageTransition';
 import { useAppStore } from '@/store/useAppStore';
 
 const ACTIVE_STATUSES = new Set(['accepted', 'at_store', 'purchased', 'delivered']);
@@ -135,31 +136,36 @@ export default function ActiveOrderRequester() {
 
 	if (isOrdersLoading) {
 		return (
-			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
-				<RequesterNav />
-				<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
-					<p className="text-caption text-ink-light">Loading active order...</p>
-				</main>
-			</div>
+			<PageTransition>
+				<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+					<RequesterNav />
+					<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+						<p className="text-caption text-ink-light">Loading active order...</p>
+					</main>
+				</div>
+			</PageTransition>
 		);
 	}
 
 	if (!activeOrder) {
 		return (
-			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
-				<RequesterNav />
-				<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
-					<div className="max-w-225 mx-auto">
-						<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Your Order</h1>
-						<p className="text-caption text-ink-light mt-2">No active order right now.</p>
-					</div>
-				</main>
-			</div>
+			<PageTransition>
+				<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+					<RequesterNav />
+					<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+						<div className="max-w-225 mx-auto">
+							<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Your Order</h1>
+							<p className="text-caption text-ink-light mt-2">No active order right now.</p>
+						</div>
+					</main>
+				</div>
+			</PageTransition>
 		);
 	}
 
 	return (
-		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+		<PageTransition>
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
 			<RequesterNav />
 
 			<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
@@ -260,5 +266,6 @@ export default function ActiveOrderRequester() {
 				</div>
 			</main>
 		</div>
+		</PageTransition>
 	);
 }
