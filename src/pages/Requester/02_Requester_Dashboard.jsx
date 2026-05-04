@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
+import PaymentDrawer from '@/components/shared/PaymentDrawer';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -201,6 +202,7 @@ export default function RequesterDashboard() {
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const firstName = user?.user_metadata?.full_name?.split(' ')?.[0] || 'there';
   const todayLabel = new Date().toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -346,6 +348,13 @@ export default function RequesterDashboard() {
               >
                 View Active Order
               </button>
+              <button
+                type="button"
+                className="h-8 px-3 rounded-full border border-border-rule bg-surface-white text-caption text-ink-mid"
+                onClick={() => setDrawerOpen(true)}
+              >
+                Demo Pay
+              </button>
             </div>
 
             {activeCount > 0 ? (
@@ -368,6 +377,7 @@ export default function RequesterDashboard() {
         onClose={() => setSelectedRequest(null)}
         acceptLabel="View Request"
       />
+      <PaymentDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} amount={5000} currency={'php'} />
     </div>
   );
 }
