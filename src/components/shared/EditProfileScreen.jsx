@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, ClipboardList, Settings, ArrowLeft, Pencil, Lock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -98,19 +101,19 @@ function ReadOnlyPhoneField({ phone }) {
   );
 }
 
-function EditableField({ label, value, onChange, placeholder = 'Input Text' }) {
+function EditableField({ label, name, register, error, placeholder = 'Input Text' }) {
   return (
     <label className="space-y-1.5 block w-full">
       <span className="text-caption tracking-[0.08em] text-ink-light uppercase">{label}</span>
       <span className="h-11 rounded-lg border border-border-rule bg-surface-white px-3 flex items-center gap-2">
         <input
           className="flex-1 min-w-0 bg-transparent outline-none text-body text-ink-default"
-          value={value}
+          {...(register ? register(name) : {})}
           placeholder={placeholder}
-          onChange={(event) => onChange(event.target.value)}
         />
         <Pencil className="w-4 h-4 text-ink-light" />
       </span>
+      {error ? <p className="text-red-500 text-sm mt-1">{error.message}</p> : null}
     </label>
   );
 }
@@ -126,41 +129,56 @@ export default function EditProfileScreen({ role = 'requester' }) {
   const initialPhone = normalizePhone(meta.phone || '');
   const initialGcash = normalizePhone(meta.gcash_number || '');
 
-  const [firstName, setFirstName] = useState(initialFirstName);
-  const [lastName, setLastName] = useState(initialLastName);
-  const [zone, setZone] = useState(initialZone);
-  const [gcash, setGcash] = useState(initialGcash);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
-  const fullName = useMemo(() => `${firstName} ${lastName}`.trim(), [firstName, lastName]);
-  const profilePath = isRunner ? '/runner/profile' : '/requester/profile';
+  const profileSchema = useMemo(
+    () =>
+      z.object({
+        firstName: z.string().nonempty('First name is required'),
+        lastName: z.string().nonempty('Last name is required'),
+        zone: z.string().nonempty(),
+        gcash: z
+          .string()
+          .optional()
+          .refine((val) => !val || /^\d{10}$/.test(val), {
+            message: 'GCash number must be 10 digits (without +63).',
+          }),
+      }),
+    []
+  );
 
-  const handleSave = async () => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    getValues,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { firstName: initialFirstName, lastName: initialLastName, zone: initialZone, gcash: initialGcash },
+  });
+
+  const watchedZone = watch('zone');
+
+  const fullName = useMemo(() => `${getValues('firstName') || ''} ${getValues('lastName') || ''}`.trim(), [watch('firstName'), watch('lastName')]);
+  const profilePath = isRunner ? '/runner/profile' : '/requester/profile';
+  const handleSave = handleSubmit(async (values) => {
     setError('');
     setNotice('');
-
-    if (!firstName.trim() || !lastName.trim()) {
-      setError('First name and last name are required.');
-      return;
-    }
-
-    if (isRunner && gcash && !/^\d{10}$/.test(gcash)) {
-      setError('GCash number must be 10 digits (without +63).');
-      return;
-    }
 
     try {
       setIsSaving(true);
       const nextMetadata = {
         ...meta,
-        full_name: fullName,
-        zone,
+        full_name: `${values.firstName} ${values.lastName}`.trim(),
+        zone: values.zone,
       };
 
       if (isRunner) {
-        nextMetadata.gcash_number = gcash ? `+63${gcash}` : '';
+        nextMetadata.gcash_number = values.gcash ? `+63${values.gcash}` : '';
       }
 
       const { error: updateError } = await supabase.auth.updateUser({
@@ -179,7 +197,7 @@ export default function EditProfileScreen({ role = 'requester' }) {
     } finally {
       setIsSaving(false);
     }
-  };
+  });
 
   return (
     <div className="bg-surface-default flex min-h-screen w-full items-stretch">
@@ -206,8 +224,8 @@ export default function EditProfileScreen({ role = 'requester' }) {
               <p className="font-mono text-mono-sm text-ink-light text-center">PERSONAL INFORMATION</p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                <EditableField label="First Name" value={firstName} onChange={setFirstName} />
-                <EditableField label="Last Name" value={lastName} onChange={setLastName} />
+                <EditableField label="First Name" name="firstName" register={register} error={errors.firstName} />
+                <EditableField label="Last Name" name="lastName" register={register} error={errors.lastName} />
               </div>
 
               <div className="mt-4">
@@ -223,7 +241,7 @@ export default function EditProfileScreen({ role = 'requester' }) {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {ZONES.map((zoneOption) => {
-                  const selected = zone === zoneOption;
+                  const selected = watchedZone === zoneOption;
                   return (
                     <button
                       key={zoneOption}
@@ -233,7 +251,7 @@ export default function EditProfileScreen({ role = 'requester' }) {
                           ? 'bg-primary-orange-bg border-primary-orange text-primary-orange font-semibold'
                           : 'bg-surface-default border-border-rule text-ink-mid'
                       }`}
-                      onClick={() => setZone(zoneOption)}
+                      onClick={() => setValue('zone', zoneOption)}
                     >
                       {zoneOption}
                     </button>
@@ -252,8 +270,8 @@ export default function EditProfileScreen({ role = 'requester' }) {
                     <span className="font-mono text-mono text-primary-orange-light">+63</span>
                     <input
                       className="flex-1 min-w-0 bg-transparent outline-none text-body text-ink-default"
-                      value={gcash}
-                      onChange={(event) => setGcash(event.target.value.replace(/\D/g, '').slice(0, 10))}
+                      {...register('gcash')}
+                      onChange={(event) => setValue('gcash', event.target.value.replace(/\D/g, '').slice(0, 10))}
                       placeholder="9123456789"
                     />
                     <Pencil className="w-4 h-4 text-ink-light" />
@@ -261,6 +279,7 @@ export default function EditProfileScreen({ role = 'requester' }) {
                   <p className="text-caption text-ink-light text-center">
                     Requesters will see this number to pay you after delivery.
                   </p>
+                  {errors.gcash ? <p className="text-red-500 text-sm mt-1">{errors.gcash.message}</p> : null}
                 </div>
               </section>
             ) : null}
