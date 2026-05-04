@@ -16,9 +16,9 @@ export default function AppShell({ children, user, needsOnboarding }) {
   const headerMode = !user ? 'public' : needsOnboarding ? 'onboarding' : (user?.user_metadata?.role === 'runner' ? 'runner' : 'requester');
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-default text-ink-default">
+    <div className="flex min-h-screen w-full flex-col bg-surface-default text-ink-default overflow-x-hidden">
       <Header mode={headerMode} />
-      <div className="flex-1">
+      <div className="flex-1 w-full">
         {children}
       </div>
       {showFooter ? <Footer /> : null}

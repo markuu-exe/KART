@@ -9,7 +9,7 @@ export default function Modal({
   return (
     <div
       className={cn(
-        'flex w-full max-w-xl max-h-screen flex-col items-center justify-start overflow-y-auto rounded-t-2xl bg-surface-white px-6 py-6 shadow-lg',
+        'flex w-full max-w-lg max-h-[90vh] flex-col items-center justify-start overflow-y-auto rounded-t-2xl bg-surface-white px-6 py-6 shadow-lg',
         type === 'BottomSheet' ? 'sm:rounded-2xl' : 'rounded-2xl',
         className,
       )}

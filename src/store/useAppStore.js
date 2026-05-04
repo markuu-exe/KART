@@ -128,6 +128,40 @@ export const useAppStore = create((set, get) => ({
     set({ error: null });
     return { data, error: null };
   },
+  createOrder: async ({ requesterId, items, zone, amount, address }) => {
+    if (!requesterId || !items || !zone || !amount || !address) {
+      return { data: null, error: 'Missing required order fields: requesterId, items, zone, amount, address.' };
+    }
+
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return { data: null, error: 'Amount must be a valid positive number.' };
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({
+        requester_id: requesterId,
+        items: Array.isArray(items) ? items : [items],
+        zone,
+        amount: numericAmount,
+        city: address,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select('*')
+      .single();
+
+    if (error) {
+      set({ error: error.message });
+      return { data: null, error: error.message };
+    }
+
+    get().upsertOrder(data);
+    set({ error: null });
+    return { data, error: null };
+  },
 
   startOrdersRealtime: () => {
     const existingChannel = get().ordersRealtimeChannel;

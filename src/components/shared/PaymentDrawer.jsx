@@ -16,7 +16,7 @@ function formatDisplayAmount(amount, currency) {
       return `${currency.toUpperCase()} 0.00`
     }
 
-    const majorAmount = (normalizedAmount / 100).toFixed(2)
+    const majorAmount = normalizedAmount.toFixed(2)
     return `${currency.toUpperCase()} ${majorAmount}`
   } catch {
     return `${currency.toUpperCase()} ${amount}`
@@ -27,7 +27,16 @@ function getLastFour(cardNumber) {
   return String(cardNumber || '').replace(/\s+/g, '').slice(-4) || '0000'
 }
 
-export default function PaymentDrawer({ open = false, onClose = () => {}, amount = 0, currency = 'php', onSuccess }) {
+export default function PaymentDrawer({
+  open = false,
+  onClose = () => {},
+  amount = 0,
+  currency = 'php',
+  orderId = null,
+  orderSummary = '',
+  ctaLabel = 'Pay Now',
+  onSuccess,
+}) {
   const { user } = useAppStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSuccessful, setIsSuccessful] = useState(false)
@@ -47,7 +56,7 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
       setMessage('')
       setIsProcessing(false)
     }
-  }, [open])
+  }, [open, orderId])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -57,7 +66,7 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
     }))
   }
 
-  const handleSubmit = async (event) => {
+  const handleDemoPayment = async (event) => {
     event.preventDefault()
     setMessage('')
     setIsProcessing(true)
@@ -68,11 +77,12 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
       const paymentRecord = {
         user_id: user?.id ?? null,
         requester_id: user?.id ?? null,
+        order_id: orderId,
         amount: Number(amount),
         currency,
         status: 'paid',
-        provider: 'mock',
-        payment_method: 'mock_card',
+        provider: 'demo_checkout',
+        payment_method: 'demo_card',
         card_last4: getLastFour(formState.cardNumber),
         payer_name: formState.name,
       }
@@ -84,7 +94,7 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
 
       setIsSuccessful(true)
       if (typeof onSuccess === 'function') {
-        onSuccess(paymentRecord)
+        await onSuccess(paymentRecord)
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Payment failed')
@@ -111,7 +121,7 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
       <div className="flex items-center justify-between border-b border-border-rule px-5 py-4">
         <div>
           <h3 className="text-lg font-semibold text-ink-default">Checkout</h3>
-          <p className="text-caption text-ink-light">Mock payment flow for local development</p>
+          <p className="text-caption text-ink-light">Demo payment flow connected to the requester order</p>
         </div>
         <button type="button" aria-label="Close checkout" onClick={handleClose} className="rounded-full p-2 text-ink-mid hover:bg-surface-default">
           <X className="h-4 w-4" />
@@ -128,6 +138,8 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
             <p className="text-body text-ink-mid">Your mock payment for {amountDisplay} was completed locally.</p>
           </div>
           <div className="rounded-2xl border border-border-rule bg-surface-default px-4 py-3 text-left text-caption text-ink-light">
+            {orderId ? <p className="font-medium text-ink-default">Order ID: {orderId}</p> : null}
+            {orderSummary ? <p className="mt-1 text-ink-mid">{orderSummary}</p> : null}
             <p className="font-medium text-ink-default">Card ending in {getLastFour(formState.cardNumber)}</p>
             <p>Recorded as a mocked payment in Supabase if the `payments` table is available.</p>
           </div>
@@ -140,10 +152,10 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
           </button>
         </div>
       ) : (
-        <form className="flex h-[calc(100%-73px)] flex-col gap-4 overflow-y-auto px-5 py-5" onSubmit={handleSubmit}>
+        <form className="flex h-[calc(100%-73px)] flex-col gap-4 overflow-y-auto px-5 py-5" onSubmit={handleDemoPayment}>
           <div className="rounded-2xl bg-primary-orange-bg px-4 py-4 text-sm text-ink-default">
-            <p className="font-semibold text-primary-orange">Test checkout only</p>
-            <p className="mt-1 text-ink-mid">This form simulates a payment without Stripe and finishes after a short delay.</p>
+            <p className="font-semibold text-primary-orange">Demo Pay</p>
+            <p className="mt-1 text-ink-mid">This form simulates a payment request and finishes after a short delay.</p>
           </div>
 
           <div className="grid gap-4">
@@ -221,7 +233,7 @@ export default function PaymentDrawer({ open = false, onClose = () => {}, amount
               disabled={isProcessing}
             >
               {isProcessing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-              <span>{isProcessing ? 'Processing Payment...' : `Pay ${amountDisplay}`}</span>
+              <span>{isProcessing ? 'Processing...' : ctaLabel}</span>
             </button>
             <button
               type="button"
