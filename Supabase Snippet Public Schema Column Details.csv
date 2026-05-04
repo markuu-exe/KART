@@ -1,0 +1,25 @@
+table_name,column_name,data_type,is_nullable,column_default
+orders,id,uuid,NO,gen_random_uuid()
+orders,requester_id,uuid,YES,null
+orders,runner_id,uuid,YES,null
+orders,items,ARRAY,YES,null
+orders,zone,text,YES,null
+orders,city,text,YES,null
+orders,status,text,YES,'accepted'::text
+orders,amount,numeric,YES,null
+orders,created_at,timestamp without time zone,YES,now()
+orders,updated_at,timestamp without time zone,YES,now()
+users,id,uuid,NO,gen_random_uuid()
+users,email,text,NO,null
+users,phone,text,YES,null
+users,full_name,text,YES,null
+users,role,text,YES,'requester'::text
+users,avatar_url,text,YES,null
+users,created_at,timestamp without time zone,YES,now()
+users,updated_at,timestamp without time zone,YES,now()
+zones,id,uuid,NO,gen_random_uuid()
+zones,zone_name,text,NO,null
+zones,city,text,NO,null
+zones,description,text,YES,null
+zones,active,boolean,YES,true
+zones,created_at,timestamp without time zone,YES,now()

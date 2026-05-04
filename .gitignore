@@ -22,3 +22,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Build / cache
+.vite
+.cache
+.parcel-cache
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Framework / platform
+.next/
+.vercel/
+
+# Misc
+Thumbs.db
+.pnp.*
