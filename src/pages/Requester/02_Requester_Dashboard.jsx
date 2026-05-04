@@ -221,12 +221,13 @@ function EmptyOrdersState({ onPostRequest }) {
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
-  const { user, orders, fetchOrders, isOrdersLoading, createOrder } = useAppStore();
+  const { user, orders, fetchOrders, isOrdersLoading, createOrder, updateOrderStatus } = useAppStore();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [budgetCap, setBudgetCap] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [checkoutRequest, setCheckoutRequest] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -277,7 +278,7 @@ export default function RequesterDashboard() {
         items: itemText.trim().split(',').map((item) => item.trim()),
         zone,
         amount: numericBudget,
-        city: deliveryAddress.trim(),
+        address: deliveryAddress.trim(),
       });
 
       if (error) {
@@ -333,6 +334,7 @@ export default function RequesterDashboard() {
   );
 
   const activeCount = activeRequests.length;
+  const activeCheckoutRequest = checkoutRequest ?? activeRequests[0] ?? null;
 
   const modalErrand = useMemo(() => {
     if (!selectedRequest) {
@@ -478,7 +480,11 @@ export default function RequesterDashboard() {
               <button
                 type="button"
                 className="h-8 px-3 rounded-full border border-border-rule bg-surface-white text-caption text-ink-mid"
-                onClick={() => setDrawerOpen(true)}
+                onClick={() => {
+                  setCheckoutRequest(activeRequests[0] ?? null);
+                  setDrawerOpen(true);
+                }}
+                disabled={!activeCheckoutRequest}
               >
                 Demo Pay
               </button>
@@ -511,7 +517,25 @@ export default function RequesterDashboard() {
         onClose={() => setSelectedRequest(null)}
         acceptLabel="View Request"
       />
-      <PaymentDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} amount={5000} currency={'php'} />
+      <PaymentDrawer
+        open={drawerOpen}
+        onClose={() => {
+          setDrawerOpen(false);
+          setCheckoutRequest(null);
+        }}
+        amount={activeCheckoutRequest?.sourceOrder?.amount ?? 0}
+        currency="php"
+        orderId={activeCheckoutRequest?.id ?? null}
+        orderSummary={activeCheckoutRequest?.summary ?? ''}
+        ctaLabel="Demo Pay"
+        onSuccess={async () => {
+          if (!activeCheckoutRequest?.id) {
+            return;
+          }
+
+          await updateOrderStatus({ orderId: activeCheckoutRequest.id, status: 'purchased' });
+        }}
+      />
       </div>
     </PageTransition>
   );
