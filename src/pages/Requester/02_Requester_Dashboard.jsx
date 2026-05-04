@@ -182,6 +182,27 @@ function RequestCard({ request, onOpen }) {
   );
 }
 
+function RequestCardSkeleton() {
+  return (
+    <div className="w-full bg-surface-white border-l-4 border-status-blue rounded-2xl shadow-sm pl-5 pr-4 py-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-6">
+          <Skeleton className="flex-1 h-5" />
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <MapPin className="w-3 h-3 text-ink-light" />
+          <Skeleton className="h-3 w-12" />
+          <span className="w-0.5 h-0.5 rounded-full bg-ink-light" />
+          <Skeleton className="h-3 w-16" />
+          <span className="w-0.5 h-0.5 rounded-full bg-ink-light" />
+          <Skeleton className="h-3 w-8" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmptyOrdersState({ onPostRequest }) {
   return (
     <div className="flex min-h-90 items-center justify-center py-4">
@@ -205,6 +226,9 @@ export default function RequesterDashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const firstName = user?.user_metadata?.full_name?.split(' ')?.[0] || 'there';
   const todayLabel = new Date().toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Fallback: Hardcoded loading state to prove UI works with skeletons
+  const mockIsLoading = true;
 
   useEffect(() => {
     if (!user?.id) {
@@ -363,10 +387,16 @@ export default function RequesterDashboard() {
                   <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
                 ))}
               </div>
+            ) : mockIsLoading ? (
+              <div className="flex flex-col gap-3">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <RequestCardSkeleton key={i} />
+                ))}
+              </div>
             ) : (
               <EmptyOrdersState onPostRequest={() => navigate('/requester/board')} />
             )}
-            {isOrdersLoading ? <p className="text-center text-caption text-ink-light">Loading requests...</p> : null}
+            {isOrdersLoading && !mockIsLoading ? <p className="text-center text-caption text-ink-light">Loading requests...</p> : null}
           </div>
         </section>
       </main>
