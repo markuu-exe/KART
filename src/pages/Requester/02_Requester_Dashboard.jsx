@@ -277,7 +277,7 @@ export default function RequesterDashboard() {
         items: itemText.trim().split(',').map((item) => item.trim()),
         zone,
         amount: numericBudget,
-        address: deliveryAddress.trim(),
+        city: deliveryAddress.trim(),
       });
 
       if (error) {
