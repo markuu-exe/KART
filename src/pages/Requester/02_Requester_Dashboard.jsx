@@ -4,6 +4,7 @@ import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-rea
 import { ErrandDetailModal, EmptyState } from '@/components';
 import PaymentDrawer from '@/components/shared/PaymentDrawer';
 import PageTransition from '@/components/shared/PageTransition';
+import SkeletonList from '@/components/shared/SkeletonList';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -359,7 +360,9 @@ export default function RequesterDashboard() {
               </button>
             </div>
 
-            {activeCount > 0 ? (
+            {isOrdersLoading ? (
+              <SkeletonList count={4} className="flex flex-col gap-3" />
+            ) : activeCount > 0 ? (
               <div className="flex flex-col gap-3">
                 {activeRequests.map((request) => (
                   <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
@@ -368,7 +371,6 @@ export default function RequesterDashboard() {
             ) : (
               <EmptyOrdersState onPostRequest={() => navigate('/requester/board')} />
             )}
-            {isOrdersLoading ? <p className="text-center text-caption text-ink-light">Loading requests...</p> : null}
           </div>
         </section>
       </main>
