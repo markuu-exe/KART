@@ -154,7 +154,6 @@ export default function EditProfileScreen({ role = 'requester' }) {
     handleSubmit,
     setValue,
     watch,
-    getValues,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(profileSchema),
@@ -163,7 +162,6 @@ export default function EditProfileScreen({ role = 'requester' }) {
 
   const watchedZone = watch('zone');
 
-  const fullName = useMemo(() => `${getValues('firstName') || ''} ${getValues('lastName') || ''}`.trim(), [watch('firstName'), watch('lastName')]);
   const profilePath = isRunner ? '/runner/profile' : '/requester/profile';
   const handleSave = handleSubmit(async (values) => {
     setError('');

@@ -221,7 +221,7 @@ function EmptyOrdersState({ onPostRequest }) {
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
-  const { user, orders, fetchOrders, isOrdersLoading, createOrder, error: storeError } = useAppStore();
+  const { user, orders, fetchOrders, isOrdersLoading, createOrder } = useAppStore();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [budgetCap, setBudgetCap] = useState('');
@@ -272,7 +272,7 @@ export default function RequesterDashboard() {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await createOrder({
+      const { error } = await createOrder({
         requesterId: user.id,
         items: itemText.trim().split(',').map((item) => item.trim()),
         zone,
