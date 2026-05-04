@@ -1,3 +1,27 @@
+import { colors } from './src/constants/colors.js';
+import { fonts, typography } from './src/constants/fonts.js';
+import { spacing } from './src/constants/spacing.js';
+
+const camelToKebab = (value) => value.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+
+const mapTokenKeysToTailwind = (tokenGroup) => (
+  Object.fromEntries(
+    Object.entries(tokenGroup).map(([key, value]) => [camelToKebab(key), value]),
+  )
+);
+
+const tailwindFontSizes = Object.fromEntries(
+  Object.entries(typography.textStyles).map(([styleName, style]) => {
+    const config = { lineHeight: style.lineHeight };
+
+    if (style.letterSpacing) {
+      config.letterSpacing = style.letterSpacing;
+    }
+
+    return [camelToKebab(styleName), [style.size, config]];
+  }),
+);
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -7,43 +31,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          orange: '#ff5c1a',
-          'orange-bg': '#fff3ee',
-          'orange-light': '#ff8a5c',
-        },
-        surface: {
-          white: '#ffffff',
-          default: '#fafaf8',
-        },
-        border: {
-          rule: '#e8e4e0',
-        },
-        ink: {
-          default: '#12100e',
-          mid: '#4a4540',
-          light: '#8c8480',
-        },
-        status: {
-          blue: '#1a6eff',
-          'blue-bg': '#eef3ff',
-          green: '#00c27c',
-        },
+        primary: mapTokenKeysToTailwind(colors.primary),
+        surface: mapTokenKeysToTailwind(colors.surface),
+        border: mapTokenKeysToTailwind(colors.border),
+        ink: mapTokenKeysToTailwind(colors.ink),
+        status: mapTokenKeysToTailwind(colors.status),
       },
       fontFamily: {
-        sans: ['DM Sans', 'Inter Variable', 'sans-serif'],
-        heading: ['Syne', 'Inter Variable', 'sans-serif'],
-        mono: ['DM Mono', 'monospace'],
+        sans: [fonts.content.primary.family, fonts.general.family, fonts.content.primary.fallback],
+        heading: [fonts.display.family, fonts.general.family, fonts.display.fallback],
+        mono: [fonts.content.mono.family, fonts.content.mono.fallback],
       },
-      fontSize: {
-        'caption': ['12px', { lineHeight: '1.5' }],
-        'heading-1': ['24px', { lineHeight: '1.3', letterSpacing: '-0.02em' }],
-        'heading-2': ['18px', { lineHeight: '1.4' }],
-        'body': ['15px', { lineHeight: '1.65' }],
-        'mono': ['13px', { lineHeight: '1.5' }],
-        'mono-sm': ['11px', { lineHeight: '1.5' }],
-        'label': ['13px', { lineHeight: '1.5' }],
-      },
+      fontSize: tailwindFontSizes,
+      spacing,
       boxShadow: {
         'sm': '0px 1px 3px 0px rgba(0, 0, 0, 0.08)',
       },

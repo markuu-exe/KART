@@ -1,0 +1,48 @@
+@import './../../components/tokens.css';
+
+.nav-item-btn {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-family: var(--font-content-primary);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-ink-mid);
+  transition: var(--transition-normal);
+  text-align: left;
+  width: 100%;
+}
+
+.nav-item-active {
+  background-color: var(--color-primary-orange-bg);
+  color: var(--color-primary-orange);
+  font-weight: 600;
+}
+
+.nav-item-default {
+  color: var(--color-ink-mid);
+}
+
+.nav-item-default:hover {
+  background-color: rgba(255, 92, 26, 0.05);
+}
+
+.nav-item-icon {
+  width: var(--size-icon);
+  height: var(--size-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-item-label {
+  white-space: nowrap;
+  flex: 1;
+}
