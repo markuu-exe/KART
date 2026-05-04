@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
 import PageTransition from '@/components/shared/PageTransition';
-import { Skeleton } from '@/components/ui';
+import SkeletonList from '@/components/shared/SkeletonList';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -303,7 +303,14 @@ export default function RunnerErrandBoard() {
 					})}
 				</section>
 
-				{filteredErrands.length > 0 ? (
+				{isOrdersLoading ? (
+					<SkeletonList
+						count={6}
+						className="pt-6 flex flex-wrap gap-4 justify-center"
+						cardClassName="max-w-125 min-w-90"
+						cardProps={{ showActions: true, accent: 'orange' }}
+					/>
+				) : filteredErrands.length > 0 ? (
 					<section className="pt-6 flex flex-wrap gap-4 justify-center">
 						{filteredErrands.map((errand) => (
 							<RunnerErrandCard
@@ -323,7 +330,6 @@ export default function RunnerErrandBoard() {
 				) : (
 					<EmptyErrandState zoneLabel={selectedFilter} />
 				)}
-				{isOrdersLoading && !mockIsLoading ? <p className="pt-4 text-center text-caption text-ink-light">Loading errands...</p> : null}
 			</main>
 
 			<ErrandDetailModal
