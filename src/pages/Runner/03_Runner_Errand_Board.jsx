@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
-import { ErrandDetailModal, EmptyState } from '@/components';
+import { ErrandDetailModal, EmptyState, Skeleton } from '@/components';
 import PageTransition from '@/components/shared/PageTransition';
 import SkeletonList from '@/components/shared/SkeletonList';
 import { useAppStore } from '@/store/useAppStore';
