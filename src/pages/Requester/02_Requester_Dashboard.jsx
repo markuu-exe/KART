@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
 import { ErrandDetailModal, EmptyState } from '@/components';
 import PaymentDrawer from '@/components/shared/PaymentDrawer';
+import PageTransition from '@/components/shared/PageTransition';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -257,7 +258,8 @@ export default function RequesterDashboard() {
   }, [selectedRequest]);
 
   return (
-    <div className="bg-surface-default flex min-h-screen w-full items-stretch">
+    <PageTransition>
+      <div className="bg-surface-default flex min-h-screen w-full items-stretch">
       <AppNav selected="Home" />
 
       <main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
@@ -378,6 +380,7 @@ export default function RequesterDashboard() {
         acceptLabel="View Request"
       />
       <PaymentDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} amount={5000} currency={'php'} />
-    </div>
+      </div>
+    </PageTransition>
   );
 }
