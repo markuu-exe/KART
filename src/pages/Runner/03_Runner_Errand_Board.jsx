@@ -287,6 +287,17 @@ export default function RunnerErrandBoard() {
 	}, [selectedErrand]);
 
 	const handleAccept = async (errand) => {
+		const requesterId = errand?.sourceOrder?.requester_id;
+		const isSelfOrder = requesterId && requesterId === user?.id;
+
+		if (isSelfOrder) {
+			if (import.meta.env.PROD) {
+				return;
+			}
+
+			// TODO: Remove self-accept bypass before production
+		}
+
 		const { error } = await acceptOrder({ orderId: errand.id, runnerId: user?.id });
 		if (!error) {
 			navigate('/runner/active-order');

@@ -88,14 +88,72 @@ function SideNav({ role }) {
 }
 
 function ReadOnlyPhoneField({ phone }) {
+  const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [isPhoneVerifiedMock, setIsPhoneVerifiedMock] = useState(false);
+
+  const { user } = useAppStore();
+  const metadata = user?.user_metadata || {};
+  const isPhoneVerified = Boolean(user?.phoneVerified ?? metadata.phoneVerified ?? metadata.phone_verified ?? false);
+  const shouldShowVerify = !isPhoneVerified && !isPhoneVerifiedMock;
+
+  const handleVerifyClick = () => {
+    setIsVerifyingPhone(true);
+    setOtpCode('');
+  };
+
+  const handleConfirmOtp = () => {
+    if (otpCode.length !== 6) {
+      return;
+    }
+
+    setIsPhoneVerifiedMock(true);
+    setIsVerifyingPhone(false);
+  };
+
   return (
     <div className="space-y-1.5">
       <p className="text-caption tracking-[0.08em] text-ink-light uppercase">Phone Number</p>
       <div className="h-11 rounded-lg border border-border-rule bg-surface-white px-3 flex items-center gap-2">
         <span className="font-mono text-mono text-primary-orange-light">+63</span>
         <span className="text-body text-ink-default">{phone}</span>
-        <Lock className="w-4 h-4 text-ink-light ml-auto" />
+        {shouldShowVerify ? (
+          <button
+            type="button"
+            className="ml-auto h-7 px-2.5 rounded-full border border-primary-orange text-primary-orange text-caption font-semibold"
+            onClick={handleVerifyClick}
+          >
+            Verify
+          </button>
+        ) : null}
+        {isPhoneVerified || isPhoneVerifiedMock ? (
+          <span className="ml-auto h-7 px-2.5 rounded-full bg-status-green-bg text-status-green text-caption font-semibold inline-flex items-center">
+            Verified
+          </span>
+        ) : null}
+        <Lock className="w-4 h-4 text-ink-light" />
       </div>
+      {isVerifyingPhone ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={otpCode}
+            onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="Enter 6-digit code"
+            className="h-10 flex-1 rounded-lg border border-border-rule bg-surface-white px-3 outline-none text-body text-ink-default"
+          />
+          <button
+            type="button"
+            className="h-10 px-3 rounded-lg bg-primary-orange text-surface-white text-label disabled:opacity-50"
+            onClick={handleConfirmOtp}
+            disabled={otpCode.length !== 6}
+          >
+            Confirm
+          </button>
+        </div>
+      ) : null}
       <p className="text-caption text-ink-light text-center">Phone cannot be change</p>
     </div>
   );
