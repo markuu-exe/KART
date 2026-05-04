@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { BadgeCheck, CheckCircle2, Footprints, Package, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 
 import { Button, Card } from '@/components';
+import PageTransition from '@/components/shared/PageTransition';
 
 const steps = [
   {
@@ -38,7 +39,8 @@ const runnerPoints = [
 
 export default function LandingPage() {
   return (
-    <main className="relative overflow-hidden">
+    <PageTransition>
+      <main className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-128 bg-[radial-gradient(circle_at_top_left,rgba(246,168,74,0.24),transparent_42%),radial-gradient(circle_at_top_right,rgba(255,239,224,0.9),transparent_34%),linear-gradient(180deg,rgba(255,250,244,0.92)_0%,rgba(247,244,240,0)_100%)]" />
       <div className="pointer-events-none absolute left-1/2 top-24 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-primary-orange/10 blur-3xl" />
 
@@ -198,5 +200,6 @@ export default function LandingPage() {
         </Card>
       </section>
     </main>
+    </PageTransition>
   );
 }
