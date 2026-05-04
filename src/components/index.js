@@ -6,6 +6,7 @@ export { default as Divider } from './ui/Divider';
 export { default as Input } from './ui/Input';
 export { default as Modal } from './ui/Modal';
 export { default as ProgressBar } from './ui/ProgressBar';
+export { default as Skeleton } from './ui/Skeleton';
 export { default as StatusPill } from './ui/StatusPill';
 export { Button } from './ui/button';
 
