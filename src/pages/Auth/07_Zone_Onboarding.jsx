@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '@/components';
 import { Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import PageTransition from '@/components/shared/PageTransition';
 import { useAppStore } from '@/store/useAppStore';
 import onboardingHeroImage from '@/assets/Images/hero-onboading-orangeAbstract.jpg';
 import './07_Zone_Onboarding.css';
@@ -87,7 +88,8 @@ export default function ZoneOnboarding() {
 	};
 
 	return (
-		<div className="onboarding-page" style={{ '--onboarding-bg-image': `url(${onboardingHeroImage})` }}>
+		<PageTransition>
+			<div className="onboarding-page" style={{ '--onboarding-bg-image': `url(${onboardingHeroImage})` }}>
 			<div className="onboarding-shell">
 				<Card variant="Base" className="onboarding-card">
 					<div className="onboarding-progress" aria-hidden="true">
@@ -167,6 +169,7 @@ export default function ZoneOnboarding() {
 					</Button>
 				</Card>
 			</div>
-		</div>
+			</div>
+		</PageTransition>
 	);
 }
