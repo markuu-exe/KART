@@ -85,6 +85,11 @@ function toSummary(items) {
   return 'Errand request';
 }
 
+function getInitials(name) {
+  const parts = String(name || '').trim().split(' ').filter(Boolean);
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '';
+}
+
 function AppNav({ selected = 'Home' }) {
   const navigate = useNavigate();
   const { user } = useAppStore();
@@ -341,6 +346,8 @@ export default function RequesterDashboard() {
       return null;
     }
 
+    const requesterName = user?.user_metadata?.full_name || '';
+
     return {
       sourceOrder: selectedRequest.sourceOrder,
       items: selectedRequest.items,
@@ -348,11 +355,11 @@ export default function RequesterDashboard() {
       address: selectedRequest.address,
       budget: selectedRequest.amount,
       postedTime: selectedRequest.age,
-      requesterInitials: 'GC',
-      requesterName: 'Gina',
-      requesterRole: 'Requester',
+      requesterInitials: getInitials(requesterName),
+      requesterName,
+      requesterRole: user?.user_metadata?.role ? String(user.user_metadata.role).replace(/^./, (letter) => letter.toUpperCase()) : 'Requester',
     };
-  }, [selectedRequest]);
+  }, [selectedRequest, user?.user_metadata?.full_name, user?.user_metadata?.role]);
 
   return (
     <PageTransition>

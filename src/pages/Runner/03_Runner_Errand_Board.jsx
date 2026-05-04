@@ -59,6 +59,23 @@ function toSummary(items) {
 	return 'Errand request';
 }
 
+function getInitials(name) {
+	const parts = String(name || '').trim().split(' ').filter(Boolean);
+	return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '';
+}
+
+function getRequesterName(order) {
+	return (
+		order?.requesterName ||
+		order?.requester_name ||
+		order?.requesterFullName ||
+		order?.requester_full_name ||
+		order?.requester?.full_name ||
+		order?.requester?.user_metadata?.full_name ||
+		''
+	);
+}
+
 function RunnerNav() {
   const navigate = useNavigate();
 	const { user } = useAppStore();
@@ -252,16 +269,20 @@ export default function RunnerErrandBoard() {
 			return null;
 		}
 
+		const sourceOrder = selectedErrand.sourceOrder;
+		const requesterName = getRequesterName(sourceOrder);
+		const requesterRole = sourceOrder?.requesterRole || sourceOrder?.requester_role || '';
+
 		return {
-			sourceOrder: selectedErrand.sourceOrder,
+			sourceOrder,
 			items: selectedErrand.items,
 			zone: selectedErrand.zone,
 			address: selectedErrand.address,
 			budget: selectedErrand.payout,
 			postedTime: selectedErrand.age,
-			requesterInitials: 'GC',
-			requesterName: 'Gina',
-			requesterRole: 'Requester',
+			requesterInitials: getInitials(requesterName),
+			requesterName,
+			requesterRole,
 		};
 	}, [selectedErrand]);
 
