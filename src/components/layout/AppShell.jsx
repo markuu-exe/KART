@@ -16,7 +16,7 @@ export default function AppShell({ children, user, needsOnboarding, isAuthResolv
   const headerMode = !isAuthResolved ? 'public' : !user ? 'public' : needsOnboarding ? 'onboarding' : (user?.user_metadata?.role === 'runner' ? 'runner' : 'requester');
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-surface-default text-ink-default overflow-x-hidden">
+    <div className="flex min-h-screen w-full flex-col bg-surface-default text-ink-default overflow-x-hidden overflow-y-scroll">
       <Header mode={headerMode} />
       <div className="flex-1 w-full">
         {children}
