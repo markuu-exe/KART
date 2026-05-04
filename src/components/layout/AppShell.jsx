@@ -10,10 +10,10 @@ const SETTINGS_PATHS = [
   '/runner/profile/edit',
 ];
 
-export default function AppShell({ children, user, needsOnboarding }) {
+export default function AppShell({ children, user, needsOnboarding, isAuthResolved = true }) {
   const { pathname } = useLocation();
   const showFooter = pathname === '/' || pathname === '/auth' || SETTINGS_PATHS.some((path) => pathname.startsWith(path));
-  const headerMode = !user ? 'public' : needsOnboarding ? 'onboarding' : (user?.user_metadata?.role === 'runner' ? 'runner' : 'requester');
+  const headerMode = !isAuthResolved ? 'public' : !user ? 'public' : needsOnboarding ? 'onboarding' : (user?.user_metadata?.role === 'runner' ? 'runner' : 'requester');
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-surface-default text-ink-default overflow-x-hidden">

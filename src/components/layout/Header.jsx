@@ -20,7 +20,7 @@ function getInitials(name) {
 export default function Header({ mode = 'public', className = '' }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
-  const { user, logout } = useAppStore();
+  const { user, logout, isAuthResolved } = useAppStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
 
@@ -77,7 +77,12 @@ export default function Header({ mode = 'public', className = '' }) {
           </Link>
         </div>
 
-        {!user ? (
+        {!isAuthResolved ? (
+          // Stable placeholder while auth is resolving
+          <div className="flex items-center justify-end gap-3 min-w-fit">
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-border-rule bg-surface-white px-2 py-1.5 h-10 w-32" />
+          </div>
+        ) : !user ? (
           <div className="flex flex-wrap items-center justify-end gap-3">
             <a href="#how-it-works" className="hidden text-sm font-medium text-ink-mid transition-colors hover:text-ink-default sm:inline-flex">
               How it Works
@@ -90,7 +95,7 @@ export default function Header({ mode = 'public', className = '' }) {
             </Button>
           </div>
         ) : role === 'requester' ? (
-          <div className="flex items-center gap-3">
+          <nav className="flex items-center gap-3 flex-1">
             <Button type="button" variant="brand" size="sm" onClick={() => navigate(homePath)}>
               Post an Errand
             </Button>
@@ -146,9 +151,9 @@ export default function Header({ mode = 'public', className = '' }) {
                 </div>
               ) : null}
             </div>
-          </div>
+          </nav>
         ) : (
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          <nav className="flex flex-wrap items-center justify-end gap-3 flex-1">
             <button
               type="button"
               className="hidden items-center gap-2 rounded-full border border-border-rule bg-surface-white px-3 py-2 text-sm font-medium text-ink-mid transition hover:bg-surface-default hover:text-ink-default sm:inline-flex"
@@ -209,7 +214,7 @@ export default function Header({ mode = 'public', className = '' }) {
                 </div>
               ) : null}
             </div>
-          </div>
+          </nav>
         )}
       </div>
 
