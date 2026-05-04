@@ -4,6 +4,7 @@ import { Button, Card } from '@/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
+import PageTransition from '@/components/shared/PageTransition';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
 import authHeroImage from '@/assets/Images/hero-auth-orangeAbstract.jpg';
 import ForgotPasswordModal from './06_Forgot_Password';
@@ -334,10 +335,11 @@ export default function Auth() {
   };
 
   return (
-    <div
-      className={`auth-page ${isForgotPasswordOpen ? 'auth-page--modalOpen' : ''}`}
-      style={{ '--auth-bg-image': `url(${authHeroImage})` }}
-    >
+    <PageTransition>
+      <div
+        className={`auth-page ${isForgotPasswordOpen ? 'auth-page--modalOpen' : ''}`}
+        style={{ '--auth-bg-image': `url(${authHeroImage})` }}
+      >
       <div className="auth-shell">
         <aside className="auth-brandPanel" aria-label="Kart brand introduction">
           <div className="auth-brandPanel__content">
@@ -538,6 +540,7 @@ export default function Auth() {
         error={forgotError}
         notice={forgotNotice}
       />
-    </div>
+      </div>
+    </PageTransition>
   );
 }
