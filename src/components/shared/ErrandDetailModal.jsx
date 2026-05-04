@@ -70,6 +70,8 @@ export default function ErrandDetailModal({
   }
 
   const source = errand.sourceOrder || errand;
+  
+  // Extract pickup coordinates with multiple fallback patterns
   const pickupCoordinates =
     source.pickupCoordinates ||
     source.pickup_coordinates ||
@@ -80,8 +82,12 @@ export default function ErrandDetailModal({
       : null) ||
     (source.pickupLatitude != null && source.pickupLongitude != null
       ? { lat: source.pickupLatitude, lng: source.pickupLongitude }
+      : null) ||
+    (source.pickupLat != null && source.pickupLng != null
+      ? { lat: source.pickupLat, lng: source.pickupLng }
       : null);
 
+  // Extract dropoff coordinates with multiple fallback patterns
   const dropoffCoordinates =
     source.dropoffCoordinates ||
     source.dropoff_coordinates ||
@@ -94,6 +100,9 @@ export default function ErrandDetailModal({
       : null) ||
     (source.dropoffLatitude != null && source.dropoffLongitude != null
       ? { lat: source.dropoffLatitude, lng: source.dropoffLongitude }
+      : null) ||
+    (source.dropoffLat != null && source.dropoffLng != null
+      ? { lat: source.dropoffLat, lng: source.dropoffLng }
       : null);
 
   const requesterName = getRequesterDisplayName(errand);

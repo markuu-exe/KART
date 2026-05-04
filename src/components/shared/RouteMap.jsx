@@ -20,6 +20,7 @@ export default function RouteMap({
   className = '',
 }) {
   const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
   const markerRefs = useRef([]);
   const [estimate, setEstimate] = useState(null);
   const [status, setStatus] = useState('idle');
@@ -28,6 +29,7 @@ export default function RouteMap({
   const dropoffCoordinates = useMemo(() => normalizeCoordinates(dropoff), [dropoff]);
   const hasCoordinates = Boolean(pickupCoordinates && dropoffCoordinates);
 
+  // Fetch route estimate when coordinates change
   useEffect(() => {
     if (!hasCoordinates) {
       return undefined;
@@ -51,16 +53,32 @@ export default function RouteMap({
         setEstimate(null);
         setStatus('error');
       }
-    });
+    })();
 
     return () => controller.abort();
   }, [dropoffCoordinates, hasCoordinates, pickupCoordinates]);
 
+  // Manage map instance and markers
   useEffect(() => {
-    if (!mapContainerRef.current || !hasCoordinates) {
+    if (!mapContainerRef.current) {
       return undefined;
     }
 
+    // Clean up previous map instance if it exists
+    if (mapInstanceRef.current) {
+      try {
+        mapInstanceRef.current.remove();
+      } catch {
+        // Silently catch error if map is already removed
+      }
+      mapInstanceRef.current = null;
+    }
+
+    if (!hasCoordinates) {
+      return undefined;
+    }
+
+    // Create new map instance
     const map = L.map(mapContainerRef.current).setView(pickupCoordinates, 12);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -68,6 +86,7 @@ export default function RouteMap({
       maxZoom: 19,
     }).addTo(map);
 
+    // Add pickup marker
     const pickupMarker = L.circleMarker(pickupCoordinates, {
       color: '#ff5c1a',
       radius: 8,
@@ -76,6 +95,7 @@ export default function RouteMap({
       fillOpacity: 0.8,
     }).addTo(map);
 
+    // Add dropoff marker
     const dropoffMarker = L.circleMarker(dropoffCoordinates, {
       color: '#1f9d55',
       radius: 8,
@@ -86,17 +106,29 @@ export default function RouteMap({
 
     markerRefs.current = [pickupMarker, dropoffMarker];
 
+    // Draw route line
     L.polyline([pickupCoordinates, dropoffCoordinates], {
       color: '#ff5c1a',
       weight: 4,
       opacity: 0.9,
     }).addTo(map);
 
+    // Fit bounds to show both markers
     const bounds = L.latLngBounds([pickupCoordinates, dropoffCoordinates]);
     map.fitBounds(bounds, { padding: [56, 56] });
 
+    // Store reference for cleanup
+    mapInstanceRef.current = map;
+
     return () => {
-      map.remove();
+      try {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+        }
+      } catch {
+        // Silently catch error if map is already removed
+      }
       markerRefs.current = [];
     };
   }, [dropoffCoordinates, hasCoordinates, pickupCoordinates]);

@@ -20,7 +20,7 @@ import ProfileRunner from './pages/Runner/09_Profile_Runner';
 import EditProfileRunner from './pages/Runner/09b_Edit_Profile_Runner';
 
 export default function App() {
-  const { user, setUser, setLoading } = useAppStore();
+  const { user, setUser, setLoading, isAuthResolved } = useAppStore();
   const needsOnboarding = Boolean(user) && !user?.user_metadata?.onboarding_complete;
   const activeRole = user?.user_metadata?.role === 'runner' ? 'runner' : 'requester';
   const homePath = activeRole === 'runner' ? '/runner/board' : '/requester/board';
@@ -38,7 +38,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <AppShell user={user} needsOnboarding={needsOnboarding}>
+      <AppShell user={user} needsOnboarding={needsOnboarding} isAuthResolved={isAuthResolved}>
         <Routes>
           {!user ? (
             <>

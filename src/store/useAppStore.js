@@ -27,6 +27,7 @@ export const useAppStore = create((set, get) => ({
   // Auth state
   user: null,
   isLoading: false,
+  isAuthResolved: false,
   error: null,
 
   // Orders state
@@ -37,7 +38,7 @@ export const useAppStore = create((set, get) => ({
 
   // User actions
   setUser: (user) => {
-    set({ user });
+    set({ user, isAuthResolved: true });
 
     if (user) {
       get().startOrdersRealtime();
@@ -47,7 +48,7 @@ export const useAppStore = create((set, get) => ({
     get().stopOrdersRealtime();
     set({ orders: [] });
   },
-  setLoading: (loading) => set({ isLoading: loading }),
+  setLoading: (loading) => set({ isLoading: loading, ...(loading === false && { isAuthResolved: true }) }),
   setError: (error) => set({ error }),
 
   // Orders actions

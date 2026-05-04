@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
-import { ErrandDetailModal, EmptyState, Skeleton } from '@/components';
+import { ErrandDetailModal, EmptyState, Skeleton, LocationAutocomplete } from '@/components';
 import PaymentDrawer from '@/components/shared/PaymentDrawer';
 import PageTransition from '@/components/shared/PageTransition';
 import SkeletonList from '@/components/shared/SkeletonList';
@@ -231,6 +231,10 @@ export default function RequesterDashboard() {
   const [zone, setZone] = useState('Guadalupe');
   const [budgetCap, setBudgetCap] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [pickupLat, setPickupLat] = useState(null);
+  const [pickupLng, setPickupLng] = useState(null);
+  const [dropoffLat, setDropoffLat] = useState(null);
+  const [dropoffLng, setDropoffLng] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [checkoutRequest, setCheckoutRequest] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -270,6 +274,16 @@ export default function RequesterDashboard() {
       return;
     }
 
+    if (!dropoffLat || !dropoffLng) {
+      setSubmitError('Please select a valid delivery location with coordinates.');
+      return;
+    }
+
+    if (!pickupLat || !pickupLng) {
+      setSubmitError('Please select a valid pickup location with coordinates.');
+      return;
+    }
+
     if (!user?.id) {
       setSubmitError('You must be logged in to post a request.');
       return;
@@ -284,6 +298,10 @@ export default function RequesterDashboard() {
         zone,
         amount: numericBudget,
         address: deliveryAddress.trim(),
+        pickupLat,
+        pickupLng,
+        dropoffLat,
+        dropoffLng,
       });
 
       if (error) {
@@ -296,6 +314,10 @@ export default function RequesterDashboard() {
       setItemText('');
       setBudgetCap('');
       setDeliveryAddress('');
+      setPickupLat(null);
+      setPickupLng(null);
+      setDropoffLat(null);
+      setDropoffLng(null);
       setZone('Guadalupe');
       setSubmitSuccess(true);
 
@@ -435,16 +457,27 @@ export default function RequesterDashboard() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-caption uppercase tracking-wide text-ink-light">Delivery Address</label>
-                    <input
-                      type="text"
-                      className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 outline-none text-body text-ink-default placeholder:text-ink-light"
-                      placeholder="Street, Landmark"
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                    />
-                  </div>
+                  <LocationAutocomplete
+                    label="Pickup Location"
+                    placeholder="Select pickup landmark..."
+                    value={pickupLat && pickupLng ? `${pickupLat}, ${pickupLng}` : ''}
+                    onSelect={(landmark) => {
+                      setPickupLat(landmark.lat);
+                      setPickupLng(landmark.lng);
+                    }}
+                  />
+
+                  <LocationAutocomplete
+                    label="Delivery Address"
+                    placeholder="Select delivery location..."
+                    value={deliveryAddress}
+                    onChange={setDeliveryAddress}
+                    onSelect={(landmark) => {
+                      setDeliveryAddress(landmark.label);
+                      setDropoffLat(landmark.lat);
+                      setDropoffLng(landmark.lng);
+                    }}
+                  />
                 </div>
 
                 {submitError && (
