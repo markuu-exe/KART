@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, Card } from '@/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAppStore } from '@/store/useAppStore';
 import PageTransition from '@/components/shared/PageTransition';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
@@ -16,6 +19,8 @@ function AuthField({
   type = 'text',
   value,
   onChange,
+  register,
+  error,
   placeholder,
   prefix,
   suffix,
@@ -42,16 +47,21 @@ function AuthField({
       <span className="auth-field__label">{label}</span>
       <div className={`auth-field__control ${prefix ? 'auth-field__control--prefixed' : ''}`}>
         {prefix ? <span className="auth-field__prefix">{prefix}</span> : null}
-        <input
-          className="auth-field__input"
-          name={name}
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          inputMode={inputMode}
-        />
+        <>
+          <input
+            className="auth-field__input"
+            name={name}
+            type={type}
+            {...(register ? register(name) : {})}
+            value={register ? undefined : value}
+            onChange={register ? undefined : onChange}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            inputMode={inputMode}
+            aria-invalid={error ? true : undefined}
+          />
+          {error ? <p className="text-red-500 text-sm mt-1">{error.message}</p> : null}
+        </>
         {suffixNode ? <span className="auth-field__suffix">{suffixNode}</span> : null}
       </div>
     </label>
@@ -85,11 +95,6 @@ function BenefitItem({ emoji, children }) {
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(new URLSearchParams(location.search).get('mode') === 'signup');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -107,6 +112,33 @@ export default function Auth() {
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
 
   const { setUser, setLoading: setAppLoading } = useAppStore();
+
+  const authSchema = useMemo(() =>
+    z
+      .object({
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        email: z.string().min(1, 'Email is required').email('Invalid email address'),
+        password: z.string().min(8, 'Password must be at least 8 characters'),
+        confirmPassword: z.string().optional(),
+      })
+      .refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
+        path: ['confirmPassword'],
+        message: 'Passwords do not match',
+      }),
+    []
+  );
+
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(authSchema),
+    defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' },
+  });
 
   useEffect(() => {
     setIsSignUp(new URLSearchParams(location.search).get('mode') === 'signup');
@@ -149,7 +181,7 @@ export default function Auth() {
     setNotice('');
 
     try {
-      const normalizedEmail = email.trim().toLowerCase();
+      const normalizedEmail = String(getValues('email') || '').trim().toLowerCase();
 
       if (!normalizedEmail) {
         throw new Error('Enter your email address first to receive a magic link.');
@@ -163,8 +195,8 @@ export default function Auth() {
           ...(isSignUp
             ? {
                 data: {
-                  first_name: firstName.trim(),
-                  last_name: lastName.trim(),
+                  first_name: String(getValues('firstName') || '').trim(),
+                  last_name: String(getValues('lastName') || '').trim(),
                 },
               }
             : {}),
@@ -214,7 +246,7 @@ export default function Auth() {
   };
 
   const openForgotPassword = () => {
-    setForgotEmail(email);
+    setForgotEmail(String(getValues('email') || ''));
     setForgotError('');
     setForgotNotice('');
     setIsForgotPasswordOpen(true);
@@ -256,39 +288,38 @@ export default function Auth() {
     }
   };
 
-  const handleAuth = async (event) => {
-    event.preventDefault();
+  const handleAuth = async (data) => {
     setLoading(true);
     setError('');
     setNotice('');
 
     try {
-      const normalizedEmail = email.trim().toLowerCase();
+      const normalizedEmail = String(data.email || '').trim().toLowerCase();
 
       if (!normalizedEmail) {
         throw new Error('Please enter your email address.');
       }
 
-      if (!password) {
+      if (!data.password) {
         throw new Error('Please enter your password.');
       }
 
-      if (isSignUp && (!firstName.trim() || !lastName.trim())) {
+      if (isSignUp && (!String(data.firstName || '').trim() || !String(data.lastName || '').trim())) {
         throw new Error('Please provide both first and last name.');
       }
 
-      if (isSignUp && password !== confirmPassword) {
+      if (isSignUp && data.password !== data.confirmPassword) {
         throw new Error('Passwords do not match.');
       }
 
       if (isSignUp) {
-        const { data, error: authError } = await supabase.auth.signUp({
+        const { data: signupData, error: authError } = await supabase.auth.signUp({
           email: normalizedEmail,
-          password,
+          password: data.password,
           options: {
             data: {
-              first_name: firstName.trim(),
-              last_name: lastName.trim(),
+              first_name: String(data.firstName || '').trim(),
+              last_name: String(data.lastName || '').trim(),
             },
           },
         });
@@ -297,11 +328,11 @@ export default function Auth() {
           throw authError;
         }
 
-        if (data.user) {
-          setUser(data.user);
+        if (signupData.user) {
+          setUser(signupData.user);
         }
 
-        if (!data.session) {
+        if (!signupData.session) {
           setVerificationEmail(normalizedEmail);
           setNotice(`Verification required. We sent an email to ${normalizedEmail}.`);
           setIsSignUp(false);
@@ -310,16 +341,16 @@ export default function Auth() {
           navigate('/auth/onboarding');
         }
       } else {
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({
           email: normalizedEmail,
-          password,
+          password: data.password,
         });
 
         if (authError) {
           throw authError;
         }
 
-        setUser(data.user);
+        setUser(signInData.user);
         navigate('/auth/onboarding');
       }
 
@@ -388,7 +419,7 @@ export default function Auth() {
               </div>
             ) : null}
 
-            <form className="auth-form" onSubmit={handleAuth}>
+            <form className="auth-form" onSubmit={handleSubmit(handleAuth)}>
               <div className="auth-socialActions">
                 <button
                   type="button"
@@ -418,8 +449,8 @@ export default function Auth() {
                   <AuthField
                     label="FIRST NAME"
                     name="firstName"
-                    value={firstName}
-                    onChange={(event) => setFirstName(event.target.value)}
+                    register={register}
+                    error={errors.firstName}
                     placeholder="Enter first name"
                     autoComplete="given-name"
                     suffix={<img src={fieldIcon} alt="" aria-hidden="true" />}
@@ -427,8 +458,8 @@ export default function Auth() {
                   <AuthField
                     label="LAST NAME"
                     name="lastName"
-                    value={lastName}
-                    onChange={(event) => setLastName(event.target.value)}
+                    register={register}
+                    error={errors.lastName}
                     placeholder="Enter last name"
                     autoComplete="family-name"
                     suffix={<img src={fieldIcon} alt="" aria-hidden="true" />}
@@ -440,8 +471,8 @@ export default function Auth() {
                 label="EMAIL ADDRESS"
                 name="email"
                 type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                register={register}
+                error={errors.email}
                 placeholder="name@yourmail.com"
                 autoComplete="email"
                 inputMode="email"
@@ -451,18 +482,12 @@ export default function Auth() {
               <AuthField
                 label="PASSWORD"
                 name="password"
+                register={register}
+                error={errors.password}
                 type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter password"
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                suffix={
-                  showPassword ? (
-                    <EyeOff className="auth-field__icon" aria-hidden="true" />
-                  ) : (
-                    <Eye className="auth-field__icon" aria-hidden="true" />
-                  )
-                }
+                suffix={showPassword ? <EyeOff className="auth-field__icon" aria-hidden="true" /> : <Eye className="auth-field__icon" aria-hidden="true" />}
                 onSuffixClick={() => setShowPassword((currentValue) => !currentValue)}
               />
 
@@ -480,18 +505,12 @@ export default function Auth() {
                 <AuthField
                   label="CONFIRM PASSWORD"
                   name="confirmPassword"
+                  register={register}
+                  error={errors.confirmPassword}
                   type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="Confirm password"
                   autoComplete="new-password"
-                  suffix={
-                    showConfirmPassword ? (
-                      <EyeOff className="auth-field__icon" aria-hidden="true" />
-                    ) : (
-                      <Eye className="auth-field__icon" aria-hidden="true" />
-                    )
-                  }
+                  suffix={showConfirmPassword ? <EyeOff className="auth-field__icon" aria-hidden="true" /> : <Eye className="auth-field__icon" aria-hidden="true" />}
                   onSuffixClick={() => setShowConfirmPassword((currentValue) => !currentValue)}
                 />
               ) : null}
