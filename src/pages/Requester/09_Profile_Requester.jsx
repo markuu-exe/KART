@@ -1,5 +1,10 @@
 import ProfileScreen from '@/components/shared/ProfileScreen';
+import PageTransition from '@/components/shared/PageTransition';
 
 export default function ProfileRequester() {
-	return <ProfileScreen role="requester" />;
+	return (
+		<PageTransition>
+			<ProfileScreen role="requester" />
+		</PageTransition>
+	);
 }

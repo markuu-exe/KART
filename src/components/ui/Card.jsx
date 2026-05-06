@@ -23,6 +23,7 @@ export default function Card({
       )}
       {...props}
     >
+    <div className={cn('w-full max-w-full flex flex-col items-start justify-center overflow-hidden rounded-lg bg-surface-white p-4 sm:p-6 shadow-sm', variantClass, className)} {...props}>
       {children}
     </div>
   );

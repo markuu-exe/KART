@@ -20,7 +20,7 @@ function getInitials(name) {
 export default function Header({ mode = 'public', className = '' }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
-  const { user, logout } = useAppStore();
+  const { user, logout, isAuthResolved } = useAppStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
 
@@ -77,140 +77,146 @@ export default function Header({ mode = 'public', className = '' }) {
           </Link>
         </div>
 
-        {!user ? (
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <a href="#how-it-works" className="hidden text-sm font-medium text-ink-mid transition-colors hover:text-ink-default sm:inline-flex">
-              How it Works
-            </a>
-            <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/auth?mode=login')}>
-              Login
-            </Button>
-            <Button type="button" variant="brand" size="sm" onClick={() => navigate('/auth?mode=signup')}>
-              Sign Up
-            </Button>
-          </div>
-        ) : role === 'requester' ? (
-          <div className="flex items-center gap-3">
-            <Button type="button" variant="brand" size="sm" onClick={() => navigate(homePath)}>
-              Post an Errand
-            </Button>
+        <div className="ml-auto flex min-w-0 items-center gap-3">
+          {!isAuthResolved ? (
+            <div className="flex min-w-fit items-center justify-end gap-3">
+              <div className="hidden h-10 w-32 items-center gap-2 rounded-full border border-border-rule bg-surface-white px-2 py-1.5 sm:flex" />
+            </div>
+          ) : !user ? (
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <a href="#how-it-works" className="hidden text-sm font-medium text-ink-mid transition-colors hover:text-ink-default sm:inline-flex">
+                How it Works
+              </a>
+              <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/auth?mode=login')}>
+                Login
+              </Button>
+              <Button type="button" variant="brand" size="sm" onClick={() => navigate('/auth?mode=signup')}>
+                Sign Up
+              </Button>
+            </div>
+          ) : role === 'requester' ? (
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="brand" size="sm" onClick={() => navigate(homePath)}>
+                Post an Errand
+              </Button>
 
-            <div className="relative" ref={menuRef}>
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-border-rule bg-surface-white px-2 py-1.5 text-left shadow-sm transition hover:bg-surface-default"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((currentValue) => !currentValue)}
+                >
+                  <Avatar initials={initials} className="h-9 w-9 aspect-square" />
+                  <span className="hidden min-w-0 sm:block">
+                    <span className="block max-w-32 truncate text-sm font-semibold text-ink-default">{fullName}</span>
+                    <span className="block text-caption text-ink-light">Requester</span>
+                  </span>
+                  <ChevronDown className={cn('h-4 w-4 text-ink-light transition-transform', menuOpen && 'rotate-180')} aria-hidden="true" />
+                </button>
+
+                {menuOpen ? (
+                  <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-border-rule bg-surface-white p-2 shadow-lg">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate(profilePath);
+                      }}
+                    >
+                      <CircleUserRound className="h-4 w-4" aria-hidden="true" />
+                      View Profile
+                    </button>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate(editProfilePath);
+                      }}
+                    >
+                      <Menu className="h-4 w-4" aria-hidden="true" />
+                      Edit Profile
+                    </button>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-status-red transition hover:bg-status-red-bg"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-end gap-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-border-rule bg-surface-white px-2 py-1.5 text-left shadow-sm transition hover:bg-surface-default"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((currentValue) => !currentValue)}
+                className="hidden items-center gap-2 rounded-full border border-border-rule bg-surface-white px-3 py-2 text-sm font-medium text-ink-mid transition hover:bg-surface-default hover:text-ink-default sm:inline-flex"
+                onClick={() => setIsOnline((currentValue) => !currentValue)}
               >
-                <Avatar initials={initials} />
-                <span className="hidden min-w-0 sm:block">
-                  <span className="block max-w-32 truncate text-sm font-semibold text-ink-default">{fullName}</span>
-                  <span className="block text-caption text-ink-light">Requester</span>
-                </span>
-                <ChevronDown className={cn('h-4 w-4 text-ink-light transition-transform', menuOpen && 'rotate-180')} aria-hidden="true" />
+                {isOnline ? <ToggleRight className="h-4 w-4 text-status-green" aria-hidden="true" /> : <ToggleLeft className="h-4 w-4 text-ink-light" aria-hidden="true" />}
+                <span>{isOnline ? 'Online' : 'Offline'}</span>
               </button>
 
-              {menuOpen ? (
-                <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-border-rule bg-surface-white p-2 shadow-lg">
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate(profilePath);
-                    }}
-                  >
-                    <CircleUserRound className="h-4 w-4" aria-hidden="true" />
-                    View Profile
-                  </button>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate(editProfilePath);
-                    }}
-                  >
-                    <Menu className="h-4 w-4" aria-hidden="true" />
-                    Edit Profile
-                  </button>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-status-red transition hover:bg-status-red-bg"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="h-4 w-4" aria-hidden="true" />
-                    Sign Out
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <button
-              type="button"
-              className="hidden items-center gap-2 rounded-full border border-border-rule bg-surface-white px-3 py-2 text-sm font-medium text-ink-mid transition hover:bg-surface-default hover:text-ink-default sm:inline-flex"
-              onClick={() => setIsOnline((currentValue) => !currentValue)}
-            >
-              {isOnline ? <ToggleRight className="h-4 w-4 text-status-green" aria-hidden="true" /> : <ToggleLeft className="h-4 w-4 text-ink-light" aria-hidden="true" />}
-              <span>{isOnline ? 'Online' : 'Offline'}</span>
-            </button>
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-border-rule bg-surface-white px-2 py-1.5 text-left shadow-sm transition hover:bg-surface-default"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((currentValue) => !currentValue)}
+                >
+                  <Avatar initials={initials} className="h-9 w-9 aspect-square" />
+                  <span className="hidden min-w-0 sm:block">
+                    <span className="block max-w-32 truncate text-sm font-semibold text-ink-default">{fullName}</span>
+                    <span className="block text-caption text-ink-light">Runner</span>
+                  </span>
+                  <ChevronDown className={cn('h-4 w-4 text-ink-light transition-transform', menuOpen && 'rotate-180')} aria-hidden="true" />
+                </button>
 
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-border-rule bg-surface-white px-2 py-1.5 text-left shadow-sm transition hover:bg-surface-default"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((currentValue) => !currentValue)}
-              >
-                <Avatar initials={initials} />
-                <span className="hidden min-w-0 sm:block">
-                  <span className="block max-w-32 truncate text-sm font-semibold text-ink-default">{fullName}</span>
-                  <span className="block text-caption text-ink-light">Runner</span>
-                </span>
-                <ChevronDown className={cn('h-4 w-4 text-ink-light transition-transform', menuOpen && 'rotate-180')} aria-hidden="true" />
-              </button>
-
-              {menuOpen ? (
-                <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-border-rule bg-surface-white p-2 shadow-lg">
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate(profilePath);
-                    }}
-                  >
-                    <CircleUserRound className="h-4 w-4" aria-hidden="true" />
-                    View Profile
-                  </button>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate(editProfilePath);
-                    }}
-                  >
-                    <Menu className="h-4 w-4" aria-hidden="true" />
-                    Edit Profile
-                  </button>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-status-red transition hover:bg-status-red-bg"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="h-4 w-4" aria-hidden="true" />
-                    Sign Out
-                  </button>
-                </div>
-              ) : null}
+                {menuOpen ? (
+                  <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-border-rule bg-surface-white p-2 shadow-lg">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate(profilePath);
+                      }}
+                    >
+                      <CircleUserRound className="h-4 w-4" aria-hidden="true" />
+                      View Profile
+                    </button>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-ink-mid transition hover:bg-surface-default hover:text-ink-default"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate(editProfilePath);
+                      }}
+                    >
+                      <Menu className="h-4 w-4" aria-hidden="true" />
+                      Edit Profile
+                    </button>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-status-red transition hover:bg-status-red-bg"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {authMode === 'public' ? (

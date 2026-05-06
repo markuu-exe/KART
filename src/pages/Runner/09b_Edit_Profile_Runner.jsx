@@ -1,5 +1,10 @@
 import EditProfileScreen from '@/components/shared/EditProfileScreen';
+import PageTransition from '@/components/shared/PageTransition';
 
 export default function EditProfileRunner() {
-	return <EditProfileScreen role="runner" />;
+	return (
+		<PageTransition>
+			<EditProfileScreen role="runner" />
+		</PageTransition>
+	);
 }

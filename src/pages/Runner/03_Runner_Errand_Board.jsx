@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
-import { ErrandDetailModal, EmptyState } from '@/components';
-import { Skeleton } from '@/components/ui';
+import { ErrandDetailModal, EmptyState, Skeleton } from '@/components';
+import PageTransition from '@/components/shared/PageTransition';
+import SkeletonList from '@/components/shared/SkeletonList';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -56,6 +57,23 @@ function toSummary(items) {
 	}
 
 	return 'Errand request';
+}
+
+function getInitials(name) {
+	const parts = String(name || '').trim().split(' ').filter(Boolean);
+	return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '';
+}
+
+function getRequesterName(order) {
+	return (
+		order?.requesterName ||
+		order?.requester_name ||
+		order?.requesterFullName ||
+		order?.requester_full_name ||
+		order?.requester?.full_name ||
+		order?.requester?.user_metadata?.full_name ||
+		''
+	);
 }
 
 function RunnerNav() {
@@ -115,8 +133,7 @@ function RunnerNav() {
 
 function RunnerErrandCard({ errand, onDetails, onAccept }) {
 	return (
-		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90 transform transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md">
-		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90 hover:scale-105 transition-transform duration-200 cursor-pointer">
+		<div className="transform transition-transform duration-150 hover:scale-105 bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full">
 			<div className="flex flex-col gap-2">
 				<div className="flex items-center gap-6">
 					<p className="flex-1 text-label text-ink-default font-semibold line-clamp-2">{errand.summary}</p>
@@ -157,7 +174,7 @@ function RunnerErrandCard({ errand, onDetails, onAccept }) {
 
 function RunnerErrandCardSkeleton() {
 	return (
-		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full max-w-125 min-w-90">
+		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full">
 			<div className="flex flex-col gap-2">
 				<div className="flex items-center gap-6">
 					<Skeleton className="flex-1 h-5" />
@@ -252,20 +269,35 @@ export default function RunnerErrandBoard() {
 			return null;
 		}
 
+		const sourceOrder = selectedErrand.sourceOrder;
+		const requesterName = getRequesterName(sourceOrder);
+		const requesterRole = sourceOrder?.requesterRole || sourceOrder?.requester_role || '';
+
 		return {
-			sourceOrder: selectedErrand.sourceOrder,
+			sourceOrder,
 			items: selectedErrand.items,
 			zone: selectedErrand.zone,
 			address: selectedErrand.address,
 			budget: selectedErrand.payout,
 			postedTime: selectedErrand.age,
-			requesterInitials: 'GC',
-			requesterName: 'Gina',
-			requesterRole: 'Requester',
+			requesterInitials: getInitials(requesterName),
+			requesterName,
+			requesterRole,
 		};
 	}, [selectedErrand]);
 
 	const handleAccept = async (errand) => {
+		const requesterId = errand?.sourceOrder?.requester_id;
+		const isSelfOrder = requesterId && requesterId === user?.id;
+
+		if (isSelfOrder) {
+			if (import.meta.env.PROD) {
+				return;
+			}
+
+			// TODO: Remove self-accept bypass before production
+		}
+
 		const { error } = await acceptOrder({ orderId: errand.id, runnerId: user?.id });
 		if (!error) {
 			navigate('/runner/active-order');
@@ -273,7 +305,8 @@ export default function RunnerErrandBoard() {
 	};
 
 	return (
-		<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+		<PageTransition>
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
 			<RunnerNav />
 
 			<main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
@@ -302,8 +335,15 @@ export default function RunnerErrandBoard() {
 					})}
 				</section>
 
-				{filteredErrands.length > 0 ? (
-					<section className="pt-6 flex flex-wrap gap-4 justify-center">
+				{isOrdersLoading ? (
+					<SkeletonList
+						count={6}
+					className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+					cardClassName=""
+						cardProps={{ showActions: true, accent: 'orange' }}
+					/>
+				) : filteredErrands.length > 0 ? (
+				<section className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						{filteredErrands.map((errand) => (
 							<RunnerErrandCard
 								key={errand.id}
@@ -314,7 +354,7 @@ export default function RunnerErrandBoard() {
 						))}
 					</section>
 				) : mockIsLoading ? (
-					<section className="pt-6 flex flex-wrap gap-4 justify-center">
+				<section className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						{Array.from({ length: 6 }, (_, i) => (
 							<RunnerErrandCardSkeleton key={i} />
 						))}
@@ -322,7 +362,6 @@ export default function RunnerErrandBoard() {
 				) : (
 					<EmptyErrandState zoneLabel={selectedFilter} />
 				)}
-				{isOrdersLoading && !mockIsLoading ? <p className="pt-4 text-center text-caption text-ink-light">Loading errands...</p> : null}
 			</main>
 
 			<ErrandDetailModal
@@ -332,5 +371,6 @@ export default function RunnerErrandBoard() {
 				onAccept={() => setSelectedErrand(null)}
 			/>
 		</div>
+	</PageTransition>
 	);
 }

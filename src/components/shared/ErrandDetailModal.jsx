@@ -2,6 +2,37 @@ import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import RouteMap from './RouteMap';
 
+function getInitials(name) {
+  const parts = String(name || '').trim().split(' ').filter(Boolean);
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '';
+}
+
+function getRequesterDisplayName(errand) {
+  return (
+    errand.requesterName ||
+    errand.requester_name ||
+    errand.requesterFullName ||
+    errand.requester_full_name ||
+    errand.sourceOrder?.requesterName ||
+    errand.sourceOrder?.requester_name ||
+    errand.sourceOrder?.requesterFullName ||
+    errand.sourceOrder?.requester_full_name ||
+    errand.sourceOrder?.requester?.full_name ||
+    errand.sourceOrder?.requester?.user_metadata?.full_name ||
+    ''
+  );
+}
+
+function getRequesterDisplayRole(errand) {
+  return (
+    errand.requesterRole ||
+    errand.requester_role ||
+    errand.sourceOrder?.requesterRole ||
+    errand.sourceOrder?.requester_role ||
+    'Requester'
+  );
+}
+
 function MetaRow({ label, value }) {
   return (
     <div className="flex items-center gap-1.5 min-h-4.5">
@@ -39,6 +70,8 @@ export default function ErrandDetailModal({
   }
 
   const source = errand.sourceOrder || errand;
+  
+  // Extract pickup coordinates with multiple fallback patterns
   const pickupCoordinates =
     source.pickupCoordinates ||
     source.pickup_coordinates ||
@@ -49,8 +82,12 @@ export default function ErrandDetailModal({
       : null) ||
     (source.pickupLatitude != null && source.pickupLongitude != null
       ? { lat: source.pickupLatitude, lng: source.pickupLongitude }
+      : null) ||
+    (source.pickupLat != null && source.pickupLng != null
+      ? { lat: source.pickupLat, lng: source.pickupLng }
       : null);
 
+  // Extract dropoff coordinates with multiple fallback patterns
   const dropoffCoordinates =
     source.dropoffCoordinates ||
     source.dropoff_coordinates ||
@@ -63,7 +100,15 @@ export default function ErrandDetailModal({
       : null) ||
     (source.dropoffLatitude != null && source.dropoffLongitude != null
       ? { lat: source.dropoffLatitude, lng: source.dropoffLongitude }
+      : null) ||
+    (source.dropoffLat != null && source.dropoffLng != null
+      ? { lat: source.dropoffLat, lng: source.dropoffLng }
       : null);
+
+  const requesterName = getRequesterDisplayName(errand);
+  const requesterInitials = getInitials(requesterName);
+  const requesterRole = getRequesterDisplayRole(errand);
+  const showRequesterIdentity = Boolean(requesterName || requesterInitials);
 
   return (
     <div
@@ -120,14 +165,16 @@ export default function ErrandDetailModal({
 
           <div className="mt-4 border-t border-border-rule" />
 
-          <div className="mt-4 flex items-center justify-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-primary-orange text-surface-white text-label font-bold inline-flex items-center justify-center">
-              {errand.requesterInitials || 'RQ'}
+          {showRequesterIdentity ? (
+            <div className="mt-4 flex items-center justify-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-primary-orange text-surface-white text-label font-bold inline-flex items-center justify-center">
+                {requesterInitials || requesterName.slice(0, 2).toUpperCase()}
+              </div>
+              <p className="text-label text-ink-mid font-medium">
+                {requesterName}{requesterRole ? ` · ${requesterRole}` : ''}
+              </p>
             </div>
-            <p className="text-label text-ink-mid font-medium">
-              {errand.requesterName} · {errand.requesterRole}
-            </p>
-          </div>
+          ) : null}
 
           <button
             type="button"

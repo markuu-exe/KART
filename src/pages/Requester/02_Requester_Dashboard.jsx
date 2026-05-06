@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
-import { ErrandDetailModal, EmptyState } from '@/components';
-import { Skeleton } from '@/components/ui';
+import { ErrandDetailModal, EmptyState, Skeleton, LocationAutocomplete } from '@/components';
+import PaymentDrawer from '@/components/shared/PaymentDrawer';
+import PageTransition from '@/components/shared/PageTransition';
+import SkeletonList from '@/components/shared/SkeletonList';
 import { useAppStore } from '@/store/useAppStore';
 import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
@@ -81,6 +83,11 @@ function toSummary(items) {
   }
 
   return 'Errand request';
+}
+
+function getInitials(name) {
+  const parts = String(name || '').trim().split(' ').filter(Boolean);
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '';
 }
 
 function AppNav({ selected = 'Home' }) {
@@ -219,15 +226,109 @@ function EmptyOrdersState({ onPostRequest }) {
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
-  const { user, orders, fetchOrders, isOrdersLoading } = useAppStore();
+  const { user, orders, fetchOrders, isOrdersLoading, createOrder, updateOrderStatus } = useAppStore();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
+  const [budgetCap, setBudgetCap] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [pickupLat, setPickupLat] = useState(null);
+  const [pickupLng, setPickupLng] = useState(null);
+  const [dropoffLat, setDropoffLat] = useState(null);
+  const [dropoffLng, setDropoffLng] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [checkoutRequest, setCheckoutRequest] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const firstName = user?.user_metadata?.full_name?.split(' ')?.[0] || 'there';
   const todayLabel = new Date().toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
 
   // Fallback: Hardcoded loading state to prove UI works with skeletons
   const mockIsLoading = true;
+
+  const handlePostRequest = async (e) => {
+    e.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    // Validation
+    if (!itemText.trim()) {
+      setSubmitError('Please specify items needed.');
+      return;
+    }
+
+    if (!zone) {
+      setSubmitError('Please select a delivery zone.');
+      return;
+    }
+
+    const numericBudget = Number(budgetCap);
+    if (!budgetCap || !Number.isFinite(numericBudget) || numericBudget <= 0) {
+      setSubmitError('Please enter a valid budget amount.');
+      return;
+    }
+
+    if (!deliveryAddress.trim()) {
+      setSubmitError('Please provide a delivery address.');
+      return;
+    }
+
+    if (!dropoffLat || !dropoffLng) {
+      setSubmitError('Please select a valid delivery location with coordinates.');
+      return;
+    }
+
+    if (!pickupLat || !pickupLng) {
+      setSubmitError('Please select a valid pickup location with coordinates.');
+      return;
+    }
+
+    if (!user?.id) {
+      setSubmitError('You must be logged in to post a request.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await createOrder({
+        requesterId: user.id,
+        items: itemText.trim().split(',').map((item) => item.trim()),
+        zone,
+        amount: numericBudget,
+        address: deliveryAddress.trim(),
+        pickupLat,
+        pickupLng,
+        dropoffLat,
+        dropoffLng,
+      });
+
+      if (error) {
+        setSubmitError(error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Success: Clear form and show success feedback
+      setItemText('');
+      setBudgetCap('');
+      setDeliveryAddress('');
+      setPickupLat(null);
+      setPickupLng(null);
+      setDropoffLat(null);
+      setDropoffLng(null);
+      setZone('Guadalupe');
+      setSubmitSuccess(true);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (err) {
+      setSubmitError(err?.message || 'Failed to post request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.id) {
@@ -260,11 +361,14 @@ export default function RequesterDashboard() {
   );
 
   const activeCount = activeRequests.length;
+  const activeCheckoutRequest = checkoutRequest ?? activeRequests[0] ?? null;
 
   const modalErrand = useMemo(() => {
     if (!selectedRequest) {
       return null;
     }
+
+    const requesterName = user?.user_metadata?.full_name || '';
 
     return {
       sourceOrder: selectedRequest.sourceOrder,
@@ -273,14 +377,15 @@ export default function RequesterDashboard() {
       address: selectedRequest.address,
       budget: selectedRequest.amount,
       postedTime: selectedRequest.age,
-      requesterInitials: 'GC',
-      requesterName: 'Gina',
-      requesterRole: 'Requester',
+      requesterInitials: getInitials(requesterName),
+      requesterName,
+      requesterRole: user?.user_metadata?.role ? String(user.user_metadata.role).replace(/^./, (letter) => letter.toUpperCase()) : 'Requester',
     };
-  }, [selectedRequest]);
+  }, [selectedRequest, user?.user_metadata?.full_name, user?.user_metadata?.role]);
 
   return (
-    <div className="bg-surface-default flex min-h-screen w-full items-stretch">
+    <PageTransition>
+      <div className="bg-surface-default flex min-h-screen w-full items-stretch">
       <AppNav selected="Home" />
 
       <main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
@@ -339,20 +444,61 @@ export default function RequesterDashboard() {
                     <label className="text-caption uppercase tracking-wide text-ink-light">Budget Cap (₱)</label>
                     <div className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 flex items-center gap-2">
                       <span className="font-mono text-mono text-primary-orange-light">₱</span>
-                      <span className="text-body text-ink-light">Includes ₱30 runner fee</span>
+                      <input
+                        type="number"
+                        className="flex-1 outline-none bg-transparent text-body text-ink-default placeholder:text-ink-light"
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        value={budgetCap}
+                        onChange={(e) => setBudgetCap(e.target.value)}
+                      />
+                      <span className="text-body text-ink-light whitespace-nowrap">+ ₱30 fee</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-caption uppercase tracking-wide text-ink-light">Delivery Address</label>
-                    <div className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 flex items-center">
-                      <span className="text-body text-ink-light">Street, Landmark</span>
-                    </div>
-                  </div>
+                  <LocationAutocomplete
+                    label="Pickup Location"
+                    placeholder="Select pickup landmark..."
+                    value={pickupLat && pickupLng ? `${pickupLat}, ${pickupLng}` : ''}
+                    onSelect={(landmark) => {
+                      setPickupLat(landmark.lat);
+                      setPickupLng(landmark.lng);
+                    }}
+                  />
+
+                  <LocationAutocomplete
+                    label="Delivery Address"
+                    placeholder="Select delivery location..."
+                    value={deliveryAddress}
+                    onChange={setDeliveryAddress}
+                    onSelect={(landmark) => {
+                      setDeliveryAddress(landmark.label);
+                      setDropoffLat(landmark.lat);
+                      setDropoffLng(landmark.lng);
+                    }}
+                  />
                 </div>
 
-                <button type="button" className="h-11 rounded-xl px-5 bg-primary-orange text-surface-white text-label shadow-sm">
-                  Post Request →
+                {submitError && (
+                  <div className="bg-status-red-bg text-status-red text-caption px-4 py-3 rounded-lg">
+                    {submitError}
+                  </div>
+                )}
+
+                {submitSuccess && (
+                  <div className="bg-status-green text-surface-white text-caption px-4 py-3 rounded-lg">
+                    Request posted successfully! 🎉
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handlePostRequest}
+                  disabled={isSubmitting}
+                  className="h-11 rounded-xl px-5 bg-primary-orange text-surface-white text-label shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Posting...' : 'Post Request →'}
                 </button>
               </div>
             </div>
@@ -371,16 +517,29 @@ export default function RequesterDashboard() {
               >
                 View Active Order
               </button>
+              <button
+                type="button"
+                className="h-8 px-3 rounded-full border border-border-rule bg-surface-white text-caption text-ink-mid"
+                onClick={() => {
+                  setCheckoutRequest(activeRequests[0] ?? null);
+                  setDrawerOpen(true);
+                }}
+                disabled={!activeCheckoutRequest}
+              >
+                Demo Pay
+              </button>
             </div>
 
-            {activeCount > 0 ? (
-              <div className="flex flex-col gap-3">
+            {isOrdersLoading ? (
+              <SkeletonList count={4} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" />
+            ) : activeCount > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeRequests.map((request) => (
                   <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
                 ))}
               </div>
             ) : mockIsLoading ? (
-              <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array.from({ length: 3 }, (_, i) => (
                   <RequestCardSkeleton key={i} />
                 ))}
@@ -388,7 +547,6 @@ export default function RequesterDashboard() {
             ) : (
               <EmptyOrdersState onPostRequest={() => navigate('/requester/board')} />
             )}
-            {isOrdersLoading && !mockIsLoading ? <p className="text-center text-caption text-ink-light">Loading requests...</p> : null}
           </div>
         </section>
       </main>
@@ -399,6 +557,26 @@ export default function RequesterDashboard() {
         onClose={() => setSelectedRequest(null)}
         acceptLabel="View Request"
       />
-    </div>
+      <PaymentDrawer
+        open={drawerOpen}
+        onClose={() => {
+          setDrawerOpen(false);
+          setCheckoutRequest(null);
+        }}
+        amount={activeCheckoutRequest?.sourceOrder?.amount ?? 0}
+        currency="php"
+        orderId={activeCheckoutRequest?.id ?? null}
+        orderSummary={activeCheckoutRequest?.summary ?? ''}
+        ctaLabel="Demo Pay"
+        onSuccess={async () => {
+          if (!activeCheckoutRequest?.id) {
+            return;
+          }
+
+          await updateOrderStatus({ orderId: activeCheckoutRequest.id, status: 'purchased' });
+        }}
+      />
+      </div>
+    </PageTransition>
   );
 }

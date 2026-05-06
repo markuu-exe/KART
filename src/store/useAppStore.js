@@ -27,6 +27,7 @@ export const useAppStore = create((set, get) => ({
   // Auth state
   user: null,
   isLoading: false,
+  isAuthResolved: false,
   error: null,
 
   // Orders state
@@ -37,7 +38,7 @@ export const useAppStore = create((set, get) => ({
 
   // User actions
   setUser: (user) => {
-    set({ user });
+    set({ user, isAuthResolved: true });
 
     if (user) {
       get().startOrdersRealtime();
@@ -47,7 +48,7 @@ export const useAppStore = create((set, get) => ({
     get().stopOrdersRealtime();
     set({ orders: [] });
   },
-  setLoading: (loading) => set({ isLoading: loading }),
+  setLoading: (loading) => set({ isLoading: loading, ...(loading === false && { isAuthResolved: true }) }),
   setError: (error) => set({ error }),
 
   // Orders actions
@@ -116,6 +117,40 @@ export const useAppStore = create((set, get) => ({
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId)
+      .select('*')
+      .single();
+
+    if (error) {
+      set({ error: error.message });
+      return { data: null, error: error.message };
+    }
+
+    get().upsertOrder(data);
+    set({ error: null });
+    return { data, error: null };
+  },
+  createOrder: async ({ requesterId, items, zone, amount, address }) => {
+    if (!requesterId || !items || !zone || !amount || !address) {
+      return { data: null, error: 'Missing required order fields: requesterId, items, zone, amount, address.' };
+    }
+
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return { data: null, error: 'Amount must be a valid positive number.' };
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({
+        requester_id: requesterId,
+        items: Array.isArray(items) ? items : [items],
+        zone,
+        amount: numericAmount,
+        city: address,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
       .select('*')
       .single();
 

@@ -7,3 +7,4 @@ export { default as ErrandDetailModal } from './ErrandDetailModal';
 export { default as OrderRow } from './OrderRow';
 export { default as ZoneCard } from './ZoneCard';
 export { default as RouteMap } from './RouteMap';
+export { default as LocationAutocomplete } from './LocationAutocomplete';
