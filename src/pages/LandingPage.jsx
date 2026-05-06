@@ -92,6 +92,14 @@ export default function LandingPage() {
         </div>
 
         <div className="grid gap-4 self-center lg:pl-6">
+          <div className="h-72 overflow-hidden rounded-3xl bg-surface-default shadow-sm">
+            <img
+              src="https://placehold.co/600x400/orange/white?text=Placeholder"
+              alt="Placeholder visual"
+              className="h-full w-full object-cover"
+            />
+          </div>
+
           <Card variant="highlight" className="gap-4 rounded-3xl p-6 sm:p-8">
             <div className="flex items-center gap-3">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-orange text-surface-white">

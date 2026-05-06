@@ -382,6 +382,15 @@ export default function Auth() {
               <BenefitItem emoji="🛵">Flat ₱30 runner fee, no hidden charges</BenefitItem>
             </ul>
           </div>
+
+          <div className="h-72 overflow-hidden rounded-3xl shadow-sm">
+            <img
+              src="https://placehold.co/600x400/orange/white?text=Placeholder"
+              alt="Placeholder visual"
+              className="h-full w-full object-cover"
+            />
+          </div>
+
           <div className="auth-brandPanel__glow" aria-hidden="true" />
         </aside>
 

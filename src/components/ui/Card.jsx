@@ -15,6 +15,14 @@ export default function Card({
   const variantClass = variantClasses[variant.toLowerCase()] || variantClasses.base;
 
   return (
+    <div
+      className={cn(
+        'flex flex-col items-start justify-center overflow-hidden rounded-lg bg-surface-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg',
+        variantClass,
+        className
+      )}
+      {...props}
+    >
     <div className={cn('w-full max-w-full flex flex-col items-start justify-center overflow-hidden rounded-lg bg-surface-white p-4 sm:p-6 shadow-sm', variantClass, className)} {...props}>
       {children}
     </div>
