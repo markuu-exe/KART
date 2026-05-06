@@ -391,6 +391,14 @@ export default function Auth() {
             <p className="auth-mobileBrand__tagline">Skip the checkout line.</p>
           </div>
 
+          <div className="auth-visual">
+            <img
+              src="https://placehold.co/600x400/orange/white?text=Placeholder"
+              alt="Authentication placeholder"
+              className="auth-visual__image"
+            />
+          </div>
+
           <Card variant="Base" className={`auth-card ${isSignUp ? 'auth-card--register' : 'auth-card--login'}`}>
             <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
               <AuthTabButton active={!isSignUp} onClick={() => switchMode(false)}>
