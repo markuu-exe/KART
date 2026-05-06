@@ -9,8 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary-orange text-surface-white hover:bg-primary-orange-light",
-        brand: "bg-primary-orange text-surface-white hover:bg-primary-orange-light",
+        default: "bg-primary-orange text-surface-white hover:bg-primary-orange-light transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg",
+        brand: "bg-primary-orange text-surface-white hover:bg-primary-orange-light transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg",
         outline:
           "border-border-rule bg-surface-white text-ink-default shadow-sm hover:bg-surface-default aria-expanded:bg-surface-default aria-expanded:text-ink-default",
         secondary:
