@@ -28,6 +28,7 @@ export default {
           blue: '#1a6eff',
           'blue-bg': '#eef3ff',
           green: '#00c27c',
+          red: '#d93025',
         },
       },
       fontFamily: {
