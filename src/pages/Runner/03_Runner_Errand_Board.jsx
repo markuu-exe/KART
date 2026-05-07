@@ -1,168 +1,376 @@
-import React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ClipboardList, History, User, Settings, MapPin } from 'lucide-react';
+import { ErrandDetailModal, EmptyState, Skeleton } from '@/components';
+import PageTransition from '@/components/shared/PageTransition';
+import SkeletonList from '@/components/shared/SkeletonList';
+import { useAppStore } from '@/store/useAppStore';
+import boxIllustration from '@/assets/Icons/Icon=Box.svg';
 
-const imgVector = "https://www.figma.com/api/mcp/asset/abf86184-619a-415f-ad14-2f94cc481893";
-const imgVector1 = "https://www.figma.com/api/mcp/asset/db530cde-6538-4e8e-a2c9-e34d12504b4e";
-const imgVector2 = "https://www.figma.com/api/mcp/asset/92e8de68-0585-41e2-bf40-0a6609be9120";
-const imgVector3 = "https://www.figma.com/api/mcp/asset/ec043952-7cb8-4d3f-a5c6-8ddc2108c9e9";
-const imgVector4 = "https://www.figma.com/api/mcp/asset/c1e63455-5873-48ee-9a91-9354e02f3d0f";
-const imgDot = "https://www.figma.com/api/mcp/asset/cb67a4c8-81b9-4883-a8e3-77a7b5594341";
-const imgVector5 = "https://www.figma.com/api/mcp/asset/08e95ea3-94af-4535-9451-e0adfc87f231";
+const FILTERS = ['All Zones', 'Guadalupe', 'Tisa', 'Talamban', 'Lahug', 'Labangon', 'Banilad', 'Apas', 'Zapatera'];
 
-function Chip({ className, label = "Label", state = true }) {
-  const isState = state;
-  return (
-    <div className={`${className || `border border-solid flex h-8 items-center justify-center min-h-8 px-3 rounded-full ${isState ? `bg-primary-orange-bg border-primary-orange` : `bg-surface-default border-border-rule`}`}`} id={isState ? "node-75_22" : "node-75_24"}>
-      {!state && (
-        <p className="font-medium leading-[1.5] relative shrink-0 text-caption text-ink-mid whitespace-nowrap font-sans">
-          {label}
-        </p>
-      )}
-      {isState && (
-        <p className="font-semibold leading-[1.5] relative shrink-0 text-caption text-primary-orange whitespace-nowrap font-sans">
-          {label}
-        </p>
-      )}
-    </div>
-  );
+const FALLBACK_ITEMS = ['No item details provided'];
+const OPEN_STATUSES = new Set(['', 'open', 'pending', 'posted', 'new']);
+
+function formatCurrency(amount) {
+	const numericAmount = Number(amount);
+	if (!Number.isFinite(numericAmount)) {
+		return '₱0.00';
+	}
+
+	return new Intl.NumberFormat('en-PH', {
+		style: 'currency',
+		currency: 'PHP',
+		minimumFractionDigits: 2,
+	}).format(numericAmount);
 }
 
-function Icons({ className, icon = "Icon" }) {
-  const isSettings = icon === "Settings";
-  return (
-    <div className={className || "relative w-5 h-5"} id={isSettings ? "node-119_48" : "node-116_42"}>
-      <div className={`absolute ${isSettings ? "inset-[8.33%_8.13%]" : "inset-[8.33%_8.33%_8.34%_8.34%]"}`} id={isSettings ? "node-119_51" : "node-116_45"}>
-        <img alt="" className="absolute inset-0 block w-full h-full object-contain" src={isSettings ? imgVector1 : imgVector} />
-      </div>
-    </div>
-  );
+function formatRelativeTime(inputDate) {
+	if (!inputDate) {
+		return 'Just now';
+	}
+
+	const date = new Date(inputDate);
+	if (Number.isNaN(date.getTime())) {
+		return 'Just now';
+	}
+
+	const diffMs = Math.max(0, Date.now() - date.getTime());
+	const diffMinutes = Math.floor(diffMs / 60000);
+	if (diffMinutes < 1) return 'Just now';
+	if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+	const diffHours = Math.floor(diffMinutes / 60);
+	if (diffHours < 24) return `${diffHours}h ago`;
+
+	const diffDays = Math.floor(diffHours / 24);
+	return `${diffDays}d ago`;
+}
+
+function toSummary(items) {
+	if (Array.isArray(items) && items.length > 0) {
+		return items.join(', ');
+	}
+
+	if (typeof items === 'string' && items.trim()) {
+		return items;
+	}
+
+	return 'Errand request';
+}
+
+function getInitials(name) {
+	const parts = String(name || '').trim().split(' ').filter(Boolean);
+	return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '';
+}
+
+function getRequesterName(order) {
+	return (
+		order?.requesterName ||
+		order?.requester_name ||
+		order?.requesterFullName ||
+		order?.requester_full_name ||
+		order?.requester?.full_name ||
+		order?.requester?.user_metadata?.full_name ||
+		''
+	);
+}
+
+function RunnerNav() {
+  const navigate = useNavigate();
+	const { user } = useAppStore();
+	const fullName = user?.user_metadata?.full_name || 'User';
+	const initials = fullName
+		.split(' ')
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part[0]?.toUpperCase())
+		.join('') || 'U';
+
+	const items = [
+		{ id: 'Board', icon: ClipboardList, label: 'Board', active: true, path: '/runner/board' },
+		{ id: 'History', icon: History, label: 'History', active: false, path: '/runner/history' },
+		{ id: 'Profile', icon: User, label: 'Profile', active: false, path: '/runner/profile' },
+	];
+
+	return (
+		<aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
+			<div className="flex flex-col gap-1">
+				{items.map((item) => {
+					const Icon = item.icon;
+
+					return (
+						<button
+							key={item.id}
+							type="button"
+							className={`min-h-11 px-3 rounded-xl flex items-center gap-3 text-left ${
+								item.active ? 'bg-primary-orange-bg text-primary-orange' : 'text-ink-mid'
+							}`}
+							onClick={() => navigate(item.path)}
+						>
+							<Icon className="w-5 h-5" />
+							<span className={`text-sm ${item.active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+						</button>
+					);
+				})}
+			</div>
+
+			<div className="mt-auto pt-8">
+				<div className="flex items-center gap-3 min-w-52">
+					<div className="w-9 h-9 rounded-full bg-status-blue inline-flex items-center justify-center text-surface-white text-sm font-bold">
+						{initials}
+					</div>
+					<div className="flex-1 min-w-0">
+						<p className="text-sm font-semibold text-ink-default truncate">{fullName}</p>
+						<p className="text-caption text-ink-light">Runner</p>
+					</div>
+					<Settings className="w-5 h-5 text-ink-mid" />
+				</div>
+			</div>
+		</aside>
+	);
+}
+
+function RunnerErrandCard({ errand, onDetails, onAccept }) {
+	return (
+		<div className="transform transition-transform duration-150 hover:scale-105 bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full">
+			<div className="flex flex-col gap-2">
+				<div className="flex items-center gap-6">
+					<p className="flex-1 text-label text-ink-default font-semibold line-clamp-2">{errand.summary}</p>
+					<span className="h-6 px-2.5 rounded-full bg-status-green-bg text-status-green font-mono text-mono-sm inline-flex items-center">
+						{errand.payout}
+					</span>
+				</div>
+
+				<div className="flex items-center gap-1.5 text-caption text-ink-light">
+					<MapPin className="w-3 h-3" />
+					<span>{errand.zone}</span>
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
+					<span>{errand.address}</span>
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
+					<span>{errand.age}</span>
+				</div>
+
+				<div className="grid grid-cols-2 gap-2 pt-1">
+					<button
+						type="button"
+						className="h-9 rounded-xl bg-status-green-bg text-status-green text-label"
+						onClick={() => onAccept(errand)}
+					>
+						Accept
+					</button>
+					<button
+						type="button"
+						className="h-9 rounded-xl border border-border-rule bg-surface-white text-ink-mid text-label"
+						onClick={() => onDetails(errand)}
+					>
+						Details
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function RunnerErrandCardSkeleton() {
+	return (
+		<div className="bg-surface-white border-l-4 border-primary-orange rounded-2xl shadow-sm pl-5 pr-4 py-4 w-full">
+			<div className="flex flex-col gap-2">
+				<div className="flex items-center gap-6">
+					<Skeleton className="flex-1 h-5" />
+					<Skeleton className="h-6 w-16 rounded-full" />
+				</div>
+
+				<div className="flex items-center gap-1.5">
+					<MapPin className="w-3 h-3 text-ink-light" />
+					<Skeleton className="h-3 w-12" />
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
+					<Skeleton className="h-3 w-20" />
+					<span className="w-0.75 h-0.75 rounded-full bg-ink-light" />
+					<Skeleton className="h-3 w-8" />
+				</div>
+
+				<div className="grid grid-cols-2 gap-2 pt-1">
+					<Skeleton className="h-9 rounded-xl" />
+					<Skeleton className="h-9 rounded-xl" />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function EmptyErrandState({ zoneLabel }) {
+	const navigate = useNavigate();
+
+	return (
+		<div className="flex items-center justify-center py-4" style={{ minHeight: 360 }}>
+			<EmptyState
+				illustration={<img src={boxIllustration} alt="" aria-hidden="true" />}
+				title="No errands available"
+				message={
+					zoneLabel === 'All Zones'
+						? 'There are no open errands near you right now. Check back soon or pick a zone to narrow the search.'
+						: `There are no open errands in ${zoneLabel.toLowerCase()} right now. Try another zone or check back soon.`
+				}
+				actionLabel={zoneLabel === 'All Zones' ? 'Refresh board' : 'Show all zones'}
+				onAction={() => {
+					if (zoneLabel === 'All Zones') {
+						navigate('/runner/board');
+						return;
+					}
+
+					navigate('/runner/board');
+				}}
+			/>
+		</div>
+	);
 }
 
 export default function RunnerErrandBoard() {
-  return (
-    <div className="min-h-screen bg-surface-default flex flex-col lg:flex-row">
-      <div className="bg-surface-white border-border-rule border-r border-solid flex flex-col w-full lg:w-[240px] px-6 py-6">
-        <div className="flex flex-col gap-1 pb-8">
-          <h1 className="text-2xl font-extrabold text-primary-orange font-heading">Kart</h1>
-          <p className="text-caption text-ink-light">Skip the checkout line.</p>
-        </div>
-        <div className="flex flex-col gap-3 w-full">
-          <div className="bg-primary-orange-bg flex gap-3 items-center min-h-[44px] px-3 rounded-[12px] w-full">
-            <div className="relative shrink-0 w-5 h-5">
-              <img alt="" className="absolute inset-0 block w-full h-full object-contain" src={imgVector2} />
-            </div>
-            <p className="font-semibold leading-[1.5] text-label text-primary-orange whitespace-nowrap font-sans">Board</p>
-          </div>
-          <div className="flex gap-3 items-center min-h-[44px] px-3 rounded-[12px] w-full">
-            <div className="relative shrink-0 w-5 h-5">
-              <img alt="" className="absolute inset-0 block w-full h-full object-contain" src={imgVector3} />
-            </div>
-            <p className="font-medium leading-[1.5] text-label text-ink-mid whitespace-nowrap font-sans">History</p>
-          </div>
-          <div className="flex gap-3 items-center min-h-[44px] px-3 rounded-[12px] w-full">
-            <div className="relative shrink-0 w-5 h-5">
-              <img alt="" className="absolute inset-0 block w-full h-full object-contain" src={imgVector4} />
-            </div>
-            <p className="font-medium leading-[1.5] text-label text-ink-mid whitespace-nowrap font-sans">Profile</p>
-          </div>
-        </div>
-        <div className="flex-1 flex flex-col justify-end">
-          <div className="flex items-center gap-3 w-full">
-            <div className="bg-status-blue flex items-center justify-center rounded-full shrink-0 w-9 h-9">
-              <div className="font-bold text-label text-surface-white text-center whitespace-nowrap font-sans">
-                <p className="leading-[1.5]">YB</p>
-              </div>
-            </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-px">
-              <div className="font-semibold text-label text-ink-default truncate font-sans">
-                <p className="leading-[1.2]">Yuno Ball</p>
-              </div>
-              <div className="font-normal text-caption text-ink-light font-sans">
-                <p className="leading-[1.2]">Runner</p>
-              </div>
-            </div>
-            <Icons className="shrink-0 w-5 h-5" icon="Settings" />
-          </div>
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-auto overflow-y-auto p-6 lg:p-10">
-        <div className="flex flex-col gap-1 pb-6 w-full">
-          <p className="font-bold text-heading-1 text-ink-default tracking-[-0.48px] font-heading">Errand Board</p>
-          <p className="font-normal text-caption text-ink-light">6 open near you</p>
-        </div>
-        <div className="border-b border-border-rule pb-4 flex flex-wrap gap-2 w-full">
-          <Chip className="bg-primary-orange-bg border-primary-orange border-solid flex h-8 items-center justify-center px-3 rounded-full shrink-0" label="All Zones" />
-          <Chip className="bg-surface-default border-border-rule border-solid flex h-8 items-center justify-center px-3 rounded-full shrink-0" label="Guadalupe" state={false} />
-          <Chip className="bg-surface-default border-border-rule border-solid flex h-8 items-center justify-center px-3 rounded-full shrink-0" label="Tisa" state={false} />
-          <Chip className="bg-surface-default border-border-rule border-solid flex h-8 items-center justify-center px-3 rounded-full shrink-0" label="Talamban" state={false} />
-          <Chip className="bg-surface-default border-border-rule border-solid flex h-8 items-center justify-center px-3 rounded-full shrink-0" label="Lahug" state={false} />
-          <div className="bg-surface-default border-border-rule border border-solid flex h-8 items-center px-3 rounded-full shrink-0">
-            <p className="font-medium leading-[1.5] text-caption text-ink-mid whitespace-nowrap font-sans">
-              Labangon
-            </p>
-          </div>
-          <div className="bg-surface-default border-border-rule border border-solid flex h-8 items-center px-3 rounded-full shrink-0">
-            <p className="font-medium leading-[1.5] text-caption text-ink-mid whitespace-nowrap font-sans">
-              Banilad
-            </p>
-          </div>
-          <div className="bg-surface-default border-border-rule border border-solid flex h-8 items-center px-3 rounded-full shrink-0">
-            <p className="font-medium leading-[1.5] text-caption text-ink-mid whitespace-nowrap font-sans">
-              Apas
-            </p>
-          </div>
-          <div className="bg-surface-default border-border-rule border border-solid flex h-8 items-center px-3 rounded-full shrink-0">
-            <p className="font-medium leading-[1.5] text-caption text-ink-mid whitespace-nowrap font-sans">
-              Zapatera
-            </p>
-          </div>
-        </div>
-        <div className="grid gap-6 lg:grid-cols-2 w-full pt-6">
-          {/* Request Cards - placeholder, repeat as needed */}
-          <section className="bg-surface-white border-primary-orange border-l-4 border-solid flex flex-col justify-between w-full max-w-[500px] min-h-[220px] overflow-hidden rounded-[16px] shadow-sm p-4">
-            <div className="space-y-4">
-              <p className="font-semibold text-label text-ink-default break-words leading-[1.5]">
-                Bananas (1 bunch), Apples (4 pcs), Onions (1 kg), Garlic (3 bulbs), Tomatoes (500g), Potatoes (1 kg), Carrots (2 pcs), Leafy Greens (2 bundles), Chicken (1 kg), Ground Meat (500g), Eggs (1 dozen), Fish (3 pcs), Tofu (2 blocks), Milk (1L), Butter (1 bar), Cheese (1 box), Rice (5 kg), Pasta (500g), Cooking Oil (1L), Soy Sauce (1 bottle), Vinegar (1 bottle), Canned Tuna (3 cans), Loaf Bread (1 pack), Coffee (1 pack), Crackers (1 pack), Dishwashing Liquid (1 pouch), Laundry Detergent (1 kg), Bath Soap (3 bars).
-              </p>
-              <div className="inline-flex items-center rounded-full bg-status-green-bg px-3 h-8">
-                <span className="font-medium text-mono-sm text-status-green whitespace-nowrap">₱40.00</span>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2 text-caption text-ink-light">
-                <span>📍 Tisa</span>
-                <span className="inline-block w-1 h-1 rounded-full bg-ink-light" />
-                <span>Sitio Sunflower, 5th Street</span>
-                <span className="inline-block w-1 h-1 rounded-full bg-ink-light" />
-                <span>12m ago</span>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button type="button" className="bg-status-green-bg text-status-green font-normal h-9 rounded-[12px] px-5 transition hover:bg-status-green/90">
-                  Accept
-                </button>
-                <button type="button" className="border border-border-rule text-ink-mid font-normal h-9 rounded-[12px] px-5 transition hover:bg-surface-default">
-                  Details
-                </button>
-              </div>
-            </div>
-          </section>
-          {/* Repeat for more cards */}
-        </div>
-        <div className="flex flex-col gap-8 items-center justify-center p-10 w-full">
-          <div className="relative shrink-0 w-12 h-12">
-            <div className="absolute inset-[16.67%_19.2%_18.95%_20%]">
-              <div className="absolute inset-[-1.55%_-1.99%_-1.97%_-1.64%]">
-                <img alt="" className="absolute inset-0 block w-full h-full object-contain" src={imgVector5} />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col font-semibold justify-center leading-[0] relative shrink-0 text-label text-ink-default text-center whitespace-nowrap font-sans">
-            <p className="leading-[1.5]">Laid-back Day</p>
-          </div>
-          <div className="flex flex-col font-normal justify-center leading-[0] max-w-[320px] relative shrink-0 text-body text-ink-light text-center whitespace-nowrap font-sans">
-            <p className="leading-[1.65]">No open errands in Tisa right now.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	const navigate = useNavigate();
+	const { user, orders, fetchOrders, acceptOrder, isOrdersLoading } = useAppStore();
+	const [selectedFilter, setSelectedFilter] = useState('All Zones');
+	const [selectedErrand, setSelectedErrand] = useState(null);
+
+	// Fallback: Hardcoded loading state to prove UI works with skeletons
+	const mockIsLoading = true;
+
+	useEffect(() => {
+		fetchOrders();
+	}, [fetchOrders, user?.id]);
+
+	const openErrands = useMemo(
+		() =>
+			orders
+				.filter((order) => OPEN_STATUSES.has(String(order.status || '').toLowerCase()))
+				.map((order) => ({
+					id: order.id,
+					sourceOrder: order,
+					summary: toSummary(order.items),
+					zone: order.zone || 'Unspecified zone',
+					address: [order.city, order.zone].filter(Boolean).join(', ') || 'Address not specified',
+					age: formatRelativeTime(order.created_at),
+					payout: formatCurrency(order.amount),
+					items: Array.isArray(order.items) && order.items.length > 0 ? order.items : FALLBACK_ITEMS,
+				})),
+		[orders],
+	);
+
+	const filteredErrands = useMemo(() => {
+		if (selectedFilter === 'All Zones') {
+			return openErrands;
+		}
+
+		return openErrands.filter((errand) => errand.zone === selectedFilter);
+	}, [openErrands, selectedFilter]);
+
+	const modalErrand = useMemo(() => {
+		if (!selectedErrand) {
+			return null;
+		}
+
+		const sourceOrder = selectedErrand.sourceOrder;
+		const requesterName = getRequesterName(sourceOrder);
+		const requesterRole = sourceOrder?.requesterRole || sourceOrder?.requester_role || '';
+
+		return {
+			sourceOrder,
+			items: selectedErrand.items,
+			zone: selectedErrand.zone,
+			address: selectedErrand.address,
+			budget: selectedErrand.payout,
+			postedTime: selectedErrand.age,
+			requesterInitials: getInitials(requesterName),
+			requesterName,
+			requesterRole,
+		};
+	}, [selectedErrand]);
+
+	const handleAccept = async (errand) => {
+		const requesterId = errand?.sourceOrder?.requester_id;
+		const isSelfOrder = requesterId && requesterId === user?.id;
+
+		if (isSelfOrder) {
+			if (import.meta.env.PROD) {
+				return;
+			}
+
+			// TODO: Remove self-accept bypass before production
+		}
+
+		const { error } = await acceptOrder({ orderId: errand.id, runnerId: user?.id });
+		if (!error) {
+			navigate('/runner/active-order');
+		}
+	};
+
+	return (
+		<PageTransition>
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+			<RunnerNav />
+
+			<main className="bg-surface-default flex-1 min-h-screen p-10 overflow-y-auto">
+				<header className="pb-6">
+					<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Errand Board</h1>
+					<p className="text-caption text-ink-light">{filteredErrands.length} open near you</p>
+				</header>
+
+				<section className="pb-4 border-b border-border-rule flex flex-wrap gap-2">
+					{FILTERS.map((zone) => {
+						const active = zone === selectedFilter;
+						return (
+							<button
+								key={zone}
+								type="button"
+								className={`h-8 px-3 rounded-full border text-caption ${
+									active
+										? 'bg-primary-orange-bg border-primary-orange text-primary-orange font-semibold'
+										: 'bg-surface-default border-border-rule text-ink-mid font-medium'
+								}`}
+								onClick={() => setSelectedFilter(zone)}
+							>
+								{zone}
+							</button>
+						);
+					})}
+				</section>
+
+				{isOrdersLoading ? (
+					<SkeletonList
+						count={6}
+					className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+					cardClassName=""
+						cardProps={{ showActions: true, accent: 'orange' }}
+					/>
+				) : filteredErrands.length > 0 ? (
+				<section className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{filteredErrands.map((errand) => (
+							<RunnerErrandCard
+								key={errand.id}
+								errand={errand}
+								onDetails={setSelectedErrand}
+								onAccept={handleAccept}
+							/>
+						))}
+					</section>
+				) : mockIsLoading ? (
+				<section className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{Array.from({ length: 6 }, (_, i) => (
+							<RunnerErrandCardSkeleton key={i} />
+						))}
+					</section>
+				) : (
+					<EmptyErrandState zoneLabel={selectedFilter} />
+				)}
+			</main>
+
+			<ErrandDetailModal
+				isOpen={Boolean(selectedErrand)}
+				errand={modalErrand}
+				onClose={() => setSelectedErrand(null)}
+				onAccept={() => setSelectedErrand(null)}
+			/>
+		</div>
+	</PageTransition>
+	);
 }

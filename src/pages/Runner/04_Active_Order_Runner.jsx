@@ -1,211 +1,320 @@
-import React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ClipboardList, History, User, Settings, ArrowLeft, Camera, CheckCircle2 } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
+import PageTransition from '@/components/shared/PageTransition';
 
-const imgGroup = "https://www.figma.com/api/mcp/asset/30478b0f-93c7-45ef-93e1-8bbc5fdb9cf2";
-const imgVector = "https://www.figma.com/api/mcp/asset/d1e67bbd-321b-42dd-b46c-9b1aae6df38d";
-const imgVector1 = "https://www.figma.com/api/mcp/asset/89d6ed47-f577-4ff9-91ac-f7dad44e9a6a";
-const imgVector2 = "https://www.figma.com/api/mcp/asset/23339004-9851-44f4-ab52-3a3512c84611";
-const imgVector3 = "https://www.figma.com/api/mcp/asset/b1f9895b-9d73-4d17-a933-dd01a04ce171";
-const imgVector4 = "https://www.figma.com/api/mcp/asset/346c61ea-fbd0-42ba-8796-04635033d6b1";
-const imgVector5 = "https://www.figma.com/api/mcp/asset/708ac628-1a9a-433c-81eb-ad353e6b1353";
+const STEP_ORDER = ['accepted', 'at_store', 'purchased', 'delivered'];
 
-function Btn({ className, buttonLabel = "Button", state = "Default", type = "Primary" }) {
-  return (
-    <div className={`${className || "bg-primary-orange flex items-center justify-center h-11 px-5 rounded-[12px] shadow-sm"}`}>
-      <div className="text-label text-surface-white text-center font-normal font-sans">
-        <p className="leading-[1.5]">{buttonLabel}</p>
-      </div>
-    </div>
-  );
+const STEP_LABELS = {
+	accepted: 'Accepted',
+	at_store: 'At Store',
+	purchased: 'Purchased',
+	delivered: 'Delivered',
+};
+
+const ACTIVE_STATUSES = new Set(['accepted', 'at_store', 'purchased', 'delivered']);
+
+function getInitials(name) {
+	const parts = String(name || 'User').trim().split(' ').filter(Boolean);
+	return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'U';
 }
 
-function Camera({ className }) {
-  return (
-    <div className={className || "relative w-6 h-6"}>
-      <img alt="" className="absolute inset-0 w-full h-full object-contain" src={imgGroup} />
-    </div>
-  );
+function toSummaryItems(items) {
+	if (Array.isArray(items) && items.length > 0) {
+		return items;
+	}
+
+	if (typeof items === 'string' && items.trim()) {
+		return [items];
+	}
+
+	return ['No items listed'];
 }
 
-function StepNode({ className, state = "current", stepLabel2 = "Current", stepLabel3 = "Future" }) {
-  const isCurrent = state === "current";
-  const isFuture = state === "future";
-  return (
-    <div className={className || "h-[48px] relative w-[59px]"} id={isCurrent ? "node-189_606" : "node-189_609"}>
-      {isFuture && (
-        <>
-          <div className="absolute flex flex-col font-normal inset-[58.33%_16.95%_0_16.95%] justify-center leading-[0] text-label text-ink-default text-center whitespace-nowrap font-sans">
-            <p className="leading-[1.5]">{stepLabel3}</p>
-          </div>
-          <div className="absolute bg-border-rule inset-[0_25.42%_41.67%_27.12%] rounded-[9999px]" />
-        </>
-      )}
-      {isCurrent && (
-        <>
-          <div className="absolute flex flex-col font-normal inset-[58.33%_10.17%_0_10.17%] justify-center leading-[0] text-label text-ink-default text-center whitespace-nowrap font-sans">
-            <p className="leading-[1.5]">{stepLabel2}</p>
-          </div>
-          <div className="absolute inset-[0_25.42%_41.67%_27.12%] flex items-center justify-center rounded-full bg-primary-orange">
-            <div className="text-label text-surface-white font-normal font-sans">
-              <p className="leading-[1.5]">.</p>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
+function formatCurrency(amount) {
+	const numericAmount = Number(amount || 0);
+	return new Intl.NumberFormat('en-PH', {
+		style: 'currency',
+		currency: 'PHP',
+		minimumFractionDigits: 2,
+	}).format(numericAmount);
 }
 
-function ConnectorLine({ className, state = "unfilled" }) {
-  return <div className={className || "bg-border-rule h-1.5 rounded-full"} />;
+function RunnerNav() {
+	const navigate = useNavigate();
+	const { user } = useAppStore();
+	const fullName = user?.user_metadata?.full_name || 'User';
+
+	const items = [
+		{ id: 'Board', icon: ClipboardList, label: 'Board', path: '/runner/board' },
+		{ id: 'History', icon: History, label: 'History', path: '/runner/history' },
+		{ id: 'Profile', icon: User, label: 'Profile', path: '/runner/profile' },
+	];
+
+	return (
+		<aside className="bg-surface-white border-r border-border-rule flex min-h-screen min-w-60 flex-col px-4 py-6 self-stretch">
+			<div className="flex flex-col gap-1">
+				{items.map((item) => {
+					const Icon = item.icon;
+					return (
+						<button
+							type="button"
+							key={item.id}
+							className="min-h-11 px-3 rounded-xl flex items-center gap-3 text-ink-mid"
+							onClick={() => navigate(item.path)}
+						>
+							<Icon className="w-5 h-5" />
+							<span className="text-sm font-medium">{item.label}</span>
+						</button>
+					);
+				})}
+			</div>
+
+			<div className="mt-auto pt-8">
+				<div className="flex items-center gap-3 min-w-52">
+					<div className="w-9 h-9 rounded-full bg-primary-orange inline-flex items-center justify-center text-surface-white text-sm font-bold">
+						{getInitials(fullName)}
+					</div>
+					<div className="flex-1 min-w-0">
+						<p className="text-sm font-semibold text-ink-default truncate">{fullName}</p>
+						<p className="text-caption text-ink-light">Runner</p>
+					</div>
+					<Settings className="w-5 h-5 text-ink-mid" />
+				</div>
+			</div>
+		</aside>
+	);
 }
 
-function StatusPills({ className, state = "Accepted" }) {
-  return (
-    <div className={className || "inline-flex items-center h-6 px-3 rounded-full bg-status-blue-bg"}>
-      <span className="text-mono-sm font-medium text-status-blue whitespace-nowrap font-mono">Accepted</span>
-    </div>
-  );
-}
+function Stepper({ step }) {
+	const activeIndex = STEP_ORDER.indexOf(step);
 
-function Arrow({ className }) {
-  return (
-    <div className={className || "relative w-5 h-5"}>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img alt="" className="w-full h-full object-contain" src={imgVector} />
-      </div>
-    </div>
-  );
-}
+	return (
+		<div className="w-full flex items-center px-2">
+			{STEP_ORDER.map((name, index) => {
+				const isDone = index <= activeIndex;
+				const isCurrent = index === activeIndex;
 
-function Icons({ className, icon = "Icon" }) {
-  const isSettings = icon === "Settings";
-  return (
-    <div className={className || "relative w-5 h-5"} id={isSettings ? "node-119_48" : "node-116_42"}>
-      <div className={`absolute ${isSettings ? "inset-[8.33%_8.13%]" : "inset-[8.33%_8.33%_8.34%_8.34%]"}`} id={isSettings ? "node-119_51" : "node-116_45"}>
-        <img alt="" className="absolute inset-0 w-full h-full object-contain" src={isSettings ? imgVector2 : imgVector1} />
-      </div>
-    </div>
-  );
-}
-
-function Avatar({ className, initialsText = "JD", type = "Initials" }) {
-  return (
-    <div className={className || "bg-primary-orange flex items-center justify-center rounded-full w-9 h-9"}>
-      <div className="text-label text-surface-white text-center font-bold font-sans">
-        <p className="leading-[1.5]">{initialsText}</p>
-      </div>
-    </div>
-  );
+				return (
+					<div key={name} className="flex items-center flex-1">
+						<div className="w-full max-w-22.5 flex flex-col items-center">
+							<div
+								className={`w-6 h-6 rounded-full inline-flex items-center justify-center ${
+									isDone
+										? step === 'delivered'
+											? 'bg-status-green text-surface-white'
+											: 'bg-primary-orange text-surface-white'
+										: 'bg-border-rule text-border-rule'
+								}`}
+							>
+								{step === 'delivered' ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-[10px]">•</span>}
+							</div>
+							<p className={`mt-1 text-label ${isCurrent ? 'text-ink-default' : 'text-ink-mid'}`}>{STEP_LABELS[name]}</p>
+						</div>
+						{index < STEP_ORDER.length - 1 ? (
+							<div className="flex-1 h-0.5 bg-border-rule -mt-5" />
+						) : null}
+					</div>
+				);
+			})}
+		</div>
+	);
 }
 
 export default function ActiveOrderRunner() {
-  return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
-      <aside className="bg-surface-white border-border-rule border-r border-solid flex flex-col w-full lg:w-[240px] px-4 py-6">
-        <div className="flex flex-col gap-4 pb-8">
-          <div className="text-[28px] font-extrabold text-primary-orange tracking-[-0.56px] font-heading">
-            <p className="leading-normal">Kart</p>
-          </div>
-          <div className="text-caption text-ink-light font-normal font-sans">
-            <p className="leading-[1.5]">Skip the checkout line.</p>
-          </div>
-        </div>
-        <div className="flex flex-col gap-3 w-full max-w-[208px]">
-          <button className="flex items-center gap-3 min-h-[44px] w-full rounded-[12px] bg-primary-orange-bg px-3">
-            <div className="relative w-5 h-5">
-              <img alt="" className="absolute inset-0 w-full h-full object-contain" src={imgVector3} />
-            </div>
-            <span className="font-medium text-label text-primary-orange whitespace-nowrap font-sans">Board</span>
-          </button>
-          <button className="flex items-center gap-3 min-h-[44px] w-full rounded-[12px] px-3 bg-surface-default">
-            <div className="relative w-5 h-5">
-              <img alt="" className="absolute inset-0 w-full h-full object-contain" src={imgVector4} />
-            </div>
-            <span className="font-medium text-label text-ink-mid whitespace-nowrap font-sans">History</span>
-          </button>
-          <button className="flex items-center gap-3 min-h-[44px] w-full rounded-[12px] px-3 bg-surface-default">
-            <div className="relative w-5 h-5">
-              <img alt="" className="absolute inset-0 w-full h-full object-contain" src={imgVector5} />
-            </div>
-            <span className="font-medium text-label text-ink-mid whitespace-nowrap font-sans">Profile</span>
-          </button>
-        </div>
-        <div className="mt-auto flex items-center gap-3 w-full max-w-[208px]">
-          <Avatar className="bg-primary-orange rounded-full w-9 h-9" initialsText="GC" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-label text-ink-default font-sans">Gina Cole</p>
-            <p className="text-caption text-ink-light font-normal font-sans">Requester</p>
-          </div>
-          <Icons className="w-5 h-5" icon="Settings" />
-        </div>
-      </aside>
-      <div className="bg-surface-default flex-1 flex flex-col h-full overflow-x-hidden overflow-y-auto p-10 lg:p-12">
-        <div className="flex items-center gap-2 pb-4">
-          <Arrow className="w-5 h-5" />
-          <p className="font-normal leading-[1.5] text-label text-primary-orange whitespace-nowrap font-sans">
-            Back to Board
-          </p>
-        </div>
-        <main className="flex-1 px-0">
-          <div className="mx-auto flex max-w-5xl flex-col gap-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-heading-1 font-bold text-ink-default tracking-[-0.48px]">Active Errand</p>
-              <StatusPills />
-            </div>
-            <div className="flex flex-col gap-4 rounded-[16px] border border-border-rule bg-surface-default p-4">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-orange text-surface-white font-bold">.</div>
-                <p className="text-label text-ink-default">Accepted</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <ConnectorLine className="h-1.5 flex-1 rounded-full bg-border-rule" />
-                <StepNode className="h-[48px] w-[59px]" state="future" stepLabel3="At Store" />
-                <ConnectorLine className="h-1.5 flex-1 rounded-full bg-border-rule" />
-                <StepNode className="h-[48px] w-[59px]" state="future" stepLabel3="Purchased" />
-                <ConnectorLine className="h-1.5 flex-1 rounded-full bg-border-rule" />
-                <StepNode className="h-[48px] w-[59px]" state="future" stepLabel3="Delivered" />
-              </div>
-            </div>
-            <div className="rounded-[16px] border border-border-rule bg-surface-default p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-caption text-primary-orange underline">Open Maps →</p>
-                <span className="text-label text-primary-orange">📍</span>
-              </div>
-              <div className="mt-3 space-y-1">
-                <p className="text-sm font-semibold text-ink-default">Deliver to: Tisa</p>
-                <p className="text-caption text-ink-light">Sitio Sunflower, 5th Street · Ring the Doorbell</p>
-              </div>
-            </div>
-            <section className="rounded-[16px] border border-border-rule bg-surface-white p-6 shadow-sm">
-              <div className="space-y-4">
-                <p className="text-heading-2 font-semibold">🛒 Shopping List</p>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-1 text-ink-light">•</span>
-                    <p className="text-body text-ink-default">1 kg Rice</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="mt-1 text-ink-light">•</span>
-                    <p className="text-body text-ink-default">1 kilo Banana</p>
-                  </div>
-                </div>
-                <div className="rounded-[12px] border border-border-rule px-4 py-3">
-                  <p className="text-mono text-ink-light">Budget cap: ₱500</p>
-                </div>
-              </div>
-            </section>
-            <div className="space-y-4">
-              <p className="text-center text-mono-sm text-ink-light">📷 RECEIPT</p>
-              <div className="mx-auto w-full max-w-[190px] rounded-[12px] border border-dashed border-primary-orange bg-primary-orange-bg py-8">
-                <Camera className="mx-auto w-6 h-6" />
-                <p className="mt-3 text-caption text-ink-default text-center">Click to Upload Receipt</p>
-              </div>
-            </div>
-            <Btn buttonLabel="🏪 I'm at the Store" className="w-full" />
-            <div className="text-center text-caption text-status-red">Cancel Errand</div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+	const navigate = useNavigate();
+	const { user, orders, fetchOrders, isOrdersLoading, updateOrderStatus } = useAppStore();
+	const [receiptPreview, setReceiptPreview] = useState('');
+
+	useEffect(() => {
+		if (!user?.id) {
+			return;
+		}
+
+		fetchOrders({ runnerId: user.id });
+	}, [fetchOrders, user?.id]);
+
+	const activeOrder = useMemo(
+		() =>
+			orders.find((order) => {
+				const status = String(order.status || '').toLowerCase();
+				return ACTIVE_STATUSES.has(status);
+			}),
+		[orders],
+	);
+	const step = activeOrder?.status ? String(activeOrder.status).toLowerCase() : 'accepted';
+
+	const statusTone = useMemo(() => {
+		if (step === 'accepted') {
+			return { pillClass: 'bg-status-blue-bg text-status-blue', label: 'Accepted' };
+		}
+		if (step === 'at_store') {
+			return { pillClass: 'bg-primary-orange-bg text-primary-orange', label: 'At Store' };
+		}
+		if (step === 'purchased') {
+			return { pillClass: 'bg-status-yellow-bg text-status-yellow', label: 'Purchased' };
+		}
+		return { pillClass: 'bg-status-green text-surface-white', label: 'Delivered' };
+	}, [step]);
+
+	const handlePrimaryAction = async () => {
+		if (!activeOrder?.id) {
+			return;
+		}
+
+		if (step === 'accepted') {
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'at_store' });
+			return;
+		}
+
+		if (step === 'at_store') {
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'purchased' });
+			return;
+		}
+
+		if (step === 'purchased') {
+			await updateOrderStatus({ orderId: activeOrder.id, status: 'delivered' });
+		}
+	};
+
+	const primaryLabel =
+		step === 'accepted' ? "I'm at the Store" : step === 'at_store' ? 'Mark as Purchased' : 'Mark as Delivered';
+
+	if (isOrdersLoading) {
+		return (
+			<PageTransition>
+				<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+					<RunnerNav />
+					<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+						<p className="text-caption text-ink-light">Loading active errand...</p>
+					</main>
+				</div>
+			</PageTransition>
+		);
+	}
+
+	if (!activeOrder) {
+		return (
+			<PageTransition>
+				<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+					<RunnerNav />
+					<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+						<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Active Errand</h1>
+						<p className="text-caption text-ink-light mt-2">No active errand assigned right now.</p>
+					</main>
+				</div>
+			</PageTransition>
+		);
+	}
+
+	return (
+		<PageTransition>
+			<div className="bg-surface-default flex min-h-screen w-full items-stretch">
+			<RunnerNav />
+
+			<main className="bg-surface-default flex-1 min-h-screen overflow-y-auto p-10">
+				<button type="button" className="inline-flex items-center gap-1.5 text-primary-orange text-label mb-4" onClick={() => navigate('/runner/board')}>
+					<ArrowLeft className="w-4 h-4" />
+					Back to Board
+				</button>
+
+				<section className="max-w-225 mx-auto flex flex-col gap-6">
+					<div className="flex items-center justify-between">
+						<h1 className="font-heading font-bold text-heading-1 tracking-tight text-ink-default">Active Errand</h1>
+						<span className={`h-6 px-2.5 rounded-full font-mono text-mono-sm inline-flex items-center ${statusTone.pillClass}`}>
+							{statusTone.label}
+						</span>
+					</div>
+
+					<Stepper step={step} />
+
+					<div className="bg-surface-default border border-border-rule rounded-2xl p-4 flex items-center gap-3">
+						<button type="button" className="text-caption text-primary-orange underline">Open Maps →</button>
+						<span className="text-primary-orange text-label">📍</span>
+						<div>
+							<p className="text-[14px] text-ink-default font-semibold">Deliver to: {activeOrder.zone || 'Unspecified zone'}</p>
+							<p className="text-caption text-ink-light">{activeOrder.city || 'No city details provided'}</p>
+						</div>
+					</div>
+
+					<div className="bg-surface-white border border-border-rule rounded-2xl shadow-sm p-6 max-w-170 mx-auto w-full">
+						<div className="bg-surface-default border border-border-rule rounded-2xl p-5">
+							<h2 className="text-heading-2 text-ink-default font-semibold">🛒 Shopping List</h2>
+							<ul className="mt-3 text-body text-ink-default space-y-1 pl-5 list-disc">
+								{toSummaryItems(activeOrder.items).map((item) => (
+									<li key={item}>{item}</li>
+								))}
+							</ul>
+							<div className="mt-4 border border-border-rule p-3">
+								<p className="font-mono text-mono text-ink-light">Budget cap: {formatCurrency(activeOrder.amount)}</p>
+							</div>
+						</div>
+					</div>
+
+					<div className="text-center">
+						<p className="font-mono text-mono-sm text-ink-light uppercase">📷 Receipt</p>
+						{step === 'delivered' ? (
+							<div className="mt-2 mx-auto w-full max-w-190 rounded-xl border-[1.5px] border-dashed border-border-rule bg-primary-orange-bg p-4 text-caption text-ink-light">
+								{receiptPreview ? (
+									<img src={receiptPreview} alt="Uploaded receipt" className="w-full h-42.5 object-cover rounded-lg" />
+								) : (
+									'No receipt image uploaded.'
+								)}
+							</div>
+						) : (
+							<label className="mt-2 mx-auto w-full max-w-190 min-h-20 rounded-xl border-[1.5px] border-dashed border-primary-orange bg-primary-orange-bg px-8 py-5 flex flex-col items-center justify-center cursor-pointer">
+								<Camera className="w-6 h-6 text-ink-default" />
+								<span className="text-caption text-ink-default mt-1">Click to Upload Receipt</span>
+								<input
+									type="file"
+									accept="image/*"
+									className="hidden"
+									onChange={(event) => {
+										const file = event.target.files?.[0];
+										if (!file) return;
+										setReceiptPreview(URL.createObjectURL(file));
+									}}
+								/>
+							</label>
+						)}
+					</div>
+
+					<button
+						type="button"
+						className={`h-12 rounded-xl px-5 shadow-sm text-label ${
+							step === 'delivered'
+								? 'bg-border-rule text-ink-light cursor-not-allowed'
+								: 'bg-primary-orange text-surface-white'
+						}`}
+						onClick={handlePrimaryAction}
+						disabled={step === 'delivered'}
+					>
+						{step === 'delivered' ? '🏠 Mark as Delivered' : `🏪 ${primaryLabel}`}
+					</button>
+
+					{step !== 'delivered' ? (
+						<button type="button" className="text-caption text-status-red mx-auto">
+							Cancel Errand
+						</button>
+					) : null}
+
+					{step === 'delivered' ? (
+						<div className="bg-status-green-bg border border-status-green rounded-2xl p-5 text-center">
+							<p className="text-heading-2 text-status-green font-semibold">🎉 Errand Complete!</p>
+							<p className="text-body text-ink-mid mt-2">Collect payment from requester.</p>
+							<button
+								type="button"
+								className="mt-4 h-11 w-full rounded-xl bg-surface-white border border-border-rule text-label text-ink-mid"
+								onClick={() => navigate('/runner/board')}
+							>
+								Back to Errand Board
+							</button>
+						</div>
+					) : null}
+				</section>
+			</main>
+		</div>
+		</PageTransition>
+	);
 }
