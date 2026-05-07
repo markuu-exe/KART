@@ -9,11 +9,11 @@ export default function Avatar({
   ...props
 }) {
   return (
-    <div 
+    <div
       className={cn(
-        'flex items-center justify-center shrink-0 rounded-full overflow-hidden',
+        'flex items-center justify-center shrink-0 rounded-full overflow-hidden min-w-[36px] min-h-[36px]',
         className
-      )} 
+      )}
       {...props}
     >
       {type === 'Image' && image ? (

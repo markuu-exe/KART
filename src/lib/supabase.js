@@ -8,3 +8,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export async function insertOrder(order) {
+  const { data, error } = await supabase
+    .from('orders')
+    .insert(order)
+    .select('*')
+    .single();
+
+  return { data, error };
+}
