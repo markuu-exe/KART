@@ -391,7 +391,7 @@ export default function Auth() {
             <p className="auth-mobileBrand__tagline">Skip the checkout line.</p>
           </div>
 
-          <Card variant="Base" className={`auth-card ${isSignUp ? 'auth-card--register' : 'auth-card--login'}`}>
+          <Card variant="Base" className="auth-card w-full max-w-[400px] mx-auto">
             <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
               <AuthTabButton active={!isSignUp} onClick={() => switchMode(false)}>
                 Log in
@@ -418,7 +418,7 @@ export default function Auth() {
               </div>
             ) : null}
 
-            <form className="auth-form" onSubmit={handleSubmit(handleAuth)}>
+            <form className="auth-form col-span-full w-full" onSubmit={handleSubmit(handleAuth)}>
               <div className="auth-socialActions">
                 <button
                   type="button"
@@ -450,7 +450,7 @@ export default function Auth() {
                     name="firstName"
                     register={register}
                     error={errors.firstName}
-                    placeholder="Enter first name"
+                    placeholder="Given name"
                     autoComplete="given-name"
                     suffix={<img src={fieldIcon} alt="" aria-hidden="true" />}
                   />
@@ -459,7 +459,7 @@ export default function Auth() {
                     name="lastName"
                     register={register}
                     error={errors.lastName}
-                    placeholder="Enter last name"
+                    placeholder="Surname"
                     autoComplete="family-name"
                     suffix={<img src={fieldIcon} alt="" aria-hidden="true" />}
                   />
