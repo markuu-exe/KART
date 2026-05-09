@@ -53,6 +53,10 @@ export default function LocationAutocomplete({
   const [searchTerm, setSearchTerm] = useState(value);
   const containerRef = useRef(null);
 
+  useEffect(() => {
+    setSearchTerm(value || '');
+  }, [value]);
+
   const filteredLandmarks = MOCK_LANDMARKS.filter(
     (landmark) =>
       landmark.label.toLowerCase().includes(searchTerm.toLowerCase()) ||

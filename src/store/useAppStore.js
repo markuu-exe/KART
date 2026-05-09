@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
+import { supabase, insertOrder } from '@/lib/supabase';
 
 const ORDERS_REALTIME_CHANNEL = 'orders-realtime';
 
@@ -129,9 +129,9 @@ export const useAppStore = create((set, get) => ({
     set({ error: null });
     return { data, error: null };
   },
-  createOrder: async ({ requesterId, items, zone, amount, address }) => {
-    if (!requesterId || !items || !zone || !amount || !address) {
-      return { data: null, error: 'Missing required order fields: requesterId, items, zone, amount, address.' };
+  createOrder: async ({ requesterId, items, zone, amount, address, pickupLat, pickupLng, dropoffLat, dropoffLng, pickupAddress, deliveryAddress }) => {
+    if (!requesterId || !items || !zone || !amount || !address || !pickupLat || !pickupLng || !dropoffLat || !dropoffLng) {
+      return { data: null, error: 'Missing required order fields: requesterId, items, zone, amount, address, pickup/dropoff coordinates.' };
     }
 
     const numericAmount = Number(amount);
@@ -139,20 +139,24 @@ export const useAppStore = create((set, get) => ({
       return { data: null, error: 'Amount must be a valid positive number.' };
     }
 
-    const { data, error } = await supabase
-      .from('orders')
-      .insert({
-        requester_id: requesterId,
-        items: Array.isArray(items) ? items : [items],
-        zone,
-        amount: numericAmount,
-        city: address,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select('*')
-      .single();
+    const payload = {
+      requester_id: requesterId,
+      items: Array.isArray(items) ? items : [items],
+      zone,
+      amount: numericAmount,
+      city: address,
+      pickup_latitude: pickupLat,
+      pickup_longitude: pickupLng,
+      dropoff_latitude: dropoffLat,
+      dropoff_longitude: dropoffLng,
+      pickup_location: pickupAddress || null,
+      dropoff_location: deliveryAddress || null,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await insertOrder(payload);
 
     if (error) {
       set({ error: error.message });

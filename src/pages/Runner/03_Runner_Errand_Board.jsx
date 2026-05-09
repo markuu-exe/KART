@@ -287,19 +287,18 @@ export default function RunnerErrandBoard() {
 	}, [selectedErrand]);
 
 	const handleAccept = async (errand) => {
-		const requesterId = errand?.sourceOrder?.requester_id;
-		const isSelfOrder = requesterId && requesterId === user?.id;
-
-		if (isSelfOrder) {
-			if (import.meta.env.PROD) {
-				return;
-			}
-
-			// TODO: Remove self-accept bypass before production
+		if (!user?.id || !errand?.id) {
+			return;
 		}
 
-		const { error } = await acceptOrder({ orderId: errand.id, runnerId: user?.id });
+		const requesterId = errand?.sourceOrder?.requester_id;
+		if (requesterId && requesterId === user.id) {
+			return;
+		}
+
+		const { error } = await acceptOrder({ orderId: errand.id, runnerId: user.id });
 		if (!error) {
+			setSelectedErrand(null);
 			navigate('/runner/active-order');
 		}
 	};
@@ -368,7 +367,7 @@ export default function RunnerErrandBoard() {
 				isOpen={Boolean(selectedErrand)}
 				errand={modalErrand}
 				onClose={() => setSelectedErrand(null)}
-				onAccept={() => setSelectedErrand(null)}
+				onAccept={handleAccept}
 			/>
 		</div>
 	</PageTransition>

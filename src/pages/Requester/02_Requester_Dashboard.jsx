@@ -230,6 +230,7 @@ export default function RequesterDashboard() {
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [budgetCap, setBudgetCap] = useState('');
+  const [pickupAddress, setPickupAddress] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [pickupLat, setPickupLat] = useState(null);
   const [pickupLng, setPickupLng] = useState(null);
@@ -302,6 +303,8 @@ export default function RequesterDashboard() {
         pickupLng,
         dropoffLat,
         dropoffLng,
+        pickupAddress: pickupAddress.trim(),
+        deliveryAddress: deliveryAddress.trim(),
       });
 
       if (error) {
@@ -313,6 +316,7 @@ export default function RequesterDashboard() {
       // Success: Clear form and show success feedback
       setItemText('');
       setBudgetCap('');
+      setPickupAddress('');
       setDeliveryAddress('');
       setPickupLat(null);
       setPickupLng(null);
@@ -460,8 +464,14 @@ export default function RequesterDashboard() {
                   <LocationAutocomplete
                     label="Pickup Location"
                     placeholder="Select pickup landmark..."
-                    value={pickupLat && pickupLng ? `${pickupLat}, ${pickupLng}` : ''}
+                    value={pickupAddress}
+                    onChange={(value) => {
+                      setPickupAddress(value);
+                      setPickupLat(null);
+                      setPickupLng(null);
+                    }}
                     onSelect={(landmark) => {
+                      setPickupAddress(landmark.label);
                       setPickupLat(landmark.lat);
                       setPickupLng(landmark.lng);
                     }}
@@ -471,7 +481,11 @@ export default function RequesterDashboard() {
                     label="Delivery Address"
                     placeholder="Select delivery location..."
                     value={deliveryAddress}
-                    onChange={setDeliveryAddress}
+                    onChange={(value) => {
+                      setDeliveryAddress(value);
+                      setDropoffLat(null);
+                      setDropoffLng(null);
+                    }}
                     onSelect={(landmark) => {
                       setDeliveryAddress(landmark.label);
                       setDropoffLat(landmark.lat);
