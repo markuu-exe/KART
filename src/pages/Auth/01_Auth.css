@@ -41,6 +41,20 @@
   gap: var(--space-xs);
 }
 
+.auth-visual {
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-surface-default);
+}
+
+.auth-visual__image {
+  display: block;
+  width: 100%;
+  height: 18rem;
+  object-fit: cover;
+}
+
 .auth-mobileBrand__title {
   margin: 0;
   font-family: var(--font-display);
