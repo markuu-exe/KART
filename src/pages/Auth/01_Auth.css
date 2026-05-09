@@ -92,12 +92,9 @@
   padding: var(--space-3xl);
 }
 
-.auth-card--login {
-  max-width: var(--layout-auth-card-login-width);
-}
-
+.auth-card--login,
 .auth-card--register {
-  max-width: var(--layout-auth-card-register-width);
+  max-width: var(--layout-auth-card-login-width);
 }
 
 .auth-tabs {
