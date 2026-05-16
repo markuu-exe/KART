@@ -50,12 +50,17 @@ export default function LocationAutocomplete({
   disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(value);
   const containerRef = useRef(null);
 
-  useEffect(() => {
+  // Track the previous prop value to detect changes during render
+  const [prevValue, setPrevValue] = useState(value);
+  const [searchTerm, setSearchTerm] = useState(value);
+
+  // Reset local state synchronously if the controlled parent value prop changes
+  if (value !== prevValue) {
+    setPrevValue(value);
     setSearchTerm(value || '');
-  }, [value]);
+  }
 
   const filteredLandmarks = MOCK_LANDMARKS.filter(
     (landmark) =>
