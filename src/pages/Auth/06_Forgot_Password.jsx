@@ -46,7 +46,7 @@ export default function ForgotPasswordModal({
 				}
 			}}
 		>
-			<Card variant="Base" className="auth-forgotCard">
+			<Card variant="Base" className="auth-forgotCard w-full max-w-100 mx-auto">
 				<div className="auth-forgotCard__content">
 					<div className="auth-forgotCard__header">
 						<h2 id="forgot-password-title" className="auth-forgotCard__title">
@@ -57,7 +57,7 @@ export default function ForgotPasswordModal({
 						</p>
 					</div>
 
-					<form className="auth-forgotForm" onSubmit={onSubmit}>
+					<form className="auth-forgotForm w-full" onSubmit={onSubmit}>
 						<label className="auth-field">
 							<span className="auth-field__label">EMAIL ADDRESS</span>
 							<div className="auth-field__control">
