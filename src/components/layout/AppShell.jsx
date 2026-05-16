@@ -1,18 +1,19 @@
 import { useLocation } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/routing';
 
 import Footer from './Footer';
 import Header from './Header';
 
 const SETTINGS_PATHS = [
-  '/requester/profile',
-  '/requester/profile/edit',
-  '/runner/profile',
-  '/runner/profile/edit',
+  APP_ROUTES.REQUESTER_PROFILE,
+  APP_ROUTES.REQUESTER_PROFILE_EDIT,
+  APP_ROUTES.RUNNER_PROFILE,
+  APP_ROUTES.RUNNER_PROFILE_EDIT,
 ];
 
 export default function AppShell({ children, user, needsOnboarding, isAuthResolved = true }) {
   const { pathname } = useLocation();
-  const showFooter = pathname === '/' || pathname === '/auth' || SETTINGS_PATHS.some((path) => pathname.startsWith(path));
+  const showFooter = pathname === APP_ROUTES.HOME || pathname === APP_ROUTES.AUTH || SETTINGS_PATHS.some((path) => pathname.startsWith(path));
   const headerMode = !isAuthResolved ? 'public' : !user ? 'public' : needsOnboarding ? 'onboarding' : (user?.user_metadata?.role === 'runner' ? 'runner' : 'requester');
 
   return (
