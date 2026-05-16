@@ -26,7 +26,7 @@ export const useAppStore = create((set, get) => ({
   user: null,
   role: null, 
   isLoading: false,
-  isAuthResolved: false, // Set to true ONLY after session check finishes
+  isAuthResolved: false, 
   error: null,
 
   orders: [],
@@ -36,7 +36,6 @@ export const useAppStore = create((set, get) => ({
 
   // --- ACTIONS ---
   
-  // Call this once at the root of the app (e.g., App.jsx) on load/refresh
   initializeAuth: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -88,61 +87,65 @@ export const useAppStore = create((set, get) => ({
   removeOrder: (orderId) => set((state) => ({ orders: removeById(state.orders, orderId) })),
   
   fetchOrders: async ({ requesterId, runnerId } = {}) => {
-    set({ isOrdersLoading: true });
-    let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+    set({ isOrdersLoading: true, error: null });
+    try {
+      let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
 
-    if (requesterId) query = query.eq('requester_id', requesterId);
-    if (runnerId) query = query.eq('runner_id', runnerId);
+      if (requesterId) query = query.eq('requester_id', requesterId);
+      if (runnerId) query = query.eq('runner_id', runnerId);
 
-    const { data, error } = await query;
-    if (error) {
-      set({ error: error.message, isOrdersLoading: false });
-      return [];
+      const { data, error } = await query;
+      if (error) throw error; // CRITICAL FIX: Rethrow this so Error Boundaries catch it
+
+      const nextOrders = Array.isArray(data) ? data : [];
+      set({ orders: nextOrders, isOrdersLoading: false, error: null });
+      return nextOrders;
+    } catch (err) {
+      set({ error: err.message, isOrdersLoading: false });
+      throw err; // CRITICAL: Propagates the schema/cache error right up to the dashboard components!
     }
-
-    const nextOrders = Array.isArray(data) ? data : [];
-    set({ orders: nextOrders, isOrdersLoading: false, error: null });
-    return nextOrders;
   },
 
   acceptOrder: async ({ orderId, runnerId }) => {
     if (!orderId || !runnerId) return { data: null, error: 'Missing orderId or runnerId.' };
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .update({ status: 'accepted', runner_id: runnerId, updated_at: new Date().toISOString() })
+        .eq('id', orderId)
+        .select('*')
+        .single();
 
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ status: 'accepted', runner_id: runnerId, updated_at: new Date().toISOString() })
-      .eq('id', orderId)
-      .select('*')
-      .single();
+      if (error) throw error;
 
-    if (error) {
-      set({ error: error.message });
-      return { data: null, error: error.message };
+      get().upsertOrder(data);
+      set({ error: null });
+      return { data, error: null };
+    } catch (err) {
+      set({ error: err.message });
+      return { data: null, error: err.message };
     }
-
-    get().upsertOrder(data);
-    set({ error: null });
-    return { data, error: null };
   },
 
   updateOrderStatus: async ({ orderId, status }) => {
     if (!orderId || !status) return { data: null, error: 'Missing orderId or status.' };
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', orderId)
+        .select('*')
+        .single();
 
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', orderId)
-      .select('*')
-      .single();
+      if (error) throw error;
 
-    if (error) {
-      set({ error: error.message });
-      return { data: null, error: error.message };
+      get().upsertOrder(data);
+      set({ error: null });
+      return { data, error: null };
+    } catch (err) {
+      set({ error: err.message });
+      return { data: null, error: err.message };
     }
-
-    get().upsertOrder(data);
-    set({ error: null });
-    return { data, error: null };
   },
 
   createOrder: async ({ requesterId, items, zone, amount, address, pickupLat, pickupLng, dropoffLat, dropoffLng, pickupAddress, deliveryAdd }) => {
@@ -172,15 +175,17 @@ export const useAppStore = create((set, get) => ({
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await insertOrder(payload);
-    if (error) {
-      set({ error: error.message });
-      return { data: null, error: error.message };
-    }
+    try {
+      const { data, error } = await insertOrder(payload);
+      if (error) throw error;
 
-    get().upsertOrder(data);
-    set({ error: null });
-    return { data, error: null };
+      get().upsertOrder(data);
+      set({ error: null });
+      return { data, error: null };
+    } catch (err) {
+      set({ error: err.message });
+      return { data: null, error: err.message };
+    }
   },
 
   startOrdersRealtime: () => {
