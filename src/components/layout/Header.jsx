@@ -108,7 +108,7 @@ export default function Header({ mode = 'public', className = '' }) {
                   aria-expanded={menuOpen}
                   onClick={() => setMenuOpen((currentValue) => !currentValue)}
                 >
-                  <Avatar initials={initials} className="h-9 w-9 min-w-[36px] min-h-[36px] aspect-square" />
+                  <Avatar initials={initials} className="h-9 w-9 min-w-9 min-h-9 aspect-square" />
                   <span className="hidden min-w-0 sm:block">
                     <span className="block max-w-32 truncate text-sm font-semibold text-ink-default">{fullName}</span>
                     <span className="block text-caption text-ink-light">Requester</span>
@@ -171,7 +171,7 @@ export default function Header({ mode = 'public', className = '' }) {
                   aria-expanded={menuOpen}
                   onClick={() => setMenuOpen((currentValue) => !currentValue)}
                 >
-                  <Avatar initials={initials} className="h-9 w-9 min-w-[36px] min-h-[36px] aspect-square" />
+                  <Avatar initials={initials} className="h-9 w-9 min-w-9 min-h-9 aspect-square" />
                   <span className="hidden min-w-0 sm:block">
                     <span className="block max-w-32 truncate text-sm font-semibold text-ink-default">{fullName}</span>
                     <span className="block text-caption text-ink-light">Runner</span>

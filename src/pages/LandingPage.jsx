@@ -92,7 +92,7 @@ export default function LandingPage() {
         </div>
 
         <div className="grid gap-4 self-center lg:pl-6">
-          <div className="overflow-hidden rounded-[2rem] bg-surface-default">
+          <div className="overflow-hidden rounded-4xl bg-surface-default">
             <img
               src="https://placehold.co/600x400/orange/white?text=Placeholder"
               alt="Placeholder visual"
