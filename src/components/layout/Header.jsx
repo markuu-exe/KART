@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
+import { APP_ROUTES } from '@/lib/routing';
 
 function getInitials(name) {
   const parts = String(name || 'Kart User')
@@ -26,9 +27,9 @@ export default function Header({ mode = 'public', className = '' }) {
 
   const fullName = user?.user_metadata?.full_name || 'Kart User';
   const role = user?.user_metadata?.role === 'runner' ? 'runner' : 'requester';
-  const homePath = role === 'runner' ? '/runner/board' : '/requester/board';
-  const profilePath = role === 'runner' ? '/runner/profile' : '/requester/profile';
-  const editProfilePath = role === 'runner' ? '/runner/profile/edit' : '/requester/profile/edit';
+  const homePath = role === 'runner' ? APP_ROUTES.RUNNER_BOARD : APP_ROUTES.REQUESTER_BOARD;
+  const profilePath = role === 'runner' ? APP_ROUTES.RUNNER_PROFILE : APP_ROUTES.REQUESTER_PROFILE;
+  const editProfilePath = role === 'runner' ? APP_ROUTES.RUNNER_PROFILE_EDIT : APP_ROUTES.REQUESTER_PROFILE_EDIT;
   const authMode = mode === 'public' ? 'public' : mode;
 
   const initials = useMemo(() => getInitials(fullName), [fullName]);
@@ -59,14 +60,14 @@ export default function Header({ mode = 'public', className = '' }) {
     await supabase.auth.signOut();
     logout();
     setMenuOpen(false);
-    navigate('/auth');
+    navigate(APP_ROUTES.AUTH);
   };
 
   return (
     <header className={cn('sticky top-0 z-40 border-b border-border-rule bg-surface-white/95 backdrop-blur supports-backdrop-filter:bg-surface-white/85', className)}>
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
-          <Link to={user ? homePath : '/'} className="flex items-center gap-3">
+          <Link to={user ? homePath : APP_ROUTES.HOME} className="flex items-center gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-orange text-lg font-black text-surface-white shadow-sm">
               K
             </span>
@@ -87,10 +88,10 @@ export default function Header({ mode = 'public', className = '' }) {
               <a href="#how-it-works" className="hidden text-sm font-medium text-ink-mid transition-colors hover:text-ink-default sm:inline-flex">
                 How it Works
               </a>
-              <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/auth?mode=login')}>
+              <Button type="button" variant="secondary" size="sm" onClick={() => navigate(`${APP_ROUTES.AUTH}?mode=login`)}>
                 Login
               </Button>
-              <Button type="button" variant="brand" size="sm" onClick={() => navigate('/auth?mode=signup')}>
+              <Button type="button" variant="brand" size="sm" onClick={() => navigate(`${APP_ROUTES.AUTH}?mode=signup`)}>
                 Sign Up
               </Button>
             </div>

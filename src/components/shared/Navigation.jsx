@@ -1,5 +1,6 @@
 import './Navigation.css';
 import Avatar from '../ui/Avatar';
+import { APP_ROUTES } from '../../lib/routing';
 
 export default function Navigation({
   userName = 'User Name',
@@ -10,10 +11,12 @@ export default function Navigation({
   className = '',
   ...props
 }) {
+  const isRunner = role?.toLowerCase() === 'runner';
+
   const navItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'history', label: 'History', icon: '⏱️' },
-    { id: 'profile', label: 'Profile', icon: '👤' },
+    { id: 'home', path: isRunner ? APP_ROUTES.RUNNER_BOARD : APP_ROUTES.REQUESTER_BOARD, label: 'Home', icon: '🏠' },
+    { id: 'history', path: isRunner ? APP_ROUTES.RUNNER_HISTORY : APP_ROUTES.REQUESTER_HISTORY, label: 'History', icon: '⏱️' },
+    { id: 'profile', path: isRunner ? APP_ROUTES.RUNNER_PROFILE : APP_ROUTES.REQUESTER_PROFILE, label: 'Profile', icon: '👤' },
   ];
 
   return (
@@ -29,7 +32,7 @@ export default function Navigation({
             key={item.id}
             type="button"
             className={`nav-item ${selectedNav === item.id ? 'nav-item-active' : ''}`}
-            onClick={() => onNavChange(item.id)}
+            onClick={() => onNavChange(item.path || item.id)}
           >
             <span className="nav-item-icon">{item.icon}</span>
             <span className="nav-item-label">{item.label}</span>

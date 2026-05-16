@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { AppShell } from '@/components';
 import { useAppStore } from '@/store/useAppStore';
+import { APP_ROUTES } from '@/lib/routing';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -23,7 +24,7 @@ export default function App() {
   const { user, setUser, setLoading, isAuthResolved } = useAppStore();
   const needsOnboarding = Boolean(user) && !user?.user_metadata?.onboarding_complete;
   const activeRole = user?.user_metadata?.role === 'runner' ? 'runner' : 'requester';
-  const homePath = activeRole === 'runner' ? '/runner/board' : '/requester/board';
+  const homePath = activeRole === 'runner' ? APP_ROUTES.RUNNER_BOARD : APP_ROUTES.REQUESTER_BOARD;
 
   useEffect(() => {
     // Check if user is logged in
@@ -42,28 +43,28 @@ export default function App() {
         <Routes>
           {!user ? (
             <>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="*" element={<Navigate to="/" />} />
+              <Route path={APP_ROUTES.HOME} element={<LandingPage />} />
+              <Route path={APP_ROUTES.AUTH} element={<Auth />} />
+              <Route path="*" element={<Navigate to={APP_ROUTES.HOME} />} />
             </>
           ) : needsOnboarding ? (
             <>
-              <Route path="/auth/onboarding" element={<ZoneOnboarding />} />
-              <Route path="*" element={<Navigate to="/auth/onboarding" />} />
+              <Route path={APP_ROUTES.ONBOARDING} element={<ZoneOnboarding />} />
+              <Route path="*" element={<Navigate to={APP_ROUTES.ONBOARDING} />} />
             </>
           ) : (
             <>
-              <Route path="/" element={<Navigate to={homePath} />} />
-              <Route path="/requester/board" element={<RequesterDashboard />} />
-              <Route path="/requester/active-order" element={<ActiveOrderRequester />} />
-              <Route path="/requester/history" element={<OrderHistoryRequester />} />
-              <Route path="/requester/profile" element={<ProfileRequester />} />
-              <Route path="/requester/profile/edit" element={<EditProfileRequester />} />
-              <Route path="/runner/board" element={<RunnerErrandBoard />} />
-              <Route path="/runner/active-order" element={<ActiveOrderRunner />} />
-              <Route path="/runner/history" element={<OrderHistoryRunner />} />
-              <Route path="/runner/profile" element={<ProfileRunner />} />
-              <Route path="/runner/profile/edit" element={<EditProfileRunner />} />
+              <Route path={APP_ROUTES.HOME} element={<Navigate to={homePath} />} />
+              <Route path={APP_ROUTES.REQUESTER_BOARD} element={<RequesterDashboard />} />
+              <Route path={APP_ROUTES.REQUESTER_ACTIVE_ORDER} element={<ActiveOrderRequester />} />
+              <Route path={APP_ROUTES.REQUESTER_HISTORY} element={<OrderHistoryRequester />} />
+              <Route path={APP_ROUTES.REQUESTER_PROFILE} element={<ProfileRequester />} />
+              <Route path={APP_ROUTES.REQUESTER_PROFILE_EDIT} element={<EditProfileRequester />} />
+              <Route path={APP_ROUTES.RUNNER_BOARD} element={<RunnerErrandBoard />} />
+              <Route path={APP_ROUTES.RUNNER_ACTIVE_ORDER} element={<ActiveOrderRunner />} />
+              <Route path={APP_ROUTES.RUNNER_HISTORY} element={<OrderHistoryRunner />} />
+              <Route path={APP_ROUTES.RUNNER_PROFILE} element={<ProfileRunner />} />
+              <Route path={APP_ROUTES.RUNNER_PROFILE_EDIT} element={<EditProfileRunner />} />
               <Route path="*" element={<Navigate to={homePath} />} />
             </>
           )}
