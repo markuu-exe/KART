@@ -12,7 +12,6 @@ import PageTransition from '@/components/shared/PageTransition';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
 import authHeroImage from '@/assets/Images/hero-auth-orangeAbstract.jpg';
 import ForgotPasswordModal from './06_Forgot_Password';
-import useForgotPasswordState from './useForgotPasswordState';
 import './01_Auth.css';
 
 /**
@@ -189,17 +188,7 @@ export default function Auth() {
     defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' },
   });
 
-  const {
-    isOpen: isForgotPasswordOpen,
-    email: forgotEmail,
-    loading: forgotLoading,
-    error: forgotError,
-    notice: forgotNotice,
-    openForgotPassword,
-    closeForgotPassword,
-    onEmailChange,
-    onSubmit: handleForgotPassword,
-  } = useForgotPasswordState(() => getValues('email'));
+  const isForgotPasswordOpen = new URLSearchParams(location.search).get('modal') === 'forgot-password';
 
   useEffect(() => {
     setIsSignUp(new URLSearchParams(location.search).get('mode') === 'signup');
@@ -280,6 +269,20 @@ export default function Auth() {
     } finally {
       setMagicLinkLoading(false);
     }
+  };
+
+  const openForgotPassword = () => {
+    const params = new URLSearchParams(location.search);
+    params.set('modal', 'forgot-password');
+
+    const currentEmail = String(getValues('email') || '').trim().toLowerCase();
+    if (currentEmail) {
+      params.set('email', currentEmail);
+    } else {
+      params.delete('email');
+    }
+
+    navigate(`${APP_ROUTES.AUTH}?${params.toString()}`, { replace: true });
   };
 
   const handleResendVerification = async () => {
@@ -565,16 +568,7 @@ export default function Auth() {
         </main>
       </div>
 
-      <ForgotPasswordModal
-        isOpen={isForgotPasswordOpen}
-        email={forgotEmail}
-        onEmailChange={onEmailChange}
-        onSubmit={handleForgotPassword}
-        onClose={closeForgotPassword}
-        loading={forgotLoading}
-        error={forgotError}
-        notice={forgotNotice}
-      />
+      <ForgotPasswordModal />
       </div>
     </PageTransition>
   );
