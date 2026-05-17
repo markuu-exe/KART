@@ -15,6 +15,25 @@ import ForgotPasswordModal from './06_Forgot_Password';
 import useForgotPasswordState from './useForgotPasswordState';
 import './01_Auth.css';
 
+/**
+ * Determines the redirect URL based on user onboarding status and role.
+ * If the user is onboarded, redirects to their role-specific dashboard.
+ * Otherwise, redirects to the onboarding page.
+ */
+function getAuthRedirectPath(user) {
+  if (!user) {
+    return APP_ROUTES.ONBOARDING;
+  }
+
+  const isOnboarded = user.user_metadata?.onboarding_complete === true;
+  if (!isOnboarded) {
+    return APP_ROUTES.ONBOARDING;
+  }
+
+  const role = user.user_metadata?.role;
+  return role === 'runner' ? APP_ROUTES.RUNNER_BOARD : APP_ROUTES.REQUESTER_BOARD;
+}
+
 function AuthField({
   label,
   name,
@@ -327,7 +346,7 @@ export default function Auth() {
           setIsSignUp(false);
         } else {
           setNotice('Account created successfully.');
-          navigate(APP_ROUTES.ONBOARDING);
+          navigate(getAuthRedirectPath(signupData.user));
         }
       } else {
         const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({
@@ -340,7 +359,7 @@ export default function Auth() {
         }
 
         setUser(signInData.user);
-        navigate(APP_ROUTES.ONBOARDING);
+        navigate(getAuthRedirectPath(signInData.user));
       }
 
       setAppLoading(false);
