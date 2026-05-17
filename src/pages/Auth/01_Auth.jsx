@@ -6,12 +6,32 @@ import { supabase } from '@/lib/supabase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { APP_ROUTES } from '@/lib/routing';
 import { useAppStore } from '@/store/useAppStore';
 import PageTransition from '@/components/shared/PageTransition';
 import fieldIcon from '@/assets/Icons/Icon=Icon.svg';
 import authHeroImage from '@/assets/Images/hero-auth-orangeAbstract.jpg';
 import ForgotPasswordModal from './06_Forgot_Password';
 import './01_Auth.css';
+
+/**
+ * Determines the redirect URL based on user onboarding status and role.
+ * If the user is onboarded, redirects to their role-specific dashboard.
+ * Otherwise, redirects to the onboarding page.
+ */
+function getAuthRedirectPath(user) {
+  if (!user) {
+    return APP_ROUTES.ONBOARDING;
+  }
+
+  const isOnboarded = user.user_metadata?.onboarding_complete === true;
+  if (!isOnboarded) {
+    return APP_ROUTES.ONBOARDING;
+  }
+
+  const role = user.user_metadata?.role;
+  return role === 'runner' ? APP_ROUTES.RUNNER_BOARD : APP_ROUTES.REQUESTER_BOARD;
+}
 
 function AuthField({
   label,
@@ -101,11 +121,6 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotLoading, setForgotLoading] = useState(false);
-  const [forgotError, setForgotError] = useState('');
-  const [forgotNotice, setForgotNotice] = useState('');
   const [verificationEmail, setVerificationEmail] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
@@ -116,41 +131,83 @@ export default function Auth() {
   const authSchema = useMemo(() =>
     z
       .object({
-        firstName: z.string().optional(),
-        lastName: z.string().optional(),
         email: z.string().min(1, 'Email is required').email('Invalid email address'),
         password: z.string().min(8, 'Password must be at least 8 characters'),
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
         confirmPassword: z.string().optional(),
       })
-      .refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
-        path: ['confirmPassword'],
-        message: 'Passwords do not match',
+      .superRefine((data, ctx) => {
+        if (!isSignUp) {
+          return;
+        }
+
+        if (!String(data.firstName || '').trim()) {
+          ctx.addIssue({
+            path: ['firstName'],
+            code: z.ZodIssueCode.custom,
+            message: 'First name is required',
+          });
+        }
+
+        if (!String(data.lastName || '').trim()) {
+          ctx.addIssue({
+            path: ['lastName'],
+            code: z.ZodIssueCode.custom,
+            message: 'Last name is required',
+          });
+        }
+
+        if (!String(data.confirmPassword || '').trim()) {
+          ctx.addIssue({
+            path: ['confirmPassword'],
+            code: z.ZodIssueCode.custom,
+            message: 'Confirm your password',
+          });
+        }
+
+        if (data.password !== data.confirmPassword) {
+          ctx.addIssue({
+            path: ['confirmPassword'],
+            code: z.ZodIssueCode.custom,
+            message: 'Passwords do not match',
+          });
+        }
       }),
-    []
+    [isSignUp]
   );
 
   const {
     register,
     handleSubmit,
     getValues,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(authSchema),
     defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' },
   });
 
+  const isForgotPasswordOpen = new URLSearchParams(location.search).get('modal') === 'forgot-password';
+
   useEffect(() => {
     setIsSignUp(new URLSearchParams(location.search).get('mode') === 'signup');
   }, [location.search]);
+
+  useEffect(() => {
+    reset({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+    setError('');
+    setNotice('');
+  }, [isSignUp, reset]);
 
   const switchMode = (shouldSignUp) => {
     setIsSignUp(shouldSignUp);
     setError('');
     setNotice('');
-    navigate(`/auth?mode=${shouldSignUp ? 'signup' : 'login'}`, { replace: true });
+    navigate(`${APP_ROUTES.AUTH}?mode=${shouldSignUp ? 'signup' : 'login'}`, { replace: true });
   };
 
-  const getAuthRedirectTo = () => `${window.location.origin}/auth`;
+  const getAuthRedirectTo = () => `${window.location.origin}${APP_ROUTES.AUTH}`;
 
   const handleGoogleAuth = async () => {
     setOauthLoading(true);
@@ -214,6 +271,20 @@ export default function Auth() {
     }
   };
 
+  const openForgotPassword = () => {
+    const params = new URLSearchParams(location.search);
+    params.set('modal', 'forgot-password');
+
+    const currentEmail = String(getValues('email') || '').trim().toLowerCase();
+    if (currentEmail) {
+      params.set('email', currentEmail);
+    } else {
+      params.delete('email');
+    }
+
+    navigate(`${APP_ROUTES.AUTH}?${params.toString()}`, { replace: true });
+  };
+
   const handleResendVerification = async () => {
     const normalizedEmail = verificationEmail.trim().toLowerCase();
 
@@ -244,49 +315,6 @@ export default function Auth() {
     }
   };
 
-  const openForgotPassword = () => {
-    setForgotEmail(String(getValues('email') || ''));
-    setForgotError('');
-    setForgotNotice('');
-    setIsForgotPasswordOpen(true);
-  };
-
-  const closeForgotPassword = () => {
-    setIsForgotPasswordOpen(false);
-    setForgotLoading(false);
-    setForgotError('');
-    setForgotNotice('');
-  };
-
-  const handleForgotPassword = async (event) => {
-    event.preventDefault();
-    setForgotLoading(true);
-    setForgotError('');
-    setForgotNotice('');
-
-    try {
-      const normalizedEmail = forgotEmail.trim().toLowerCase();
-
-      if (!normalizedEmail) {
-        throw new Error('Please enter your email address.');
-      }
-
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
-
-      if (resetError) {
-        throw resetError;
-      }
-
-      setForgotNotice('Reset link sent. Check your inbox and spam folder.');
-    } catch (resetError) {
-      setForgotError(resetError instanceof Error ? resetError.message : 'Unable to send reset link right now.');
-    } finally {
-      setForgotLoading(false);
-    }
-  };
-
   const handleAuth = async (data) => {
     setLoading(true);
     setError('');
@@ -294,22 +322,6 @@ export default function Auth() {
 
     try {
       const normalizedEmail = String(data.email || '').trim().toLowerCase();
-
-      if (!normalizedEmail) {
-        throw new Error('Please enter your email address.');
-      }
-
-      if (!data.password) {
-        throw new Error('Please enter your password.');
-      }
-
-      if (isSignUp && (!String(data.firstName || '').trim() || !String(data.lastName || '').trim())) {
-        throw new Error('Please provide both first and last name.');
-      }
-
-      if (isSignUp && data.password !== data.confirmPassword) {
-        throw new Error('Passwords do not match.');
-      }
 
       if (isSignUp) {
         const { data: signupData, error: authError } = await supabase.auth.signUp({
@@ -337,7 +349,7 @@ export default function Auth() {
           setIsSignUp(false);
         } else {
           setNotice('Account created successfully.');
-          navigate('/auth/onboarding');
+          navigate(getAuthRedirectPath(signupData.user));
         }
       } else {
         const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({
@@ -350,13 +362,10 @@ export default function Auth() {
         }
 
         setUser(signInData.user);
-        navigate('/auth/onboarding');
+        navigate(getAuthRedirectPath(signInData.user));
       }
 
       setAppLoading(false);
-
-      // TODO: Add phone verification as a secondary security checkpoint after successful email auth.
-      // Suggested flow: collect phone after login/signup, send OTP, and store verified phone + timestamp.
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Unable to authenticate right now.');
     } finally {
@@ -559,16 +568,7 @@ export default function Auth() {
         </main>
       </div>
 
-      <ForgotPasswordModal
-        isOpen={isForgotPasswordOpen}
-        email={forgotEmail}
-        onEmailChange={(event) => setForgotEmail(event.target.value)}
-        onSubmit={handleForgotPassword}
-        onClose={closeForgotPassword}
-        loading={forgotLoading}
-        error={forgotError}
-        notice={forgotNotice}
-      />
+      <ForgotPasswordModal />
       </div>
     </PageTransition>
   );
