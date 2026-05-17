@@ -21,21 +21,40 @@ import ProfileRunner from './pages/Runner/09_Profile_Runner';
 import EditProfileRunner from './pages/Runner/09b_Edit_Profile_Runner';
 
 export default function App() {
-  const { user, setUser, setLoading, isAuthResolved } = useAppStore();
+  // Pull your new initialization features from the store
+  const { user, setUser, initializeAuth, isAuthResolved } = useAppStore();
+  
   const needsOnboarding = Boolean(user) && !user?.user_metadata?.onboarding_complete;
   const activeRole = user?.user_metadata?.role === 'runner' ? 'runner' : 'requester';
   const homePath = activeRole === 'runner' ? APP_ROUTES.RUNNER_BOARD : APP_ROUTES.REQUESTER_BOARD;
 
   useEffect(() => {
-    // Check if user is logged in
-    setLoading(true);
+    // 1. Instantly verify active session state on application load/refresh
+    initializeAuth();
+
+    // 2. Keep the live listener running to capture intentional logouts or credential modifications
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
-      setLoading(false);
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+      } else if (session?.user) {
+        setUser(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [setLoading, setUser]);
+  }, [initializeAuth, setUser]);
+
+  // PROTECTION GATE: Holds the layout engine until the store proves auth state on refresh
+  if (!isAuthResolved) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-900 text-white">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+        <p className="ml-3 text-xs font-medium tracking-wider text-zinc-400 uppercase">
+          Verifying Session Securely...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>

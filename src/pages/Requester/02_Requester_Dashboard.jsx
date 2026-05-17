@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, History, User, Settings, MapPin, ClipboardList } from 'lucide-react';
 import { ErrandDetailModal, EmptyState, Skeleton, LocationAutocomplete } from '@/components';
@@ -191,19 +191,19 @@ function RequestCard({ request, onOpen }) {
 
 function RequestCardSkeleton() {
   return (
-    <div className="w-full bg-surface-white border-l-4 border-status-blue rounded-2xl shadow-sm pl-5 pr-4 py-4">
+    <div className="w-full bg-surface-white border-l-4 border-status-blue rounded-2xl shadow-sm pl-5 pr-4 py-4 animate-pulse">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-6">
-          <Skeleton className="flex-1 h-5" />
-          <Skeleton className="h-6 w-16 rounded-full" />
+          <div className="flex-1 h-5 bg-zinc-200 rounded" />
+          <div className="h-6 w-16 rounded-full bg-zinc-200" />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 mt-1">
           <MapPin className="w-3 h-3 text-ink-light" />
-          <Skeleton className="h-3 w-12" />
+          <div className="h-3 w-12 bg-zinc-200 rounded" />
           <span className="w-0.5 h-0.5 rounded-full bg-ink-light" />
-          <Skeleton className="h-3 w-16" />
+          <div className="h-3 w-16 bg-zinc-200 rounded" />
           <span className="w-0.5 h-0.5 rounded-full bg-ink-light" />
-          <Skeleton className="h-3 w-8" />
+          <div className="h-3 w-8 bg-zinc-200 rounded" />
         </div>
       </div>
     </div>
@@ -226,7 +226,7 @@ function EmptyOrdersState({ onPostRequest }) {
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
-  const { user, orders, fetchOrders, isOrdersLoading, createOrder, updateOrderStatus } = useAppStore();
+  const { user, orders, error, fetchOrders, isOrdersLoading, createOrder, updateOrderStatus, setError } = useAppStore();
   const [itemText, setItemText] = useState('');
   const [zone, setZone] = useState('Guadalupe');
   const [budgetCap, setBudgetCap] = useState('');
@@ -245,15 +245,21 @@ export default function RequesterDashboard() {
   const firstName = user?.user_metadata?.full_name?.split(' ')?.[0] || 'there';
   const todayLabel = new Date().toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
 
-  // Fallback: Hardcoded loading state to prove UI works with skeletons
-  const mockIsLoading = true;
+  // Memoize data fetching to share securely between mounts and user retry triggers
+  const loadDashboardData = useCallback(async () => {
+    if (!user?.id) return;
+    await fetchOrders({ requesterId: user.id });
+  }, [fetchOrders, user?.id]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const handlePostRequest = async (e) => {
     e.preventDefault();
     setSubmitError(null);
     setSubmitSuccess(false);
 
-    // Validation
     if (!itemText.trim()) {
       setSubmitError('Please specify items needed.');
       return;
@@ -293,7 +299,7 @@ export default function RequesterDashboard() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await createOrder({
+      const { error: reqError } = await createOrder({
         requesterId: user.id,
         items: itemText.trim().split(',').map((item) => item.trim()),
         zone,
@@ -307,13 +313,12 @@ export default function RequesterDashboard() {
         deliveryAddress: deliveryAddress.trim(),
       });
 
-      if (error) {
-        setSubmitError(error);
+      if (reqError) {
+        setSubmitError(reqError);
         setIsSubmitting(false);
         return;
       }
 
-      // Success: Clear form and show success feedback
       setItemText('');
       setBudgetCap('');
       setPickupAddress('');
@@ -325,7 +330,6 @@ export default function RequesterDashboard() {
       setZone('Guadalupe');
       setSubmitSuccess(true);
 
-      // Clear success message after 3 seconds
       setTimeout(() => setSubmitSuccess(false), 3000);
     } catch (err) {
       setSubmitError(err?.message || 'Failed to post request. Please try again.');
@@ -333,14 +337,6 @@ export default function RequesterDashboard() {
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
-
-    fetchOrders({ requesterId: user.id });
-  }, [fetchOrders, user?.id]);
 
   const activeRequests = useMemo(
     () =>
@@ -447,7 +443,7 @@ export default function RequesterDashboard() {
                   <div className="flex flex-col gap-1.5">
                     <label className="text-caption uppercase tracking-wide text-ink-light">Budget Cap (₱)</label>
                     <div className="bg-surface-white border border-border-rule rounded-lg min-h-11 px-3 flex items-center gap-2">
-                      <span className="font-mono text-mono text-primary-orange-light">₱</span>
+                      <span className="font-mono text-mono_text text-primary-orange-light">₱</span>
                       <input
                         type="number"
                         className="flex-1 outline-none bg-transparent text-body text-ink-default placeholder:text-ink-light"
@@ -544,21 +540,38 @@ export default function RequesterDashboard() {
               </button>
             </div>
 
-            {isOrdersLoading ? (
-              <SkeletonList count={4} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" />
-            ) : activeCount > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activeRequests.map((request) => (
-                  <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
-                ))}
+            {/* ERROR BOUNDARY SECTION */}
+            {error ? (
+              <div className="flex min-h-60 flex-col items-center justify-center rounded-2xl border border-status-red/20 bg-status-red-bg p-6 text-center shadow-sm">
+                <h3 className="text-label font-semibold text-status-red">Failed to Synchronize Requests</h3>
+                <p className="mt-1 text-caption text-ink-mid max-w-xs">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    loadDashboardData();
+                  }}
+                  className="mt-4 px-4 h-9 rounded-xl bg-surface-white border border-border-rule text-caption font-semibold text-ink-default shadow-sm transition active:scale-95 hover:bg-surface-default"
+                >
+                  Retry Fetch
+                </button>
               </div>
-            ) : mockIsLoading ? (
+            ) : isOrdersLoading ? (
+              /* STABILIZED INITIAL LOADING STATE */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array.from({ length: 3 }, (_, i) => (
                   <RequestCardSkeleton key={i} />
                 ))}
               </div>
+            ) : activeCount > 0 ? (
+              /* SUCCESS DATA STATE */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeRequests.map((request) => (
+                  <RequestCard key={request.id} request={request} onOpen={setSelectedRequest} />
+                ))}
+              </div>
             ) : (
+              /* VERIFIED CLEAN EMPTY STATE */
               <EmptyOrdersState onPostRequest={() => navigate('/requester/board')} />
             )}
           </div>
